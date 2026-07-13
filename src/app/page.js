@@ -1,7 +1,6 @@
 "use client";
 
 import React, { useState, useEffect, useRef } from "react";
-import { signIn } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 
@@ -22,7 +21,7 @@ export default function HomePage() {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
-  // යශේන් සර්ගේ පන්ති විස්තර ඇතුලත් කරන ලදී
+  // යශේන් සර්ගේ පන්ති විස්තර
   const ongoingCourses = [
     { id: 1, title: "2026 THEORY", day: "බ්‍රහස්පතින්දා", time: "පෙ.ව 7.30 - ප.ව 1.30", desc: "තාපය (වායු, තාප ගති විද්‍යාව) සහ ප්‍රායෝගික" },
     { id: 2, title: "2026 PAPER CLASS", day: "Papers", time: "දැනුම් දෙනු ලැබේ", desc: "Paper 06 සිට 09 දක්වා සාකච්ඡාව" },
@@ -31,7 +30,6 @@ export default function HomePage() {
   ];
 
   const resultsData = [1, 2, 3, 4, 5];
-  const testimonialsData = [1, 2, 3, 4];
 
   const slides = [
     { 
@@ -61,11 +59,9 @@ export default function HomePage() {
 
   const [courseIndex, setCourseIndex] = useState(0);
   const [resultIndex, setResultIndex] = useState(0);
-  const [testiIndex, setTestiIndex] = useState(0);
 
   const courseRef = useRef(null);
   const resultRef = useRef(null);
-  const testiRef = useRef(null);
 
   useEffect(() => {
     if (heroView !== "carousel") return;
@@ -98,44 +94,66 @@ export default function HomePage() {
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
+  // --- මෙන්න මේ කොටස තමයි Custom API එකට ගැලපෙන්න හැදුවේ ---
   const handleAuthSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
     setError("");
 
     if (heroView === "login") {
+      // Admin Login
       if (phone === "admin" && password === "admin123") {
         router.push("/admin");
         setLoading(false);
         return; 
       }
 
-      const res = await signIn("credentials", { redirect: false, phone, password });
-      if (res?.error) {
-        setError(res.error);
+      // Student Login Custom API
+      try {
+        const res = await fetch("/api/login", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ username: phone, password }), // Backend එකට username විදිහට phone එක යවයි
+        });
+
+        const data = await res.json();
+
+        if (res.ok) {
+          // ලොග් වීම සාර්ථක නම් දත්ත LocalStorage එකේ සේව් කරලා Dashboard එකට යවයි
+          localStorage.setItem("user", JSON.stringify(data.user));
+          router.push("/dashboard");
+        } else {
+          setError(data.message || "ලොග් වීමේදී දෝෂයක් මතු විය.");
+        }
+      } catch (err) {
+        setError("තාක්ෂණික දෝෂයකි. කරුණාකර නැවත උත්සාහ කරන්න.");
+      } finally {
         setLoading(false);
-      } else {
-        router.push("/dashboard");
       }
+
     } else if (heroView === "register") {
       if (password !== confirmPassword) {
         setError("මුරපදයන් එකිනෙකට නොගැලපේ. කරුණාකර නැවත පරීක්ෂා කරන්න.");
         setLoading(false);
         return;
       }
+      
       try {
         const res = await fetch("/api/register", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ name, phone, password }),
+          // Register API එකට අවශ්‍ය දත්ත
+          body: JSON.stringify({ name, username: phone, password }), 
         });
+        
+        const data = await res.json();
+        
         if (res.ok) {
           setPassword(""); setConfirmPassword("");
           changeViewAndScrollTop("login");
           alert("ලියාපදිංචි වීම සාර්ථකයි! කරුණාකර දැන් ලොග් වන්න.");
         } else {
-          const data = await res.json();
-          setError(data.message || "ලියාපදිංචි වීමේදී දෝෂයක් මතු විය.");
+          setError(data.message || "මෙම අංකයෙන් දැනටමත් ගිණුමක් ඇත.");
         }
       } catch (err) {
         setError("තාක්ෂණික දෝෂයකි. කරුණාකර නැවත උත්සාහ කරන්න.");
@@ -145,7 +163,7 @@ export default function HomePage() {
     }
   };
 
-  // --- Theme Classes (Purple/Dark අනුව වෙනස් වන වර්ණ) ---
+  // --- Theme Classes ---
   const themeBg = isDarkMode ? "bg-slate-900 text-slate-100" : "bg-slate-50 text-slate-800";
   const headerBg = isDarkMode ? "bg-slate-900/80 border-slate-800" : "bg-white/80 border-purple-100";
   const logoTextColor = isDarkMode ? "text-purple-400" : "text-purple-800";
@@ -179,7 +197,6 @@ export default function HomePage() {
             </button>
 
             <div className="flex items-center space-x-3 md:space-x-5 flex-shrink-0">
-              {/* Day / Night Toggle Button */}
               <button onClick={() => setIsDarkMode(!isDarkMode)} className={`rounded-full p-2 transition-colors focus:outline-none ${isDarkMode ? 'bg-slate-800 text-yellow-400 hover:bg-slate-700' : 'bg-purple-100 text-purple-600 hover:bg-purple-200'}`} title={isDarkMode ? "Light Mode" : "Dark Mode"}>
                 {isDarkMode ? (
                   <svg className="h-5 w-5" fill="currentColor" viewBox="0 0 20 20"><path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z" /></svg>
@@ -256,7 +273,7 @@ export default function HomePage() {
                   {heroView === "register" && (
                     <div>
                       <label className={`mb-1.5 block text-sm font-bold ${isDarkMode ? 'text-slate-300' : 'text-slate-600'}`}>නම</label>
-                      <input type="text" value={name} onChange={(e) => setName(e.target.value)} placeholder="උදා: P.K. Silva" className={`w-full rounded-xl border px-4 py-3 text-sm focus:outline-none focus:ring-4 focus:ring-purple-500/20 transition-all ${inputBg}`} required />
+                      <input type="text" value={name} onChange={(e) => setName(e.target.value)} placeholder="උදා: Y. S. Perera" className={`w-full rounded-xl border px-4 py-3 text-sm focus:outline-none focus:ring-4 focus:ring-purple-500/20 transition-all ${inputBg}`} required />
                     </div>
                   )}
                   <div>
