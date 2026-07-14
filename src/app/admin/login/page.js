@@ -43,7 +43,7 @@ export default function AdminLoginPage() {
         <div className="text-center mb-8">
           <div className="text-5xl mb-4">⚙️</div>
           <h1 className="text-2xl font-bold text-white">Admin Portal</h1>
-          <p className="text-slate-400 mt-2 text-sm">Pramoda Chemistry LMS - පද්ධති කළමනාකරණය</p>
+          <p className="text-slate-400 mt-2 text-sm">YCS Phsics LMS - පද්ධති කළමනාකරණය</p>
         </div>
 
         {error && <div className="bg-red-500/10 border border-red-500/50 text-red-500 p-3 rounded-lg text-sm font-bold text-center mb-6">{error}</div>}

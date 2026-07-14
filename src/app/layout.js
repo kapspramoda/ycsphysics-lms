@@ -12,8 +12,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata = {
-  title: "Pramoda Chemistry | LMS",
-  description: "Advanced Level Chemistry by Pramoda Katipearachchi",
+  title: "YCS Phsics | LMS",
+  description: "Advanced Level Phsics by YCS Katipearachchi",
 };
 
 export default function RootLayout({ children }) {

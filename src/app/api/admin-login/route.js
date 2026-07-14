@@ -6,7 +6,7 @@ export async function POST(req) {
 
     // මෙතන ඔයාගේ නියම Admin ඊමේල් එක සහ පාස්වර්ඩ් එක දෙන්න
     // (පසුව මේවා .env ෆයිල් එකකට දාන්න පුළුවන්)
-    const ADMIN_EMAIL = "admin@pramodachemistry.com";
+    const ADMIN_EMAIL = "admin@YCSPhsics.com";
     const ADMIN_PASSWORD = "admin12345"; // ඔයාට කැමති රහස් පදයක් දෙන්න
 
     if (email === ADMIN_EMAIL && password === ADMIN_PASSWORD) {
