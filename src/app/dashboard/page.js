@@ -144,7 +144,7 @@ export default function DashboardPage() {
           onClick={() => router.push('/')} 
           className="p-6 border-b border-blue-800 font-bold text-xl tracking-wider cursor-pointer hover:opacity-80 transition"
             >
-            YCS<span className="text-blue-300">Phsics</span>
+            YCS<span className="text-blue-300">Physics</span>
             </div>
         <nav className="flex-1 p-4 space-y-2 overflow-y-auto custom-scrollbar">
           <a href="#" onClick={(e) => { e.preventDefault(); router.push('/dashboard'); }} className="flex items-center space-x-3 hover:bg-blue-800 px-4 py-3 rounded-lg transition">
@@ -186,7 +186,7 @@ export default function DashboardPage() {
       <main className="flex-1 flex flex-col h-screen overflow-y-auto">
         <header className="bg-white shadow-sm p-4 flex justify-between items-center sticky top-0 z-30">
           <button onClick={() => setIsSidebarOpen(true)} className="md:hidden p-2 text-gray-600"><span className="text-2xl">☰</span></button>
-          <div className="hidden md:block text-gray-400 font-medium">A/L Phsics අඛණ්ඩ අධ්‍යයන පද්ධතිය</div>
+          <div className="hidden md:block text-gray-400 font-medium">A/L Physics අඛණ්ඩ අධ්‍යයන පද්ධතිය</div>
           <div className="flex items-center space-x-6">
             <div className="flex items-center space-x-3 cursor-pointer">
               <div className="text-right hidden sm:block">

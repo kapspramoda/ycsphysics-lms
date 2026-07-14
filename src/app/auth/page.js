@@ -85,9 +85,9 @@ export default function AuthPage() {
         
         <div className="bg-blue-600 p-6 text-center cursor-pointer" onClick={() => router.push('/')}>
           <h1 className="text-2xl font-bold text-white tracking-wider">
-            YCSPhsics<span className="text-blue-200">.com</span>
+            YCSPhysics<span className="text-blue-200">.com</span>
           </h1>
-          <p className="text-blue-100 text-sm mt-1">A/L Phsics Student Portal</p>
+          <p className="text-blue-100 text-sm mt-1">A/L Physics Student Portal</p>
         </div>
 
         <div className="p-8">

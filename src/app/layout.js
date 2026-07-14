@@ -12,8 +12,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata = {
-  title: "YCS Phsics | LMS",
-  description: "Advanced Level Phsics by YCS Katipearachchi",
+  title: "YCS Physics | LMS",
+  description: "Advanced Level Physics by YCS Katipearachchi",
 };
 
 export default function RootLayout({ children }) {

@@ -120,7 +120,7 @@ export default function SimulationPage() {
       {/* Sidebar Navigation */}
       <aside className={`w-64 bg-blue-900 text-white flex flex-col fixed inset-y-0 left-0 z-50 transform ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'} md:translate-x-0 md:static transition-transform duration-300 shadow-2xl`}>
         <div onClick={() => router.push('/')} className="p-6 border-b border-blue-800 font-bold text-xl tracking-wider cursor-pointer hover:opacity-80 transition">
-          YCS<span className="text-blue-300">Phsics</span>
+          YCS<span className="text-blue-300">Physics</span>
         </div>
         <nav className="flex-1 p-4 space-y-2 overflow-y-auto custom-scrollbar">
           <a href="#" onClick={(e) => { e.preventDefault(); router.push('/dashboard'); }} className="flex items-center space-x-3 hover:bg-blue-800 px-4 py-3 rounded-lg transition">
@@ -185,7 +185,7 @@ export default function SimulationPage() {
             <div className="max-w-7xl mx-auto animate-fade-in pb-10">
               <div className="bg-white rounded-3xl p-8 mb-8 border border-blue-100 shadow-sm text-center">
                 <span className="text-5xl block mb-4">🥼</span>
-                <h2 className="text-2xl font-bold text-blue-900 mb-2">YCS Phsics අතථ්‍ය විද්‍යාගාරය</h2>
+                <h2 className="text-2xl font-bold text-blue-900 mb-2">YCS Physics අතථ්‍ය විද්‍යාගාරය</h2>
                 <p className="text-slate-600 max-w-2xl mx-auto">
                   පහත ඇති පරීක්ෂණ වලින් එකක් තෝරාගෙන, විවිධ අගයන් වෙනස් කරමින් අංශු හැසිරෙන ආකාරය අධ්‍යයනය කරන්න.
                 </p>
