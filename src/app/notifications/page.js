@@ -42,7 +42,7 @@ export default function NotificationsPage() {
     setAllNotifications(allNotifications.map(n => n.id === id ? { ...n, read: true } : n));
   };
 
-  if (!user) return <div className="min-h-screen bg-gray-50 flex items-center justify-center font-bold text-blue-600">පරීක්ෂා කරමින් පවතී...</div>;
+  if (!user) return <div className="min-h-screen bg-gray-50 flex items-center justify-center font-bold text-purple-600">පරීක්ෂා කරමින් පවතී...</div>;
 
   return (
     <div className="bg-gray-50 font-sans text-gray-800 flex h-screen overflow-hidden">
@@ -51,43 +51,43 @@ export default function NotificationsPage() {
       <div className={`fixed inset-0 bg-black/50 z-40 md:hidden ${isSidebarOpen ? 'block' : 'hidden'}`} onClick={() => setIsSidebarOpen(false)}></div>
 
       {/* Sidebar Navigation */}
-      <aside className={`w-64 bg-blue-900 text-white flex flex-col fixed inset-y-0 left-0 z-50 transform ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'} md:translate-x-0 md:static transition-transform duration-300 shadow-2xl`}>
-        <div className="p-6 border-b border-blue-800 font-bold text-xl tracking-wider">
-          YCS<span className="text-blue-300">Physics</span>
+      <aside className={`w-64 bg-purple-900 text-white flex flex-col fixed inset-y-0 left-0 z-50 transform ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'} md:translate-x-0 md:static transition-transform duration-300 shadow-2xl`}>
+        <div className="p-6 border-b border-purple-800 font-bold text-xl tracking-wider">
+          YCS<span className="text-purple-300">Physics</span>
         </div>
         <nav className="flex-1 p-4 space-y-2 overflow-y-auto custom-scrollbar">
-  <a href="#" onClick={(e) => { e.preventDefault(); router.push('/dashboard'); }} className="flex items-center space-x-3 hover:bg-blue-800 px-4 py-3 rounded-lg transition">
+  <a href="#" onClick={(e) => { e.preventDefault(); router.push('/dashboard'); }} className="flex items-center space-x-3 hover:bg-purple-800 px-4 py-3 rounded-lg transition">
     <span className="text-xl">🏠</span><span className="font-medium">මුල් තිරය</span>
   </a>
-  <a href="#" onClick={(e) => { e.preventDefault(); router.push('/videos'); }} className="flex items-center space-x-3 hover:bg-blue-800 px-4 py-3 rounded-lg transition">
+  <a href="#" onClick={(e) => { e.preventDefault(); router.push('/videos'); }} className="flex items-center space-x-3 hover:bg-purple-800 px-4 py-3 rounded-lg transition">
     <span className="text-xl">📺</span><span className="font-medium">වීඩියෝ පාඩම්</span>
   </a>
-  <a href="#" onClick={(e) => { e.preventDefault(); router.push('/exam'); }} className="flex items-center space-x-3 hover:bg-blue-800 px-4 py-3 rounded-lg transition">
+  <a href="#" onClick={(e) => { e.preventDefault(); router.push('/exam'); }} className="flex items-center space-x-3 hover:bg-purple-800 px-4 py-3 rounded-lg transition">
     <span className="text-xl">💻</span><span className="font-medium">Online විභාග</span>
   </a>
-  <a href="#" onClick={(e) => { e.preventDefault(); router.push('/tutes'); }} className="flex items-center space-x-3 hover:bg-blue-800 px-4 py-3 rounded-lg transition">
+  <a href="#" onClick={(e) => { e.preventDefault(); router.push('/tutes'); }} className="flex items-center space-x-3 hover:bg-purple-800 px-4 py-3 rounded-lg transition">
     <span className="text-xl">📚</span><span className="font-medium">නිබන්ධන</span>
   </a>
-  <a href="#" onClick={(e) => { e.preventDefault(); router.push('/marking'); }} className="flex items-center space-x-3 hover:bg-blue-800 px-4 py-3 rounded-lg transition">
+  <a href="#" onClick={(e) => { e.preventDefault(); router.push('/marking'); }} className="flex items-center space-x-3 hover:bg-purple-800 px-4 py-3 rounded-lg transition">
     <span className="text-xl">✅</span><span className="font-medium">Marking Schemes</span>
   </a>
-  <a href="#" onClick={(e) => { e.preventDefault(); router.push('/dashboard/marks'); }} className="flex items-center space-x-3 hover:bg-blue-800 px-4 py-3 rounded-lg transition">
+  <a href="#" onClick={(e) => { e.preventDefault(); router.push('/dashboard/marks'); }} className="flex items-center space-x-3 hover:bg-purple-800 px-4 py-3 rounded-lg transition">
     <span className="text-xl">📊</span><span className="font-medium">ප්‍රගති වාර්තාව</span>
   </a>
   
   {/* අලුතින් එකතු කළ දැනුම්දීම් සහ සැකසුම් */}
-  <div className="pt-4 border-t border-blue-800/50 mt-4 mb-2"></div>
+  <div className="pt-4 border-t border-purple-800/50 mt-4 mb-2"></div>
 
-  <a href="#" onClick={(e) => { e.preventDefault(); router.push('/notifications'); }} className="flex items-center space-x-3 hover:bg-blue-800 px-4 py-3 rounded-lg transition">
+  <a href="#" onClick={(e) => { e.preventDefault(); router.push('/notifications'); }} className="flex items-center space-x-3 hover:bg-purple-800 px-4 py-3 rounded-lg transition">
     <span className="text-xl">🔔</span><span className="font-medium">දැනුම්දීම්</span>
   </a>
-  <a href="#" onClick={(e) => { e.preventDefault(); router.push('/settings'); }} className="flex items-center space-x-3 hover:bg-blue-800 px-4 py-3 rounded-lg transition">
+  <a href="#" onClick={(e) => { e.preventDefault(); router.push('/settings'); }} className="flex items-center space-x-3 hover:bg-purple-800 px-4 py-3 rounded-lg transition">
     <span className="text-xl">⚙️</span><span className="font-medium">සැකසුම්</span>
   </a>
 </nav>
-        <div className="p-4 border-t border-blue-800">
-          <button onClick={handleLogout} className="w-full flex items-center space-x-3 hover:bg-red-500/20 p-3 rounded-lg transition text-blue-200 hover:text-red-400">
-            <div className="w-8 h-8 rounded-full bg-blue-800 flex items-center justify-center text-white font-bold text-sm">
+        <div className="p-4 border-t border-purple-800">
+          <button onClick={handleLogout} className="w-full flex items-center space-x-3 hover:bg-red-500/20 p-3 rounded-lg transition text-purple-200 hover:text-red-400">
+            <div className="w-8 h-8 rounded-full bg-purple-800 flex items-center justify-center text-white font-bold text-sm">
               {userName.charAt(0)}
             </div>
             <span className="font-bold">Logout</span>
@@ -104,16 +104,16 @@ export default function NotificationsPage() {
             <button onClick={() => setIsSidebarOpen(true)} className="md:hidden p-2 text-slate-600 hover:bg-slate-100 rounded-lg transition">
               <span className="text-2xl font-bold">☰</span>
             </button>
-            <h1 className="text-xl font-extrabold text-blue-900 flex items-center gap-2">
+            <h1 className="text-xl font-extrabold text-purple-900 flex items-center gap-2">
               <span className="text-2xl hidden sm:block">🔔</span> සියලුම දැනුම්දීම්
             </h1>
           </div>
           
-          <div className="flex items-center gap-3 bg-blue-50 px-4 py-2 rounded-full border border-blue-100">
+          <div className="flex items-center gap-3 bg-purple-50 px-4 py-2 rounded-full border border-purple-100">
             <div className="text-right hidden sm:block">
-              <p className="font-bold text-sm text-blue-900">{userName}</p>
+              <p className="font-bold text-sm text-purple-900">{userName}</p>
             </div>
-            <div className="w-8 h-8 rounded-full border-2 border-blue-500 overflow-hidden bg-blue-600 flex items-center justify-center font-bold text-white shadow-sm">
+            <div className="w-8 h-8 rounded-full border-2 border-purple-500 overflow-hidden bg-purple-600 flex items-center justify-center font-bold text-white shadow-sm">
               {avatar ? <img src={avatar} className="w-full h-full object-cover" /> : userName.charAt(0)}
             </div>
           </div>
@@ -123,8 +123,8 @@ export default function NotificationsPage() {
         <div className="p-4 md:p-8 pb-20 max-w-4xl mx-auto w-full">
           <div className="bg-white rounded-3xl shadow-md border border-slate-100 overflow-hidden animate-fade-in">
             
-            <div className="bg-blue-50 border-b border-blue-100 p-5 flex justify-between items-center">
-              <h2 className="text-lg font-bold text-blue-900 flex items-center gap-2">
+            <div className="bg-purple-50 border-b border-purple-100 p-5 flex justify-between items-center">
+              <h2 className="text-lg font-bold text-purple-900 flex items-center gap-2">
                 ඔබේ පණිවිඩ
               </h2>
               <span className="bg-red-500 text-white text-xs px-3 py-1 rounded-full font-bold shadow-sm">
@@ -137,7 +137,7 @@ export default function NotificationsPage() {
                 <div 
                   key={n.id} 
                   onClick={() => markAsRead(n.id)}
-                  className={`p-5 border-b border-gray-50 flex items-start cursor-pointer transition ${n.read ? 'bg-white hover:bg-gray-50' : 'bg-blue-50/50 hover:bg-blue-50 border-l-4 border-l-blue-500'}`}
+                  className={`p-5 border-b border-gray-50 flex items-start cursor-pointer transition ${n.read ? 'bg-white hover:bg-gray-50' : 'bg-purple-50/50 hover:bg-purple-50 border-l-4 border-l-purple-500'}`}
                 >
                   <div className="text-3xl mr-4 mt-1">
                     {n.type === 'paper' ? '📝' : n.type === 'marks' ? '📊' : n.type === 'tute' ? '📚' : '📢'}
@@ -147,7 +147,7 @@ export default function NotificationsPage() {
                     <p className="text-sm text-gray-500 mt-1">{n.date}</p>
                   </div>
                   {!n.read && (
-                    <div className="w-3 h-3 bg-blue-500 rounded-full mt-2 shadow-sm"></div>
+                    <div className="w-3 h-3 bg-purple-500 rounded-full mt-2 shadow-sm"></div>
                   )}
                 </div>
               ))}

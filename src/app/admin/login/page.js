@@ -51,13 +51,13 @@ export default function AdminLoginPage() {
         <form onSubmit={handleLogin} className="space-y-5">
           <div>
             <label className="block text-slate-300 text-sm font-bold mb-2">Admin ඊමේල් ලිපිනය</label>
-            <input type="email" required value={formData.email} onChange={(e) => setFormData({...formData, email: e.target.value})} className="w-full px-4 py-3 rounded-xl bg-slate-700 border border-slate-600 text-white outline-none focus:border-blue-500 transition" placeholder="admin@example.com"/>
+            <input type="email" required value={formData.email} onChange={(e) => setFormData({...formData, email: e.target.value})} className="w-full px-4 py-3 rounded-xl bg-slate-700 border border-slate-600 text-white outline-none focus:border-purple-500 transition" placeholder="admin@example.com"/>
           </div>
           <div>
             <label className="block text-slate-300 text-sm font-bold mb-2">මුරපදය (Password)</label>
-            <input type="password" required value={formData.password} onChange={(e) => setFormData({...formData, password: e.target.value})} className="w-full px-4 py-3 rounded-xl bg-slate-700 border border-slate-600 text-white outline-none focus:border-blue-500 transition" placeholder="••••••••"/>
+            <input type="password" required value={formData.password} onChange={(e) => setFormData({...formData, password: e.target.value})} className="w-full px-4 py-3 rounded-xl bg-slate-700 border border-slate-600 text-white outline-none focus:border-purple-500 transition" placeholder="••••••••"/>
           </div>
-          <button type="submit" disabled={loading} className="w-full bg-blue-600 text-white font-bold rounded-xl px-4 py-4 shadow-lg hover:bg-blue-700 transition transform hover:-translate-y-1 mt-4">
+          <button type="submit" disabled={loading} className="w-full bg-purple-600 text-white font-bold rounded-xl px-4 py-4 shadow-lg hover:bg-purple-700 transition transform hover:-translate-y-1 mt-4">
             {loading ? 'පරීක්ෂා කරමින්...' : 'ඇතුල් වන්න (Login)'}
           </button>
         </form>

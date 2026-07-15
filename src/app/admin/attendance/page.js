@@ -285,7 +285,7 @@ export default function AdminAttendancePage() {
                           <th key={date} className="p-3 text-center border-r border-slate-200 min-w-[90px]">
                             <div className="text-lg font-black text-slate-800">{day}</div>
                             {note ? (
-                              <div className="text-[10px] text-blue-600 font-bold mt-1 bg-blue-50 px-1 rounded truncate max-w-[80px] mx-auto border border-blue-100" title={note}>
+                              <div className="text-[10px] text-purple-600 font-bold mt-1 bg-purple-50 px-1 rounded truncate max-w-[80px] mx-auto border border-purple-100" title={note}>
                                 {note}
                               </div>
                             ) : (

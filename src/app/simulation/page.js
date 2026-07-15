@@ -18,7 +18,7 @@ export default function SimulationPage() {
       description: 'වායු අංශු හැසිරෙන ආකාරය, උෂ්ණත්වය සහ පීඩනය අතර සම්බන්ධය.',
       url: 'https://phet.colorado.edu/sims/html/gases-intro/latest/gases-intro_en.html', 
       icon: '💨',
-      color: 'bg-blue-50 border-blue-200 text-blue-700'
+      color: 'bg-purple-50 border-purple-200 text-purple-700'
     },
     { 
       id: 2, 
@@ -118,35 +118,35 @@ export default function SimulationPage() {
       <div className={`fixed inset-0 bg-black/50 z-40 md:hidden ${isSidebarOpen ? 'block' : 'hidden'}`} onClick={() => setIsSidebarOpen(false)}></div>
 
       {/* Sidebar Navigation */}
-      <aside className={`w-64 bg-blue-900 text-white flex flex-col fixed inset-y-0 left-0 z-50 transform ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'} md:translate-x-0 md:static transition-transform duration-300 shadow-2xl`}>
-        <div onClick={() => router.push('/')} className="p-6 border-b border-blue-800 font-bold text-xl tracking-wider cursor-pointer hover:opacity-80 transition">
-          YCS<span className="text-blue-300">Physics</span>
+      <aside className={`w-64 bg-purple-900 text-white flex flex-col fixed inset-y-0 left-0 z-50 transform ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'} md:translate-x-0 md:static transition-transform duration-300 shadow-2xl`}>
+        <div onClick={() => router.push('/')} className="p-6 border-b border-purple-800 font-bold text-xl tracking-wider cursor-pointer hover:opacity-80 transition">
+          YCS<span className="text-purple-300">Physics</span>
         </div>
         <nav className="flex-1 p-4 space-y-2 overflow-y-auto custom-scrollbar">
-          <a href="#" onClick={(e) => { e.preventDefault(); router.push('/dashboard'); }} className="flex items-center space-x-3 hover:bg-blue-800 px-4 py-3 rounded-lg transition">
+          <a href="#" onClick={(e) => { e.preventDefault(); router.push('/dashboard'); }} className="flex items-center space-x-3 hover:bg-purple-800 px-4 py-3 rounded-lg transition">
             <span className="text-xl">🏠</span><span className="font-medium">මුල් තිරය</span>
           </a>
-          <a href="#" onClick={(e) => { e.preventDefault(); router.push('/videos'); }} className="flex items-center space-x-3 hover:bg-blue-800 px-4 py-3 rounded-lg transition">
+          <a href="#" onClick={(e) => { e.preventDefault(); router.push('/videos'); }} className="flex items-center space-x-3 hover:bg-purple-800 px-4 py-3 rounded-lg transition">
             <span className="text-xl">📺</span><span className="font-medium">වීඩියෝ පාඩම්</span>
           </a>
-          <a href="#" onClick={(e) => { e.preventDefault(); setActiveSim(null); router.push('/simulation'); }} className="flex items-center space-x-3 bg-blue-800 px-4 py-3 rounded-lg transition border-l-4 border-blue-400">
-            <span className="text-xl">🧪</span><span className="font-bold text-blue-100">Simulations</span>
+          <a href="#" onClick={(e) => { e.preventDefault(); setActiveSim(null); router.push('/simulation'); }} className="flex items-center space-x-3 bg-purple-800 px-4 py-3 rounded-lg transition border-l-4 border-purple-400">
+            <span className="text-xl">🧪</span><span className="font-bold text-purple-100">Simulations</span>
           </a>
-          <a href="#" onClick={(e) => { e.preventDefault(); router.push('/exam'); }} className="flex items-center space-x-3 hover:bg-blue-800 px-4 py-3 rounded-lg transition">
+          <a href="#" onClick={(e) => { e.preventDefault(); router.push('/exam'); }} className="flex items-center space-x-3 hover:bg-purple-800 px-4 py-3 rounded-lg transition">
             <span className="text-xl">💻</span><span className="font-medium">Online විභාග</span>
           </a>
-          <a href="#" onClick={(e) => { e.preventDefault(); router.push('/tutes'); }} className="flex items-center space-x-3 hover:bg-blue-800 px-4 py-3 rounded-lg transition">
+          <a href="#" onClick={(e) => { e.preventDefault(); router.push('/tutes'); }} className="flex items-center space-x-3 hover:bg-purple-800 px-4 py-3 rounded-lg transition">
             <span className="text-xl">📚</span><span className="font-medium">නිබන්ධන</span>
           </a>
-          <a href="#" onClick={(e) => { e.preventDefault(); router.push('/marking'); }} className="flex items-center space-x-3 hover:bg-blue-800 px-4 py-3 rounded-lg transition">
+          <a href="#" onClick={(e) => { e.preventDefault(); router.push('/marking'); }} className="flex items-center space-x-3 hover:bg-purple-800 px-4 py-3 rounded-lg transition">
             <span className="text-xl">✅</span><span className="font-medium">Marking Schemes</span>
           </a>
-          <a href="#" onClick={(e) => { e.preventDefault(); router.push('/dashboard/marks'); }} className="flex items-center space-x-3 hover:bg-blue-800 px-4 py-3 rounded-lg transition">
+          <a href="#" onClick={(e) => { e.preventDefault(); router.push('/dashboard/marks'); }} className="flex items-center space-x-3 hover:bg-purple-800 px-4 py-3 rounded-lg transition">
             <span className="text-xl">📊</span><span className="font-medium">ප්‍රගති වාර්තාව</span>
           </a>
         </nav>
-        <div className="p-4 border-t border-blue-800">
-          <button onClick={handleLogout} className="w-full flex items-center space-x-3 hover:bg-red-500/20 p-3 rounded-lg transition text-blue-200 hover:text-red-400">
+        <div className="p-4 border-t border-purple-800">
+          <button onClick={handleLogout} className="w-full flex items-center space-x-3 hover:bg-red-500/20 p-3 rounded-lg transition text-purple-200 hover:text-red-400">
             <span className="font-bold">Logout</span>
           </button>
         </div>
@@ -160,7 +160,7 @@ export default function SimulationPage() {
             <button onClick={() => setIsSidebarOpen(true)} className="md:hidden p-2 text-slate-600 hover:bg-slate-100 rounded-lg transition">
               <span className="text-2xl font-bold">☰</span>
             </button>
-            <h1 className="text-xl font-extrabold text-blue-900 flex items-center gap-2">
+            <h1 className="text-xl font-extrabold text-purple-900 flex items-center gap-2">
               <span className="text-2xl hidden sm:block">🧪</span> 
               {activeSim ? activeSim.title : 'Virtual Laboratory'}
             </h1>
@@ -183,9 +183,9 @@ export default function SimulationPage() {
           {!activeSim ? (
             /* --- Simulation ලැයිස්තුව (Dashboard) --- */
             <div className="max-w-7xl mx-auto animate-fade-in pb-10">
-              <div className="bg-white rounded-3xl p-8 mb-8 border border-blue-100 shadow-sm text-center">
+              <div className="bg-white rounded-3xl p-8 mb-8 border border-purple-100 shadow-sm text-center">
                 <span className="text-5xl block mb-4">🥼</span>
-                <h2 className="text-2xl font-bold text-blue-900 mb-2">YCS Physics අතථ්‍ය විද්‍යාගාරය</h2>
+                <h2 className="text-2xl font-bold text-purple-900 mb-2">YCS Physics අතථ්‍ය විද්‍යාගාරය</h2>
                 <p className="text-slate-600 max-w-2xl mx-auto">
                   පහත ඇති පරීක්ෂණ වලින් එකක් තෝරාගෙන, විවිධ අගයන් වෙනස් කරමින් අංශු හැසිරෙන ආකාරය අධ්‍යයනය කරන්න.
                 </p>
@@ -203,7 +203,7 @@ export default function SimulationPage() {
                     </div>
                     <h3 className="font-bold text-gray-800 text-lg mb-2 leading-tight">{sim.title}</h3>
                     <p className="text-sm text-gray-500 line-clamp-2">{sim.description}</p>
-                    <div className="mt-4 text-blue-600 text-sm font-bold flex items-center gap-1 group-hover:gap-2 transition-all">
+                    <div className="mt-4 text-purple-600 text-sm font-bold flex items-center gap-1 group-hover:gap-2 transition-all">
                       පරීක්ෂණය අරඹන්න <span>→</span>
                     </div>
                   </div>
@@ -215,7 +215,7 @@ export default function SimulationPage() {
             <div className="w-full h-full bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden animate-fade-in relative">
               {/* Loading Indicator (Simulation එක Load වෙනකම්) */}
               <div className="absolute inset-0 flex items-center justify-center -z-10 bg-slate-50">
-                 <div className="animate-spin rounded-full h-12 w-12 border-4 border-blue-200 border-t-blue-600"></div>
+                 <div className="animate-spin rounded-full h-12 w-12 border-4 border-purple-200 border-t-purple-600"></div>
               </div>
               <iframe 
                 src={activeSim.url}

@@ -150,13 +150,13 @@ export default function AdminVideosPage() {
                   <p className="text-center text-gray-500 py-10">දැනට වීඩියෝ කිසිවක් එක් කර නොමැත.</p>
                 ) : (
                   videos.map((video) => (
-                    <div key={video._id} className={`flex flex-col sm:flex-row items-start sm:items-center justify-between p-4 rounded-xl border ${video.isVisible === false ? 'bg-gray-100 border-gray-300 opacity-75 grayscale' : 'bg-white border-blue-100 shadow-sm'}`}>
+                    <div key={video._id} className={`flex flex-col sm:flex-row items-start sm:items-center justify-between p-4 rounded-xl border ${video.isVisible === false ? 'bg-gray-100 border-gray-300 opacity-75 grayscale' : 'bg-white border-purple-100 shadow-sm'}`}>
                       <div className="flex items-center gap-4 mb-4 sm:mb-0">
                         <img src={`https://img.youtube.com/vi/${video.youtubeId}/mqdefault.jpg`} className="w-24 h-16 object-cover rounded-md border" />
                         <div>
                           <h3 className={`font-bold ${video.isVisible === false ? 'text-gray-600 line-through' : 'text-gray-800'}`}>{video.title}</h3>
                           <div className="flex gap-2 mt-1">
-                            <span className="bg-blue-50 text-blue-600 text-xs px-2 py-1 rounded font-bold">{video.alYear}</span>
+                            <span className="bg-purple-50 text-purple-600 text-xs px-2 py-1 rounded font-bold">{video.alYear}</span>
                             <span className="bg-gray-100 text-gray-600 text-xs px-2 py-1 rounded">{video.category}</span>
                           </div>
                         </div>

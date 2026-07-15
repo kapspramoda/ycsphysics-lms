@@ -161,7 +161,7 @@ export default function AdminTutesPage() {
                     <div key={tute._id} className={`flex flex-col sm:flex-row items-start sm:items-center justify-between p-5 rounded-2xl border transition-all ${tute.isVisible === false ? 'bg-gray-50 border-gray-200 opacity-60 grayscale' : 'bg-white border-green-100 shadow-sm'}`}>
                       <div className="flex-1 mb-4 sm:mb-0 w-full overflow-hidden">
                         <div className="flex flex-wrap items-center gap-2 mb-2">
-                          <span className={`text-xs font-bold px-2 py-1 rounded-md ${tute.category === 'Theory' ? 'bg-blue-100 text-blue-700' : tute.category === 'Revision' ? 'bg-orange-100 text-orange-700' : 'bg-purple-100 text-purple-700'}`}>{tute.category}</span>
+                          <span className={`text-xs font-bold px-2 py-1 rounded-md ${tute.category === 'Theory' ? 'bg-purple-100 text-purple-700' : tute.category === 'Revision' ? 'bg-orange-100 text-orange-700' : 'bg-purple-100 text-purple-700'}`}>{tute.category}</span>
                           <span className="bg-gray-100 text-gray-600 text-xs px-2 py-1 rounded-md font-bold">{tute.alYear}</span>
                         </div>
                         <h3 className={`font-bold text-lg truncate ${tute.isVisible === false ? 'text-gray-500 line-through' : 'text-gray-800'}`}>{tute.title}</h3>

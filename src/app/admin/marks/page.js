@@ -226,9 +226,9 @@ export default function AdminMarksPage() {
                         <p className="text-sm text-gray-600 font-medium">{getStudentName(mark.email)} <span className="bg-yellow-100 text-yellow-800 px-2 rounded ml-2 font-bold">{mark.alYear || 'N/A'}</span></p>
                       </div>
                       <div className="flex items-center gap-4 w-full sm:w-auto justify-between sm:justify-end">
-                        <span className="text-2xl font-bold text-blue-600">{mark.score}%</span>
+                        <span className="text-2xl font-bold text-purple-600">{mark.score}%</span>
                         <div className="flex gap-2">
-                          <button onClick={() => handleEdit(mark)} className="text-xs font-bold bg-blue-100 text-blue-700 px-3 py-2 rounded-lg hover:bg-blue-200 transition">Edit</button>
+                          <button onClick={() => handleEdit(mark)} className="text-xs font-bold bg-purple-100 text-purple-700 px-3 py-2 rounded-lg hover:bg-purple-200 transition">Edit</button>
                           <button onClick={() => handleDelete(mark._id)} className="text-xs font-bold bg-red-100 text-red-600 px-3 py-2 rounded-lg hover:bg-red-200 transition">Erase</button>
                         </div>
                       </div>
@@ -260,9 +260,9 @@ export default function AdminMarksPage() {
                 ) : (
                   Object.keys(groupedMarks).map((paperName, idx) => (
                     <div key={idx} className="bg-white rounded-3xl shadow-lg overflow-hidden border border-gray-100">
-                      <div className="bg-blue-50 border-b border-blue-100 p-5 flex justify-between items-center">
-                        <h3 className="text-xl font-bold text-blue-900 flex items-center"><span className="mr-2 text-2xl">📝</span> {paperName} - ප්‍රතිඵල ලේඛනය</h3>
-                        <span className="bg-white text-blue-600 font-bold px-4 py-1 rounded-full shadow-sm text-sm">සිසුන් {groupedMarks[paperName].length} ක්</span>
+                      <div className="bg-purple-50 border-b border-purple-100 p-5 flex justify-between items-center">
+                        <h3 className="text-xl font-bold text-purple-900 flex items-center"><span className="mr-2 text-2xl">📝</span> {paperName} - ප්‍රතිඵල ලේඛනය</h3>
+                        <span className="bg-white text-purple-600 font-bold px-4 py-1 rounded-full shadow-sm text-sm">සිසුන් {groupedMarks[paperName].length} ක්</span>
                       </div>
                       <div className="overflow-x-auto p-4 custom-scrollbar">
                         <table className="w-full text-left border-collapse min-w-[600px]">
@@ -284,7 +284,7 @@ export default function AdminMarksPage() {
                                 {/* ඊමේල් එක වෙනුවට නම පෙන්වීම */}
                                 <td className="p-4 text-gray-800 font-bold">{getStudentName(mark.email)}</td>
                                 <td className="p-4"><span className={`px-3 py-1 rounded-full text-xs font-bold ${mark.examType === 'Online' ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700'}`}>{mark.examType}</span></td>
-                                <td className="p-4 text-center font-bold text-xl text-blue-600">{mark.score}%</td>
+                                <td className="p-4 text-center font-bold text-xl text-purple-600">{mark.score}%</td>
                                 <td className="p-4 text-center"><button onClick={() => handleDelete(mark._id)} className="text-red-500 hover:text-red-700 font-bold text-sm bg-red-50 px-3 py-1 rounded-lg hover:bg-red-100 transition">🗑️ මකන්න</button></td>
                               </tr>
                             ))}

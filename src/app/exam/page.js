@@ -121,42 +121,42 @@ export default function ExamPage() {
       <div className={`fixed inset-0 bg-black/50 z-40 md:hidden ${isSidebarOpen ? 'block' : 'hidden'}`} onClick={() => setIsSidebarOpen(false)}></div>
 
       {/* Sidebar Navigation */}
-      <aside className={`w-64 bg-blue-900 text-white flex flex-col fixed inset-y-0 left-0 z-50 transform ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'} md:translate-x-0 md:static transition-transform duration-300 shadow-2xl`}>
-        <div onClick={() => router.push('/')} className="p-6 border-b border-blue-800 font-bold text-xl tracking-wider cursor-pointer hover:opacity-80 transition">
-          YCS<span className="text-blue-300">Physics</span>
+      <aside className={`w-64 bg-purple-900 text-white flex flex-col fixed inset-y-0 left-0 z-50 transform ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'} md:translate-x-0 md:static transition-transform duration-300 shadow-2xl`}>
+        <div onClick={() => router.push('/')} className="p-6 border-b border-purple-800 font-bold text-xl tracking-wider cursor-pointer hover:opacity-80 transition">
+          YCS<span className="text-purple-300">Physics</span>
         </div>
         <nav className="flex-1 p-4 space-y-2 overflow-y-auto custom-scrollbar">
-          <a href="#" onClick={(e) => { e.preventDefault(); router.push('/dashboard'); }} className="flex items-center space-x-3 hover:bg-blue-800 px-4 py-3 rounded-lg transition">
+          <a href="#" onClick={(e) => { e.preventDefault(); router.push('/dashboard'); }} className="flex items-center space-x-3 hover:bg-purple-800 px-4 py-3 rounded-lg transition">
             <span className="text-xl">🏠</span><span className="font-medium">මුල් තිරය</span>
           </a>
-          <a href="#" onClick={(e) => { e.preventDefault(); router.push('/videos'); }} className="flex items-center space-x-3 hover:bg-blue-800 px-4 py-3 rounded-lg transition">
+          <a href="#" onClick={(e) => { e.preventDefault(); router.push('/videos'); }} className="flex items-center space-x-3 hover:bg-purple-800 px-4 py-3 rounded-lg transition">
             <span className="text-xl">📺</span><span className="font-medium">වීඩියෝ පාඩම්</span>
           </a>
-          <a href="#" onClick={(e) => { e.preventDefault(); router.push('/exam'); }} className="flex items-center space-x-3 bg-blue-800 px-4 py-3 rounded-lg transition border-l-4 border-blue-400">
-            <span className="text-xl">💻</span><span className="font-bold text-blue-100">Online විභාග</span>
+          <a href="#" onClick={(e) => { e.preventDefault(); router.push('/exam'); }} className="flex items-center space-x-3 bg-purple-800 px-4 py-3 rounded-lg transition border-l-4 border-purple-400">
+            <span className="text-xl">💻</span><span className="font-bold text-purple-100">Online විභාග</span>
           </a>
-          <a href="#" onClick={(e) => { e.preventDefault(); router.push('/tutes'); }} className="flex items-center space-x-3 hover:bg-blue-800 px-4 py-3 rounded-lg transition">
+          <a href="#" onClick={(e) => { e.preventDefault(); router.push('/tutes'); }} className="flex items-center space-x-3 hover:bg-purple-800 px-4 py-3 rounded-lg transition">
             <span className="text-xl">📚</span><span className="font-medium">නිබන්ධන</span>
           </a>
-          <a href="#" onClick={(e) => { e.preventDefault(); router.push('/marking'); }} className="flex items-center space-x-3 hover:bg-blue-800 px-4 py-3 rounded-lg transition">
+          <a href="#" onClick={(e) => { e.preventDefault(); router.push('/marking'); }} className="flex items-center space-x-3 hover:bg-purple-800 px-4 py-3 rounded-lg transition">
             <span className="text-xl">✅</span><span className="font-medium">Marking Schemes</span>
           </a>
-          <a href="#" onClick={(e) => { e.preventDefault(); router.push('/dashboard/marks'); }} className="flex items-center space-x-3 hover:bg-blue-800 px-4 py-3 rounded-lg transition">
+          <a href="#" onClick={(e) => { e.preventDefault(); router.push('/dashboard/marks'); }} className="flex items-center space-x-3 hover:bg-purple-800 px-4 py-3 rounded-lg transition">
             <span className="text-xl">📊</span><span className="font-medium">ප්‍රගති වාර්තාව</span>
           </a>
           
-          <div className="pt-4 border-t border-blue-800/50 mt-4 mb-2"></div>
+          <div className="pt-4 border-t border-purple-800/50 mt-4 mb-2"></div>
 
-          <a href="#" onClick={(e) => { e.preventDefault(); router.push('/notifications'); }} className="flex items-center space-x-3 hover:bg-blue-800 px-4 py-3 rounded-lg transition">
+          <a href="#" onClick={(e) => { e.preventDefault(); router.push('/notifications'); }} className="flex items-center space-x-3 hover:bg-purple-800 px-4 py-3 rounded-lg transition">
             <span className="text-xl">🔔</span><span className="font-medium">දැනුම්දීම්</span>
           </a>
-          <a href="#" onClick={(e) => { e.preventDefault(); router.push('/settings'); }} className="flex items-center space-x-3 hover:bg-blue-800 px-4 py-3 rounded-lg transition">
+          <a href="#" onClick={(e) => { e.preventDefault(); router.push('/settings'); }} className="flex items-center space-x-3 hover:bg-purple-800 px-4 py-3 rounded-lg transition">
             <span className="text-xl">⚙️</span><span className="font-medium">සැකසුම්</span>
           </a>
         </nav>
-        <div className="p-4 border-t border-blue-800">
-          <button onClick={handleLogout} className="w-full flex items-center space-x-3 hover:bg-red-500/20 p-3 rounded-lg transition text-blue-200 hover:text-red-400">
-            <div className="w-8 h-8 rounded-full bg-blue-800 flex items-center justify-center text-white font-bold text-sm">
+        <div className="p-4 border-t border-purple-800">
+          <button onClick={handleLogout} className="w-full flex items-center space-x-3 hover:bg-red-500/20 p-3 rounded-lg transition text-purple-200 hover:text-red-400">
+            <div className="w-8 h-8 rounded-full bg-purple-800 flex items-center justify-center text-white font-bold text-sm">
               {userName.charAt(0)}
             </div>
             <span className="font-bold">Logout</span>
@@ -173,14 +173,14 @@ export default function ExamPage() {
             <button onClick={() => setIsSidebarOpen(true)} className="md:hidden p-2 text-slate-600 hover:bg-slate-100 rounded-lg transition">
               <span className="text-2xl font-bold">☰</span>
             </button>
-            <h1 className="text-xl font-extrabold text-blue-900 flex items-center gap-2">
+            <h1 className="text-xl font-extrabold text-purple-900 flex items-center gap-2">
               <span className="text-2xl hidden sm:block">💻</span> Online විභාගය
             </h1>
           </div>
           
           {/* විභාගය පටන් ගත්තට පස්සේ විතරක් Timer එක පෙන්වයි */}
           {(examStarted && !isSubmitted && questions.length > 0) && (
-             <div className={`flex items-center gap-2 px-4 py-2 rounded-lg font-mono text-lg sm:text-xl font-bold shadow-sm ${timeLeft < 60 ? 'bg-red-100 text-red-600 animate-pulse' : 'bg-blue-50 text-blue-700'}`}>
+             <div className={`flex items-center gap-2 px-4 py-2 rounded-lg font-mono text-lg sm:text-xl font-bold shadow-sm ${timeLeft < 60 ? 'bg-red-100 text-red-600 animate-pulse' : 'bg-purple-50 text-purple-700'}`}>
                <span>⏱️</span> {formatTime(timeLeft)}
              </div>
           )}
@@ -191,7 +191,7 @@ export default function ExamPage() {
           
           {examLoading ? (
              <div className="text-center mt-20 text-slate-500 font-bold text-lg animate-pulse flex flex-col items-center">
-               <div className="w-12 h-12 border-4 border-blue-100 border-t-blue-600 rounded-full animate-spin mb-4"></div>
+               <div className="w-12 h-12 border-4 border-purple-100 border-t-purple-600 rounded-full animate-spin mb-4"></div>
                විභාගය පූරණය වෙමින් පවතී... ⏳
              </div>
           ) : questions.length === 0 ? (
@@ -207,17 +207,17 @@ export default function ExamPage() {
               <span className="text-7xl block mb-6">🚀</span>
               <h2 className="text-2xl md:text-3xl font-extrabold text-gray-800 mb-6">විභාගය සඳහා සූදානම්ද?</h2>
               
-              <div className="bg-blue-50 p-6 rounded-2xl text-left mb-8 border border-blue-100 inline-block w-full">
+              <div className="bg-purple-50 p-6 rounded-2xl text-left mb-8 border border-purple-100 inline-block w-full">
                 <ul className="space-y-4 text-gray-700 font-medium">
-                  <li className="flex items-center gap-3"><span className="text-blue-600 text-xl">📝</span> ප්‍රශ්න ගණන: <span className="font-bold text-blue-900">{questions.length}</span></li>
-                  <li className="flex items-center gap-3"><span className="text-blue-600 text-xl">⏱️</span> ලබා දී ඇති කාලය: <span className="font-bold text-blue-900">විනාඩි 10 යි</span></li>
+                  <li className="flex items-center gap-3"><span className="text-purple-600 text-xl">📝</span> ප්‍රශ්න ගණන: <span className="font-bold text-purple-900">{questions.length}</span></li>
+                  <li className="flex items-center gap-3"><span className="text-purple-600 text-xl">⏱️</span> ලබා දී ඇති කාලය: <span className="font-bold text-purple-900">විනාඩි 10 යි</span></li>
                   <li className="flex items-center gap-3"><span className="text-amber-500 text-xl">⚠️</span> විභාගය අතරතුර පිටුව Refresh කිරීමෙන් වළකින්න.</li>
                 </ul>
               </div>
 
               <button 
                 onClick={() => setExamStarted(true)} 
-                className="bg-blue-600 text-white font-bold text-lg px-10 py-4 rounded-full shadow-lg hover:bg-blue-700 transition transform hover:scale-105 w-full sm:w-auto"
+                className="bg-purple-600 text-white font-bold text-lg px-10 py-4 rounded-full shadow-lg hover:bg-purple-700 transition transform hover:scale-105 w-full sm:w-auto"
               >
                 විභාගය ආරම්භ කරන්න
               </button>
@@ -233,16 +233,16 @@ export default function ExamPage() {
                 <p className="text-gray-500 mb-8">ඔබේ පිළිතුරු පත්‍රය සාර්ථකව පරීක්ෂා කරන ලදී.</p>
                 
                 <div className="flex flex-wrap justify-center gap-6 mb-8">
-                  <div className="bg-blue-50 p-6 rounded-2xl w-40 border border-blue-100">
-                    <p className="text-sm text-blue-600 font-bold mb-1">ලකුණු</p>
-                    <p className="text-4xl font-bold text-blue-900">{score}/{questions.length}</p>
+                  <div className="bg-purple-50 p-6 rounded-2xl w-40 border border-purple-100">
+                    <p className="text-sm text-purple-600 font-bold mb-1">ලකුණු</p>
+                    <p className="text-4xl font-bold text-purple-900">{score}/{questions.length}</p>
                   </div>
                   <div className={`p-6 rounded-2xl w-40 border ${(Math.round((score / questions.length) * 100)) >= 50 ? 'bg-green-50 border-green-100' : 'bg-red-50 border-red-100'}`}>
                     <p className={`text-sm font-bold mb-1 ${(Math.round((score / questions.length) * 100)) >= 50 ? 'text-green-600' : 'text-red-600'}`}>ප්‍රතිශතය</p>
                     <p className={`text-4xl font-bold ${(Math.round((score / questions.length) * 100)) >= 50 ? 'text-green-600' : 'text-red-600'}`}>{(Math.round((score / questions.length) * 100))}%</p>
                   </div>
                 </div>
-                <button onClick={() => router.push('/dashboard/marks')} className="bg-blue-600 text-white px-8 py-3 rounded-xl font-bold hover:bg-blue-700 shadow-md transition">
+                <button onClick={() => router.push('/dashboard/marks')} className="bg-purple-600 text-white px-8 py-3 rounded-xl font-bold hover:bg-purple-700 shadow-md transition">
                   ප්‍රගති වාර්තාව බලන්න
                 </button>
               </div>
@@ -297,7 +297,7 @@ export default function ExamPage() {
               <div className="lg:col-span-3 flex flex-col h-full">
                 <div className="bg-white rounded-3xl shadow-sm border border-gray-200 p-6 md:p-10 flex-1">
                   <div className="flex justify-between items-center mb-6 border-b pb-4">
-                    <span className="bg-blue-100 text-blue-700 font-bold px-4 py-1.5 rounded-full text-sm">
+                    <span className="bg-purple-100 text-purple-700 font-bold px-4 py-1.5 rounded-full text-sm">
                       ප්‍රශ්නය {currentQuestion + 1} / {questions.length}
                     </span>
                   </div>
@@ -313,12 +313,12 @@ export default function ExamPage() {
                         <div 
                           key={index} 
                           onClick={() => handleSelectAnswer(index)}
-                          className={`p-4 rounded-2xl border-2 cursor-pointer transition flex items-center gap-4 ${isSelected ? 'border-blue-500 bg-blue-50 shadow-md' : 'border-gray-100 hover:border-blue-300 hover:bg-gray-50'}`}
+                          className={`p-4 rounded-2xl border-2 cursor-pointer transition flex items-center gap-4 ${isSelected ? 'border-purple-500 bg-purple-50 shadow-md' : 'border-gray-100 hover:border-purple-300 hover:bg-gray-50'}`}
                         >
-                          <div className={`w-8 h-8 rounded-full flex items-center justify-center font-bold border-2 transition-colors ${isSelected ? 'bg-blue-500 text-white border-blue-500' : 'border-gray-300 text-gray-500'}`}>
+                          <div className={`w-8 h-8 rounded-full flex items-center justify-center font-bold border-2 transition-colors ${isSelected ? 'bg-purple-500 text-white border-purple-500' : 'border-gray-300 text-gray-500'}`}>
                             {index + 1}
                           </div>
-                          <span className={`text-lg ${isSelected ? 'text-blue-900 font-bold' : 'text-gray-700 font-medium'}`}>{option}</span>
+                          <span className={`text-lg ${isSelected ? 'text-purple-900 font-bold' : 'text-gray-700 font-medium'}`}>{option}</span>
                         </div>
                       );
                     })}
@@ -341,7 +341,7 @@ export default function ExamPage() {
                   ) : (
                     <button 
                       onClick={() => setCurrentQuestion(prev => Math.min(questions.length - 1, prev + 1))}
-                      className="px-6 py-3 rounded-xl font-bold bg-blue-600 hover:bg-blue-700 text-white shadow-md transition"
+                      className="px-6 py-3 rounded-xl font-bold bg-purple-600 hover:bg-purple-700 text-white shadow-md transition"
                     >
                       ඊළඟ ප්‍රශ්නය →
                     </button>
@@ -361,8 +361,8 @@ export default function ExamPage() {
                         key={question._id}
                         onClick={() => setCurrentQuestion(index)}
                         className={`w-10 h-10 rounded-xl font-bold flex items-center justify-center transition border-2 
-                          ${isCurrent ? 'border-blue-600 ring-2 ring-blue-200 shadow-sm' : 'border-transparent'} 
-                          ${isAnswered ? 'bg-blue-100 text-blue-700' : 'bg-gray-100 text-gray-500 hover:bg-gray-200'}
+                          ${isCurrent ? 'border-purple-600 ring-2 ring-purple-200 shadow-sm' : 'border-transparent'} 
+                          ${isAnswered ? 'bg-purple-100 text-purple-700' : 'bg-gray-100 text-gray-500 hover:bg-gray-200'}
                         `}
                       >
                         {index + 1}
@@ -372,7 +372,7 @@ export default function ExamPage() {
                 </div>
                 
                 <div className="mt-6 space-y-2 text-sm bg-gray-50 p-4 rounded-xl border border-gray-100">
-                  <div className="flex items-center gap-2"><div className="w-4 h-4 bg-blue-100 rounded"></div><span className="text-gray-600 font-medium">පිළිතුරු දුන්</span></div>
+                  <div className="flex items-center gap-2"><div className="w-4 h-4 bg-purple-100 rounded"></div><span className="text-gray-600 font-medium">පිළිතුරු දුන්</span></div>
                   <div className="flex items-center gap-2"><div className="w-4 h-4 bg-gray-200 rounded"></div><span className="text-gray-600 font-medium">පිළිතුරු නොදුන්</span></div>
                 </div>
                 

@@ -73,21 +73,21 @@ export default function AuthPage() {
   };
 
   return (
-    <div className="bg-blue-50 min-h-screen flex flex-col items-center justify-center font-sans p-4">
+    <div className="bg-purple-50 min-h-screen flex flex-col items-center justify-center font-sans p-4">
       
       <div className="w-full max-w-md mb-4 flex justify-start">
-        <button onClick={() => router.push('/')} className="text-blue-600 hover:text-blue-800 flex items-center font-medium">
+        <button onClick={() => router.push('/')} className="text-purple-600 hover:text-purple-800 flex items-center font-medium">
           <span className="mr-1">←</span> මුල් පිටුවට
         </button>
       </div>
 
-      <div className="bg-white rounded-2xl shadow-xl w-full max-w-md overflow-hidden border border-blue-100">
+      <div className="bg-white rounded-2xl shadow-xl w-full max-w-md overflow-hidden border border-purple-100">
         
-        <div className="bg-blue-600 p-6 text-center cursor-pointer" onClick={() => router.push('/')}>
+        <div className="bg-purple-600 p-6 text-center cursor-pointer" onClick={() => router.push('/')}>
           <h1 className="text-2xl font-bold text-white tracking-wider">
-            YCSPhysics<span className="text-blue-200">.com</span>
+            YCSPhysics<span className="text-purple-200">.com</span>
           </h1>
-          <p className="text-blue-100 text-sm mt-1">A/L Physics Student Portal</p>
+          <p className="text-purple-100 text-sm mt-1">A/L Physics Student Portal</p>
         </div>
 
         <div className="p-8">
@@ -106,7 +106,7 @@ export default function AuthPage() {
                 required 
                 onChange={handleChange} 
                 inputMode="numeric" // ෆෝන් එකෙන් එද්දී Number Keyboard එක එන්න
-                className="w-full px-4 py-3 rounded-lg bg-gray-50 border border-gray-200 focus:border-blue-500 focus:bg-white focus:outline-none transition" 
+                className="w-full px-4 py-3 rounded-lg bg-gray-50 border border-gray-200 focus:border-purple-500 focus:bg-white focus:outline-none transition" 
                 placeholder="උදා: 07XXXXXXXX" 
               />
             </div>
@@ -120,13 +120,13 @@ export default function AuthPage() {
                   value={formData.password}
                   required 
                   onChange={handleChange} 
-                  className="w-full px-4 py-3 rounded-lg bg-gray-50 border border-gray-200 focus:border-blue-500 focus:bg-white focus:outline-none transition pr-12" 
+                  className="w-full px-4 py-3 rounded-lg bg-gray-50 border border-gray-200 focus:border-purple-500 focus:bg-white focus:outline-none transition pr-12" 
                   placeholder="••••••••" 
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-blue-700 focus:outline-none transition"
+                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-purple-700 focus:outline-none transition"
                 >
                   {showPassword ? (
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6">
@@ -142,7 +142,7 @@ export default function AuthPage() {
               </div>
             </div>
 
-            <button type="submit" disabled={loading} className="w-full bg-blue-600 text-white font-bold rounded-lg px-4 py-3 hover:bg-blue-700 shadow-md transition transform hover:-translate-y-0.5 mt-2">
+            <button type="submit" disabled={loading} className="w-full bg-purple-600 text-white font-bold rounded-lg px-4 py-3 hover:bg-purple-700 shadow-md transition transform hover:-translate-y-0.5 mt-2">
               {loading ? 'ඇතුල් වෙමින්...' : 'ඇතුල් වන්න'}
             </button>
           </form>

@@ -168,7 +168,7 @@ export default function AdminQuestionsPage() {
           <a href="#" onClick={(e) => { e.preventDefault(); router.push('/admin/attendance'); }} className="flex items-center space-x-3 hover:bg-slate-800 px-4 py-3 rounded-lg transition text-gray-300 hover:text-white"><span>✅</span><span>පැමිණීම (Attendance)</span></a>
           <a href="#" onClick={(e) => { e.preventDefault(); router.push('/admin/videos'); }} className="flex items-center space-x-3 hover:bg-slate-800 px-4 py-3 rounded-lg transition text-gray-300 hover:text-white"><span>📺</span><span>වීඩියෝ පාඩම්</span></a>
           <a href="#" onClick={(e) => { e.preventDefault(); router.push('/admin/tutes'); }} className="flex items-center space-x-3 hover:bg-slate-800 px-4 py-3 rounded-lg transition text-gray-300 hover:text-white"><span>📚</span><span>නිබන්ධන</span></a>
-          <a href="#" onClick={(e) => { e.preventDefault(); router.push('/admin/questions'); }} className="flex items-center space-x-3 bg-blue-600 px-4 py-3 rounded-lg text-white font-bold shadow-md"><span>📝</span><span>MCQ ප්‍රශ්න පත්‍ර</span></a>
+          <a href="#" onClick={(e) => { e.preventDefault(); router.push('/admin/questions'); }} className="flex items-center space-x-3 bg-purple-600 px-4 py-3 rounded-lg text-white font-bold shadow-md"><span>📝</span><span>MCQ ප්‍රශ්න පත්‍ර</span></a>
           <a href="#" onClick={(e) => { e.preventDefault(); router.push('/admin/marks'); }} className="flex items-center space-x-3 hover:bg-slate-800 px-4 py-3 rounded-lg transition text-gray-300 hover:text-white"><span>📊</span><span>ලකුණු ඇතුළත් කිරීම</span></a>
         </nav>
       </aside>
@@ -181,19 +181,19 @@ export default function AdminQuestionsPage() {
 
         <div className="p-6 md:p-10 max-w-7xl mx-auto w-full grid grid-cols-1 lg:grid-cols-3 gap-10">
           
-          <div className="bg-white p-8 rounded-3xl shadow-lg h-fit border-t-8 border-blue-600 sticky top-24 lg:col-span-1">
+          <div className="bg-white p-8 rounded-3xl shadow-lg h-fit border-t-8 border-purple-600 sticky top-24 lg:col-span-1">
             <h2 className="text-2xl font-bold mb-6 text-center">{editingId ? '✏️ ප්‍රශ්නය සංස්කරණය' : '➕ ප්‍රශ්න පත්‍ර සෑදීම'}</h2>
-            {msg && <p className={`p-3 rounded mb-4 font-bold text-center ${msg.includes('✅') ? 'bg-green-100 text-green-700' : 'bg-blue-100 text-blue-700'}`}>{msg}</p>}
+            {msg && <p className={`p-3 rounded mb-4 font-bold text-center ${msg.includes('✅') ? 'bg-green-100 text-green-700' : 'bg-purple-100 text-purple-700'}`}>{msg}</p>}
             
             <form onSubmit={handleSubmit} className="space-y-4">
               <div>
                 <label className="block text-gray-700 text-xs font-bold mb-1">ප්‍රශ්න පත්‍රයේ නම</label>
-                <input type="text" placeholder="උදා: 2026 Model Paper 01" className="w-full p-3 border rounded-xl bg-gray-50 outline-none focus:border-blue-500" required value={formData.paperName} onChange={(e) => setFormData({...formData, paperName: e.target.value})} />
+                <input type="text" placeholder="උදා: 2026 Model Paper 01" className="w-full p-3 border rounded-xl bg-gray-50 outline-none focus:border-purple-500" required value={formData.paperName} onChange={(e) => setFormData({...formData, paperName: e.target.value})} />
               </div>
               
               <div>
                 <label className="block text-gray-700 text-xs font-bold mb-1">A/L වර්ෂය</label>
-                <select className="w-full p-3 border rounded-xl bg-gray-50 outline-none focus:border-blue-500" value={formData.alYear} onChange={(e) => setFormData({...formData, alYear: e.target.value})}>
+                <select className="w-full p-3 border rounded-xl bg-gray-50 outline-none focus:border-purple-500" value={formData.alYear} onChange={(e) => setFormData({...formData, alYear: e.target.value})}>
                   <option value="All">All Years</option>
                   <option value="2026">2026</option>
                   <option value="2027">2027</option>
@@ -203,13 +203,13 @@ export default function AdminQuestionsPage() {
 
               <div>
                 <label className="block text-gray-700 text-xs font-bold mb-1">ප්‍රශ්නය</label>
-                <textarea placeholder="ප්‍රශ්නය..." className="w-full p-3 border rounded-xl bg-gray-50 outline-none focus:border-blue-500 min-h-[100px]" required value={formData.text} onChange={(e) => setFormData({...formData, text: e.target.value})} />
+                <textarea placeholder="ප්‍රශ්නය..." className="w-full p-3 border rounded-xl bg-gray-50 outline-none focus:border-purple-500 min-h-[100px]" required value={formData.text} onChange={(e) => setFormData({...formData, text: e.target.value})} />
               </div>
 
-              <div className="grid grid-cols-1 gap-2 p-3 bg-blue-50/50 rounded-xl border border-blue-100">
-                <label className="block text-blue-800 text-xs font-bold mb-1">පිළිතුරු 5 ඇතුළත් කරන්න</label>
+              <div className="grid grid-cols-1 gap-2 p-3 bg-purple-50/50 rounded-xl border border-purple-100">
+                <label className="block text-purple-800 text-xs font-bold mb-1">පිළිතුරු 5 ඇතුළත් කරන්න</label>
                 {[1, 2, 3, 4, 5].map(i => (
-                  <input key={i} type="text" placeholder={`පිළිතුර ${i}`} className="w-full p-2 border rounded-lg text-sm bg-white outline-none focus:border-blue-500 shadow-sm" required value={formData[`option${i}`]} onChange={(e) => setFormData({...formData, [`option${i}`]: e.target.value})} />
+                  <input key={i} type="text" placeholder={`පිළිතුර ${i}`} className="w-full p-2 border rounded-lg text-sm bg-white outline-none focus:border-purple-500 shadow-sm" required value={formData[`option${i}`]} onChange={(e) => setFormData({...formData, [`option${i}`]: e.target.value})} />
                 ))}
               </div>
 
@@ -220,7 +220,7 @@ export default function AdminQuestionsPage() {
                 </select>
               </div>
 
-              <button className={`w-full transition text-white p-4 rounded-xl font-bold shadow-md mt-2 ${editingId ? 'bg-green-600 hover:bg-green-700' : 'bg-blue-600 hover:bg-blue-700'}`}>
+              <button className={`w-full transition text-white p-4 rounded-xl font-bold shadow-md mt-2 ${editingId ? 'bg-green-600 hover:bg-green-700' : 'bg-purple-600 hover:bg-purple-700'}`}>
                 {editingId ? 'ප්‍රශ්නය යාවත්කාලීන කරන්න' : 'පද්ධතියට එක් කරන්න'}
               </button>
 
@@ -244,22 +244,22 @@ export default function AdminQuestionsPage() {
                 const isExpanded = expandedPaperKey === paper.key; // මේ පේපර් එක දිගහැරලාද බලනවා
 
                 return (
-                  <div key={paper.key} className={`bg-white rounded-3xl shadow-md overflow-hidden border transition-all duration-300 ${isAllHidden ? 'border-gray-300 opacity-80' : 'border-blue-100'}`}>
+                  <div key={paper.key} className={`bg-white rounded-3xl shadow-md overflow-hidden border transition-all duration-300 ${isAllHidden ? 'border-gray-300 opacity-80' : 'border-purple-100'}`}>
                     
                     {/* Paper Header (ක්ලික් කළාම Minimize/Maximize වෙනවා) */}
                     <div 
-                      className={`p-5 flex flex-wrap justify-between items-center border-b cursor-pointer transition-colors ${isExpanded ? (isAllHidden ? 'bg-gray-100' : 'bg-blue-50') : 'bg-white hover:bg-gray-50'}`}
+                      className={`p-5 flex flex-wrap justify-between items-center border-b cursor-pointer transition-colors ${isExpanded ? (isAllHidden ? 'bg-gray-100' : 'bg-purple-50') : 'bg-white hover:bg-gray-50'}`}
                       onClick={() => setExpandedPaperKey(isExpanded ? null : paper.key)}
                     >
                       <div className="flex items-center gap-3">
                         {/* ඊතලය (Arrow Icon) */}
                         <span className={`text-slate-400 transform transition-transform duration-300 ${isExpanded ? 'rotate-180' : 'rotate-0'}`}>▼</span>
                         <div>
-                          <h3 className={`text-xl font-bold flex items-center gap-2 ${isAllHidden ? 'text-gray-600' : 'text-blue-900'}`}>
+                          <h3 className={`text-xl font-bold flex items-center gap-2 ${isAllHidden ? 'text-gray-600' : 'text-purple-900'}`}>
                             <span className="text-2xl">📝</span> {paper.paperName}
                           </h3>
                           <div className="flex items-center gap-2 mt-1">
-                            <span className="bg-white text-blue-800 text-xs font-bold px-3 py-1 rounded-full shadow-sm border border-blue-100">
+                            <span className="bg-white text-purple-800 text-xs font-bold px-3 py-1 rounded-full shadow-sm border border-purple-100">
                               {paper.alYear}
                             </span>
                             <span className="text-sm font-medium text-gray-500">
@@ -290,12 +290,12 @@ export default function AdminQuestionsPage() {
                     {isExpanded && (
                       <div className="p-6 space-y-4 bg-slate-50/50 animate-fade-in">
                         {paper.questions.map((q, idx) => (
-                          <div key={q._id} className={`p-5 rounded-2xl border transition-all ${!q.isVisible ? 'bg-gray-100 opacity-60 grayscale border-gray-200' : 'bg-white shadow-sm hover:shadow-md border-blue-100'}`}>
+                          <div key={q._id} className={`p-5 rounded-2xl border transition-all ${!q.isVisible ? 'bg-gray-100 opacity-60 grayscale border-gray-200' : 'bg-white shadow-sm hover:shadow-md border-purple-100'}`}>
                             <div className="flex justify-between items-start mb-3">
                               <span className="font-bold text-gray-400 bg-gray-100 px-2 py-0.5 rounded text-sm">Q{idx + 1}</span>
                               
                               <div className="flex gap-2">
-                                <button onClick={() => handleEdit(q)} className="text-xs font-bold px-3 py-1 rounded bg-blue-100 text-blue-700 hover:bg-blue-200 transition-all transform hover:scale-105 shadow-sm border border-blue-200">
+                                <button onClick={() => handleEdit(q)} className="text-xs font-bold px-3 py-1 rounded bg-purple-100 text-purple-700 hover:bg-purple-200 transition-all transform hover:scale-105 shadow-sm border border-purple-200">
                                   ✏️ Edit
                                 </button>
                                 <button onClick={() => toggleVisibility(q._id, q.isVisible)} className={`text-xs font-bold px-3 py-1 rounded transition-all transform hover:scale-105 shadow-sm border ${!q.isVisible ? 'bg-gray-200 text-gray-700 hover:bg-gray-300 border-gray-300' : 'bg-yellow-100 text-yellow-700 hover:bg-yellow-200 border-yellow-200'}`}>

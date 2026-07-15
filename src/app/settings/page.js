@@ -125,7 +125,7 @@ export default function SettingsPage() {
   // මෙන්න මේ ආරක්ෂිත කේතය තමයි අලුතින් දැම්මේ.
   // user දත්ත නැත්නම් Error එන්නේ නැතුව Loading එකක් පෙන්වනවා.
   if (!user) {
-    return <div className="min-h-screen flex items-center justify-center font-bold text-blue-600 bg-gray-50">ගිණුම පරීක්ෂා කරමින් පවතී... ⏳</div>;
+    return <div className="min-h-screen flex items-center justify-center font-bold text-purple-600 bg-gray-50">ගිණුම පරීක්ෂා කරමින් පවතී... ⏳</div>;
   }
 
   return (
@@ -135,42 +135,42 @@ export default function SettingsPage() {
       <div className={`fixed inset-0 bg-black/50 z-40 md:hidden ${isSidebarOpen ? 'block' : 'hidden'}`} onClick={() => setIsSidebarOpen(false)}></div>
 
       {/* Sidebar Navigation */}
-      <aside className={`w-64 bg-blue-900 text-white flex flex-col fixed inset-y-0 left-0 z-50 transform ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'} md:translate-x-0 md:static transition-transform duration-300 shadow-2xl`}>
-        <div className="p-6 border-b border-blue-800 font-bold text-xl tracking-wider">
-          YCS<span className="text-blue-300">Physics</span>
+      <aside className={`w-64 bg-purple-900 text-white flex flex-col fixed inset-y-0 left-0 z-50 transform ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'} md:translate-x-0 md:static transition-transform duration-300 shadow-2xl`}>
+        <div className="p-6 border-b border-purple-800 font-bold text-xl tracking-wider">
+          YCS<span className="text-purple-300">Physics</span>
         </div>
         <nav className="flex-1 p-4 space-y-2 overflow-y-auto custom-scrollbar">
-          <a href="#" onClick={(e) => { e.preventDefault(); router.push('/dashboard'); }} className="flex items-center space-x-3 hover:bg-blue-800 px-4 py-3 rounded-lg transition">
+          <a href="#" onClick={(e) => { e.preventDefault(); router.push('/dashboard'); }} className="flex items-center space-x-3 hover:bg-purple-800 px-4 py-3 rounded-lg transition">
             <span className="text-xl">🏠</span><span className="font-medium">මුල් තිරය</span>
           </a>
-          <a href="#" onClick={(e) => { e.preventDefault(); router.push('/videos'); }} className="flex items-center space-x-3 hover:bg-blue-800 px-4 py-3 rounded-lg transition">
+          <a href="#" onClick={(e) => { e.preventDefault(); router.push('/videos'); }} className="flex items-center space-x-3 hover:bg-purple-800 px-4 py-3 rounded-lg transition">
             <span className="text-xl">📺</span><span className="font-medium">වීඩියෝ පාඩම්</span>
           </a>
-          <a href="#" onClick={(e) => { e.preventDefault(); router.push('/exam'); }} className="flex items-center space-x-3 hover:bg-blue-800 px-4 py-3 rounded-lg transition">
+          <a href="#" onClick={(e) => { e.preventDefault(); router.push('/exam'); }} className="flex items-center space-x-3 hover:bg-purple-800 px-4 py-3 rounded-lg transition">
             <span className="text-xl">💻</span><span className="font-medium">Online විභාග</span>
           </a>
-          <a href="#" onClick={(e) => { e.preventDefault(); router.push('/tutes'); }} className="flex items-center space-x-3 hover:bg-blue-800 px-4 py-3 rounded-lg transition">
+          <a href="#" onClick={(e) => { e.preventDefault(); router.push('/tutes'); }} className="flex items-center space-x-3 hover:bg-purple-800 px-4 py-3 rounded-lg transition">
             <span className="text-xl">📚</span><span className="font-medium">නිබන්ධන</span>
           </a>
-          <a href="#" onClick={(e) => { e.preventDefault(); router.push('/marking'); }} className="flex items-center space-x-3 hover:bg-blue-800 px-4 py-3 rounded-lg transition">
+          <a href="#" onClick={(e) => { e.preventDefault(); router.push('/marking'); }} className="flex items-center space-x-3 hover:bg-purple-800 px-4 py-3 rounded-lg transition">
             <span className="text-xl">✅</span><span className="font-medium">Marking Schemes</span>
           </a>
-          <a href="#" onClick={(e) => { e.preventDefault(); router.push('/dashboard/marks'); }} className="flex items-center space-x-3 hover:bg-blue-800 px-4 py-3 rounded-lg transition">
+          <a href="#" onClick={(e) => { e.preventDefault(); router.push('/dashboard/marks'); }} className="flex items-center space-x-3 hover:bg-purple-800 px-4 py-3 rounded-lg transition">
             <span className="text-xl">📊</span><span className="font-medium">ප්‍රගති වාර්තාව</span>
           </a>
           
-          <div className="pt-4 border-t border-blue-800/50 mt-4 mb-2"></div>
+          <div className="pt-4 border-t border-purple-800/50 mt-4 mb-2"></div>
 
-          <a href="#" onClick={(e) => { e.preventDefault(); router.push('/notifications'); }} className="flex items-center space-x-3 hover:bg-blue-800 px-4 py-3 rounded-lg transition">
+          <a href="#" onClick={(e) => { e.preventDefault(); router.push('/notifications'); }} className="flex items-center space-x-3 hover:bg-purple-800 px-4 py-3 rounded-lg transition">
             <span className="text-xl">🔔</span><span className="font-medium">දැනුම්දීම්</span>
           </a>
-          <a href="#" onClick={(e) => { e.preventDefault(); router.push('/settings'); }} className="flex items-center space-x-3 hover:bg-blue-800 px-4 py-3 rounded-lg transition">
+          <a href="#" onClick={(e) => { e.preventDefault(); router.push('/settings'); }} className="flex items-center space-x-3 hover:bg-purple-800 px-4 py-3 rounded-lg transition">
             <span className="text-xl">⚙️</span><span className="font-medium">සැකසුම්</span>
           </a>
         </nav>
-        <div className="p-4 border-t border-blue-800">
-          <button onClick={handleLogout} className="w-full flex items-center space-x-3 hover:bg-red-500/20 p-3 rounded-lg transition text-blue-200 hover:text-red-400">
-            <div className="w-8 h-8 rounded-full bg-blue-800 flex items-center justify-center text-white font-bold text-sm">
+        <div className="p-4 border-t border-purple-800">
+          <button onClick={handleLogout} className="w-full flex items-center space-x-3 hover:bg-red-500/20 p-3 rounded-lg transition text-purple-200 hover:text-red-400">
+            <div className="w-8 h-8 rounded-full bg-purple-800 flex items-center justify-center text-white font-bold text-sm">
               {userName.charAt(0)}
             </div>
             <span className="font-bold">Logout</span>
@@ -187,16 +187,16 @@ export default function SettingsPage() {
             <button onClick={() => setIsSidebarOpen(true)} className="md:hidden p-2 text-slate-600 hover:bg-slate-100 rounded-lg transition">
               <span className="text-2xl font-bold">☰</span>
             </button>
-            <h1 className="text-xl font-extrabold text-blue-900 flex items-center gap-2">
+            <h1 className="text-xl font-extrabold text-purple-900 flex items-center gap-2">
               <span className="text-2xl hidden sm:block">⚙️</span> ගිණුම් සැකසුම්
             </h1>
           </div>
           
-          <div className="flex items-center gap-3 bg-blue-50 px-4 py-2 rounded-full border border-blue-100">
+          <div className="flex items-center gap-3 bg-purple-50 px-4 py-2 rounded-full border border-purple-100">
             <div className="text-right hidden sm:block">
-              <p className="font-bold text-sm text-blue-900">{userName}</p>
+              <p className="font-bold text-sm text-purple-900">{userName}</p>
             </div>
-            <div className="w-8 h-8 rounded-full border-2 border-blue-500 overflow-hidden bg-blue-600 flex items-center justify-center font-bold text-white shadow-sm">
+            <div className="w-8 h-8 rounded-full border-2 border-purple-500 overflow-hidden bg-purple-600 flex items-center justify-center font-bold text-white shadow-sm">
               {avatar ? <img src={avatar} className="w-full h-full object-cover" /> : userName.charAt(0)}
             </div>
           </div>
@@ -207,9 +207,9 @@ export default function SettingsPage() {
           <div className="bg-white rounded-3xl shadow-md border border-slate-100 overflow-hidden">
             
             {/* Profile Section */}
-            <div className="bg-gradient-to-r from-blue-700 to-blue-500 p-8 text-white flex flex-col sm:flex-row items-center sm:items-start gap-6">
+            <div className="bg-gradient-to-r from-purple-700 to-purple-500 p-8 text-white flex flex-col sm:flex-row items-center sm:items-start gap-6">
               <div className="relative group cursor-pointer shrink-0">
-                <div className="w-24 h-24 rounded-full border-4 border-white overflow-hidden bg-blue-100 flex items-center justify-center text-3xl text-blue-600 font-bold shadow-md">
+                <div className="w-24 h-24 rounded-full border-4 border-white overflow-hidden bg-purple-100 flex items-center justify-center text-3xl text-purple-600 font-bold shadow-md">
                   {avatar ? (
                     <img src={avatar} alt="Profile" className="w-full h-full object-cover" />
                   ) : (
@@ -224,8 +224,8 @@ export default function SettingsPage() {
 
               <div className="text-center sm:text-left mt-2 sm:mt-0">
                 <h2 className="text-3xl font-bold">{user.name}</h2>
-                <p className="text-blue-100 mt-1 text-lg">{user.username}</p> 
-                <span className="inline-block mt-3 bg-white text-blue-700 text-xs px-3 py-1 rounded-full font-bold shadow-sm">
+                <p className="text-purple-100 mt-1 text-lg">{user.username}</p> 
+                <span className="inline-block mt-3 bg-white text-purple-700 text-xs px-3 py-1 rounded-full font-bold shadow-sm">
                   {user.alYear} A/L Student {user.center && `| ${user.center} Center`}
                 </span>
               </div>
@@ -250,7 +250,7 @@ export default function SettingsPage() {
                     type="password" required 
                     value={passwords.current}
                     onChange={(e) => setPasswords({...passwords, current: e.target.value})}
-                    className="w-full px-4 py-3 rounded-xl bg-gray-50 border border-gray-200 focus:border-blue-500 outline-none transition" 
+                    className="w-full px-4 py-3 rounded-xl bg-gray-50 border border-gray-200 focus:border-purple-500 outline-none transition" 
                   />
                 </div>
                 <div>
@@ -259,7 +259,7 @@ export default function SettingsPage() {
                     type="password" required 
                     value={passwords.new}
                     onChange={(e) => setPasswords({...passwords, new: e.target.value})}
-                    className="w-full px-4 py-3 rounded-xl bg-gray-50 border border-gray-200 focus:border-blue-500 outline-none transition" 
+                    className="w-full px-4 py-3 rounded-xl bg-gray-50 border border-gray-200 focus:border-purple-500 outline-none transition" 
                   />
                   {/* අකුරු 6ක් තියෙනවද කියලා පෙන්වන කොටස */}
                   {passwords.new.length > 0 && passwords.new.length < 6 && (
@@ -272,7 +272,7 @@ export default function SettingsPage() {
                     type="password" required 
                     value={passwords.confirm}
                     onChange={(e) => setPasswords({...passwords, confirm: e.target.value})}
-                    className="w-full px-4 py-3 rounded-xl bg-gray-50 border border-gray-200 focus:border-blue-500 outline-none transition" 
+                    className="w-full px-4 py-3 rounded-xl bg-gray-50 border border-gray-200 focus:border-purple-500 outline-none transition" 
                   />
                   {/* අලුතින් එකතු කළ Real-time Validation පණිවිඩය */}
                   {passwords.confirm.length > 0 && (
@@ -285,7 +285,7 @@ export default function SettingsPage() {
                 <button 
                   type="submit" 
                   disabled={loading || (passwords.confirm.length > 0 && passwords.new !== passwords.confirm) || passwords.new.length < 6}
-                  className={`w-full sm:w-auto bg-blue-600 text-white font-bold rounded-xl px-8 py-3.5 shadow-md hover:bg-blue-700 transition transform mt-4 ${(loading || (passwords.confirm.length > 0 && passwords.new !== passwords.confirm) || passwords.new.length < 6) ? 'opacity-50 cursor-not-allowed hover:-translate-y-0' : 'hover:-translate-y-0.5'}`}
+                  className={`w-full sm:w-auto bg-purple-600 text-white font-bold rounded-xl px-8 py-3.5 shadow-md hover:bg-purple-700 transition transform mt-4 ${(loading || (passwords.confirm.length > 0 && passwords.new !== passwords.confirm) || passwords.new.length < 6) ? 'opacity-50 cursor-not-allowed hover:-translate-y-0' : 'hover:-translate-y-0.5'}`}
                 >
                   {loading ? 'කරුණාකර රැඳී සිටින්න...' : 'මුරපදය යාවත්කාලීන කරන්න'}
                 </button>

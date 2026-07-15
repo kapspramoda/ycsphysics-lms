@@ -33,7 +33,7 @@ export default function AdminDashboard() {
           <button onClick={() => setIsSidebarOpen(false)} className="md:hidden text-gray-400 hover:text-white">✖</button>
         </div>
         <nav className="flex-1 p-4 space-y-2 overflow-y-auto custom-scrollbar">
-          <a href="#" onClick={(e) => { e.preventDefault(); router.push('/admin'); }} className="flex items-center space-x-3 bg-blue-600 px-4 py-3 rounded-lg text-white font-bold shadow-md"><span>🏠</span><span>මුල් තිරය</span></a>
+          <a href="#" onClick={(e) => { e.preventDefault(); router.push('/admin'); }} className="flex items-center space-x-3 bg-purple-600 px-4 py-3 rounded-lg text-white font-bold shadow-md"><span>🏠</span><span>මුල් තිරය</span></a>
           <a href="#" onClick={(e) => { e.preventDefault(); router.push('/admin/attendance'); }} className="flex items-center space-x-3 hover:bg-slate-800 px-4 py-3 rounded-lg transition text-gray-300 hover:text-white"><span>✅</span><span>පැමිණීම (Attendance)</span></a>
           <a href="#" onClick={(e) => { e.preventDefault(); router.push('/admin/videos'); }} className="flex items-center space-x-3 hover:bg-slate-800 px-4 py-3 rounded-lg transition text-gray-300 hover:text-white"><span>📺</span><span>වීඩියෝ පාඩම්</span></a>
           <a href="#" onClick={(e) => { e.preventDefault(); router.push('/admin/tutes'); }} className="flex items-center space-x-3 hover:bg-slate-800 px-4 py-3 rounded-lg transition text-gray-300 hover:text-white"><span>📚</span><span>නිබන්ධන</span></a>
@@ -56,9 +56,9 @@ export default function AdminDashboard() {
             </button>
             <h1 className="text-xl font-bold text-slate-800 hidden sm:block">YCS Physics LMS - Admin</h1>
           </div>
-          <div className="flex items-center gap-3 bg-blue-50 px-4 py-2 rounded-full border border-blue-100">
-            <div className="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center text-white font-bold">A</div>
-            <span className="font-bold text-blue-900 text-sm hidden sm:block">Admin Mode</span>
+          <div className="flex items-center gap-3 bg-purple-50 px-4 py-2 rounded-full border border-purple-100">
+            <div className="w-8 h-8 bg-purple-600 rounded-full flex items-center justify-center text-white font-bold">A</div>
+            <span className="font-bold text-purple-900 text-sm hidden sm:block">Admin Mode</span>
           </div>
         </header>
 
@@ -96,12 +96,12 @@ export default function AdminDashboard() {
               <button onClick={() => router.push('/admin/tutes')} className="w-full bg-green-50 text-green-600 font-bold py-3 rounded-xl hover:bg-green-100 transition">කළමනාකරණය</button>
             </div>
 
-            <div className="bg-white p-8 rounded-3xl shadow-sm border-t-8 border-blue-500 hover:shadow-lg transition transform hover:-translate-y-1">
+            <div className="bg-white p-8 rounded-3xl shadow-sm border-t-8 border-purple-500 hover:shadow-lg transition transform hover:-translate-y-1">
               <div className="flex justify-between items-start mb-6">
                 <div><h2 className="text-2xl font-bold text-gray-800 mb-2">ප්‍රශ්න පත්‍ර</h2><p className="text-gray-500 text-sm">Online MCQ ප්‍රශ්න සැකසීම.</p></div>
                 <div className="text-5xl">📝</div>
               </div>
-              <button onClick={() => router.push('/admin/questions')} className="w-full bg-blue-50 text-blue-600 font-bold py-3 rounded-xl hover:bg-blue-100 transition">කළමනාකරණය</button>
+              <button onClick={() => router.push('/admin/questions')} className="w-full bg-purple-50 text-purple-600 font-bold py-3 rounded-xl hover:bg-purple-100 transition">කළමනාකරණය</button>
             </div>
 
             <div className="bg-white p-8 rounded-3xl shadow-sm border-t-8 border-yellow-500 hover:shadow-lg transition transform hover:-translate-y-1 lg:col-span-2">

@@ -52,7 +52,7 @@ export default function StudentMarksPage() {
   };
 
   if (!isAuthorized) {
-    return <div className="min-h-screen bg-slate-50 flex items-center justify-center font-bold text-blue-600">පරීක්ෂා කරමින් පවතී...</div>;
+    return <div className="min-h-screen bg-slate-50 flex items-center justify-center font-bold text-purple-600">පරීක්ෂා කරමින් පවතී...</div>;
   }
 
   return (
@@ -62,46 +62,46 @@ export default function StudentMarksPage() {
       <div className={`fixed inset-0 bg-black/50 z-40 md:hidden ${isSidebarOpen ? 'block' : 'hidden'}`} onClick={() => setIsSidebarOpen(false)}></div>
 
       {/* Sidebar Navigation */}
-      <aside className={`w-64 bg-blue-900 text-white flex flex-col fixed inset-y-0 left-0 z-50 transform ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'} md:translate-x-0 md:static transition-transform duration-300 shadow-2xl`}>
+      <aside className={`w-64 bg-purple-900 text-white flex flex-col fixed inset-y-0 left-0 z-50 transform ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'} md:translate-x-0 md:static transition-transform duration-300 shadow-2xl`}>
         <div 
         onClick={() => router.push('/')} 
-     className="p-6 border-b border-blue-800 font-bold text-xl tracking-wider cursor-pointer hover:opacity-80 transition"
+     className="p-6 border-b border-purple-800 font-bold text-xl tracking-wider cursor-pointer hover:opacity-80 transition"
     >
-    YCS<span className="text-blue-300">Physics</span>
+    YCS<span className="text-purple-300">Physics</span>
     </div>
    <nav className="flex-1 p-4 space-y-2 overflow-y-auto custom-scrollbar">
-  <a href="#" onClick={(e) => { e.preventDefault(); router.push('/dashboard'); }} className="flex items-center space-x-3 hover:bg-blue-800 px-4 py-3 rounded-lg transition">
+  <a href="#" onClick={(e) => { e.preventDefault(); router.push('/dashboard'); }} className="flex items-center space-x-3 hover:bg-purple-800 px-4 py-3 rounded-lg transition">
     <span className="text-xl">🏠</span><span className="font-medium">මුල් තිරය</span>
   </a>
-  <a href="#" onClick={(e) => { e.preventDefault(); router.push('/videos'); }} className="flex items-center space-x-3 hover:bg-blue-800 px-4 py-3 rounded-lg transition">
+  <a href="#" onClick={(e) => { e.preventDefault(); router.push('/videos'); }} className="flex items-center space-x-3 hover:bg-purple-800 px-4 py-3 rounded-lg transition">
     <span className="text-xl">📺</span><span className="font-medium">වීඩියෝ පාඩම්</span>
   </a>
-  <a href="#" onClick={(e) => { e.preventDefault(); router.push('/exam'); }} className="flex items-center space-x-3 hover:bg-blue-800 px-4 py-3 rounded-lg transition">
+  <a href="#" onClick={(e) => { e.preventDefault(); router.push('/exam'); }} className="flex items-center space-x-3 hover:bg-purple-800 px-4 py-3 rounded-lg transition">
     <span className="text-xl">💻</span><span className="font-medium">Online විභාග</span>
   </a>
-  <a href="#" onClick={(e) => { e.preventDefault(); router.push('/tutes'); }} className="flex items-center space-x-3 hover:bg-blue-800 px-4 py-3 rounded-lg transition">
+  <a href="#" onClick={(e) => { e.preventDefault(); router.push('/tutes'); }} className="flex items-center space-x-3 hover:bg-purple-800 px-4 py-3 rounded-lg transition">
     <span className="text-xl">📚</span><span className="font-medium">නිබන්ධන</span>
   </a>
-  <a href="#" onClick={(e) => { e.preventDefault(); router.push('/marking'); }} className="flex items-center space-x-3 hover:bg-blue-800 px-4 py-3 rounded-lg transition">
+  <a href="#" onClick={(e) => { e.preventDefault(); router.push('/marking'); }} className="flex items-center space-x-3 hover:bg-purple-800 px-4 py-3 rounded-lg transition">
     <span className="text-xl">✅</span><span className="font-medium">Marking Schemes</span>
   </a>
-  <a href="#" onClick={(e) => { e.preventDefault(); router.push('/dashboard/marks'); }} className="flex items-center space-x-3 hover:bg-blue-800 px-4 py-3 rounded-lg transition">
+  <a href="#" onClick={(e) => { e.preventDefault(); router.push('/dashboard/marks'); }} className="flex items-center space-x-3 hover:bg-purple-800 px-4 py-3 rounded-lg transition">
     <span className="text-xl">📊</span><span className="font-medium">ප්‍රගති වාර්තාව</span>
   </a>
   
   {/* අලුතින් එකතු කළ දැනුම්දීම් සහ සැකසුම් */}
-  <div className="pt-4 border-t border-blue-800/50 mt-4 mb-2"></div>
+  <div className="pt-4 border-t border-purple-800/50 mt-4 mb-2"></div>
 
-  <a href="#" onClick={(e) => { e.preventDefault(); router.push('/notifications'); }} className="flex items-center space-x-3 hover:bg-blue-800 px-4 py-3 rounded-lg transition">
+  <a href="#" onClick={(e) => { e.preventDefault(); router.push('/notifications'); }} className="flex items-center space-x-3 hover:bg-purple-800 px-4 py-3 rounded-lg transition">
     <span className="text-xl">🔔</span><span className="font-medium">දැනුම්දීම්</span>
   </a>
-  <a href="#" onClick={(e) => { e.preventDefault(); router.push('/settings'); }} className="flex items-center space-x-3 hover:bg-blue-800 px-4 py-3 rounded-lg transition">
+  <a href="#" onClick={(e) => { e.preventDefault(); router.push('/settings'); }} className="flex items-center space-x-3 hover:bg-purple-800 px-4 py-3 rounded-lg transition">
     <span className="text-xl">⚙️</span><span className="font-medium">සැකසුම්</span>
   </a>
 </nav>
-        <div className="p-4 border-t border-blue-800">
-          <button onClick={handleLogout} className="w-full flex items-center space-x-3 hover:bg-red-500/20 p-3 rounded-lg transition text-blue-200 hover:text-red-400">
-            <div className="w-8 h-8 rounded-full bg-blue-800 flex items-center justify-center text-white font-bold text-sm">
+        <div className="p-4 border-t border-purple-800">
+          <button onClick={handleLogout} className="w-full flex items-center space-x-3 hover:bg-red-500/20 p-3 rounded-lg transition text-purple-200 hover:text-red-400">
+            <div className="w-8 h-8 rounded-full bg-purple-800 flex items-center justify-center text-white font-bold text-sm">
               {userName.charAt(0)}
             </div>
             <span className="font-bold">Logout</span>
@@ -123,11 +123,11 @@ export default function StudentMarksPage() {
             </h1>
           </div>
           
-          <div className="flex items-center gap-3 bg-blue-50 px-4 py-2 rounded-full border border-blue-100">
+          <div className="flex items-center gap-3 bg-purple-50 px-4 py-2 rounded-full border border-purple-100">
             <div className="text-right hidden sm:block">
-              <p className="font-bold text-sm text-blue-900">{userName}</p>
+              <p className="font-bold text-sm text-purple-900">{userName}</p>
             </div>
-            <div className="w-8 h-8 rounded-full border-2 border-blue-500 overflow-hidden bg-blue-600 flex items-center justify-center font-bold text-white shadow-sm">
+            <div className="w-8 h-8 rounded-full border-2 border-purple-500 overflow-hidden bg-purple-600 flex items-center justify-center font-bold text-white shadow-sm">
               {avatar ? <img src={avatar} className="w-full h-full object-cover" /> : userName.charAt(0)}
             </div>
           </div>
@@ -149,7 +149,7 @@ export default function StudentMarksPage() {
               {/* Line Graph Card */}
               <div className="bg-white p-6 md:p-8 rounded-3xl shadow-md border border-slate-100">
                 <h2 className="text-lg font-bold text-slate-800 mb-6 border-b pb-4 flex items-center gap-2">
-                  <span className="text-blue-500">📈</span> ලකුණු විචලනය
+                  <span className="text-purple-500">📈</span> ලකුණු විචලනය
                 </h2>
                 <div className="h-[300px] sm:h-[350px] w-full">
                   <ResponsiveContainer width="100%" height="100%">
@@ -168,8 +168,8 @@ export default function StudentMarksPage() {
 
               {/* Marks Table Card */}
               <div className="bg-white rounded-3xl shadow-md border border-slate-100 overflow-hidden">
-                <div className="bg-blue-50 border-b border-blue-100 p-5">
-                  <h2 className="text-lg font-bold text-blue-900 flex items-center gap-2">
+                <div className="bg-purple-50 border-b border-purple-100 p-5">
+                  <h2 className="text-lg font-bold text-purple-900 flex items-center gap-2">
                     <span>📝</span> සවිස්තරාත්මක ලකුණු සටහන
                   </h2>
                 </div>
@@ -192,7 +192,7 @@ export default function StudentMarksPage() {
                             <td className="p-4 text-center font-bold text-slate-400">{idx + 1}</td>
                             <td className="p-4 font-bold text-slate-800 text-base">{mark.paperName}</td>
                             <td className="p-4 text-center">
-                              <span className={`text-xl font-black ${mark.score >= 75 ? 'text-blue-600' : mark.score >= 50 ? 'text-amber-500' : 'text-red-500'}`}>
+                              <span className={`text-xl font-black ${mark.score >= 75 ? 'text-purple-600' : mark.score >= 50 ? 'text-amber-500' : 'text-red-500'}`}>
                                 {mark.score}%
                               </span>
                             </td>
