@@ -1,5 +1,5 @@
 "use client";
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 
 export default function VideoLessonsPage() {
@@ -17,6 +17,12 @@ export default function VideoLessonsPage() {
   const [userYear, setUserYear] = useState('');
   
   const [selectedLesson, setSelectedLesson] = useState('All');
+
+  // --- Video Player Controls States ---
+  const playerRef = useRef(null);
+  const [isFullscreen, setIsFullscreen] = useState(false);
+  const [isMuted, setIsMuted] = useState(false);
+  const [volumeLevel, setVolumeLevel] = useState(100);
 
   useEffect(() => {
     const savedTheme = localStorage.getItem('theme');
@@ -85,6 +91,49 @@ export default function VideoLessonsPage() {
     return url;
   };
 
+  // --- Player Custom Functions ---
+  const getSecuredVideoUrl = (ytId) => {
+    if(!ytId) return "";
+    // controls=0 මගින් YouTube හි සාමාන්‍ය බොත්තම් සම්පූර්ණයෙන්ම සඟවයි.
+    // enablejsapi=1 මගින් අපගේ අලුත් බොත්තම් වලට වීඩියෝව පාලනය කිරීමට ඉඩ දෙයි.
+    return `https://www.youtube.com/embed/${ytId}?autoplay=1&rel=0&modestbranding=1&showinfo=0&controls=0&disablekb=1&iv_load_policy=3&fs=0&enablejsapi=1`;
+  };
+
+  const sendYouTubeCommand = (func, args = []) => {
+    if (playerRef.current && playerRef.current.contentWindow) {
+      playerRef.current.contentWindow.postMessage(JSON.stringify({ event: "command", func: func, args: args }), "*");
+    }
+  };
+
+  const handleToggleMute = () => {
+    if (isMuted) { sendYouTubeCommand("unMute"); setIsMuted(false); } 
+    else { sendYouTubeCommand("mute"); setIsMuted(true); }
+  };
+
+  const handleVolumeDown = () => {
+    const newVol = Math.max(volumeLevel - 10, 0);
+    setVolumeLevel(newVol);
+    sendYouTubeCommand("setVolume", [newVol]);
+    if (newVol === 0) { sendYouTubeCommand("mute"); setIsMuted(true); }
+  };
+
+  const handleVolumeUp = () => {
+    const newVol = Math.min(volumeLevel + 10, 100);
+    setVolumeLevel(newVol);
+    sendYouTubeCommand("setVolume", [newVol]);
+    if (isMuted) { sendYouTubeCommand("unMute"); setIsMuted(false); }
+  };
+
+  const toggleFullScreen = () => {
+    if (!isFullscreen) {
+      setIsFullscreen(true);
+      try { if (screen.orientation && screen.orientation.lock) screen.orientation.lock("landscape").catch(() => {}); } catch (e) {}
+    } else {
+      setIsFullscreen(false);
+      try { if (screen.orientation && screen.orientation.unlock) screen.orientation.unlock(); } catch (e) {}
+    }
+  };
+
   const uniqueLessons = ['All', ...new Set(videos.map(v => v.lessonName || 'සාමාන්‍ය විෂය කරුණු'))];
 
   const filteredVideos = selectedLesson === 'All' 
@@ -102,6 +151,7 @@ export default function VideoLessonsPage() {
       
       <div className={`fixed inset-0 bg-black/60 z-40 md:hidden transition-opacity ${isSidebarOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'}`} onClick={() => setIsSidebarOpen(false)}></div>
 
+      {/* --- Sidebar Navigation (නොවෙනස්ව) --- */}
       <aside className={`w-64 bg-purple-900 text-white flex flex-col fixed inset-y-0 left-0 z-50 transform ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'} md:translate-x-0 md:static transition-transform duration-300 shadow-2xl`}>
         <div onClick={() => router.push('/')} className="p-6 border-b border-purple-800 font-bold text-xl tracking-wider cursor-pointer hover:opacity-80 transition flex items-center gap-2">
           <div className="bg-white text-purple-700 font-bold rounded-lg p-1.5 text-xs">YS</div>
@@ -187,78 +237,102 @@ export default function VideoLessonsPage() {
                  <p className={`${textMuted} font-bold`}>වීඩියෝ පූරණය වෙමින් පවතී...</p>
                </div>
             ) : currentVideo ? (
-              <div className={`${bgCard} rounded-3xl overflow-hidden border animate-fade-in`}>
+              <div className="animate-fade-in space-y-4">
                 
-                {/* --- මෙන්න ආරක්ෂිත (Secured) Player එක --- */}
-                <div className="relative w-full shadow-inner bg-black" style={{ paddingBottom: '56.25%' }}>
-                  
-                  {/* උඩ තියෙන Shield එක (Share Button එක සහ Title එක ඔබන්න බැරි වෙන්න) */}
-                  <div className="absolute top-0 left-0 w-full h-16 z-10 bg-transparent" title={currentVideo.title}></div>
+                {/* --- 20minutes.lk Style Player Wrapper --- */}
+                <div 
+                  className={isFullscreen ? "fixed inset-0 z-[99999] bg-black w-screen h-[100dvh] flex flex-col justify-center select-none" : "aspect-video w-full bg-black relative rounded-2xl overflow-hidden shadow-lg select-none"}
+                  onContextMenu={(e) => e.preventDefault()}
+                >
+                  {isFullscreen && (
+                    <button onClick={toggleFullScreen} className="absolute top-4 right-4 z-[1000] bg-white/20 p-2 rounded-full text-white hover:bg-white/40 border border-white/30 backdrop-blur-sm transition-all">
+                      <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
+                    </button>
+                  )}
 
-                  {/* දකුණු පැත්තේ Shield එක (YouTube Watermark එක ඔබන්න බැරි වෙන්න) */}
-                  <div className="absolute bottom-12 right-0 w-24 h-16 z-10 bg-transparent"></div>
+                  <div className="relative w-full h-full flex-grow">
+                    {/* Top Shield - Blocks Video Title */}
+                    <div className="absolute top-0 left-0 w-full h-[65px] md:h-[75px] z-[999] bg-black pointer-events-none"></div>
+                    
+                    {/* Bottom Shield - Blocks Youtube Logo/Watermark */}
+                    <div className="absolute bottom-0 left-0 w-full h-[60px] md:h-[65px] z-[999] bg-black pointer-events-none flex items-center justify-end px-3 md:px-5">
+                      <span className="text-[10px] md:text-xs font-bold text-slate-500/80 mb-2 mr-1">YCS Physics</span>
+                    </div>
 
-                  <iframe 
-                    className="absolute top-0 left-0 w-full h-full z-0"
-                    // controls=1 (Volume සහ Full Screen යටින් පෙන්වන්න)
-                    // fs=1 (Full screen වැඩ කරන්න)
-                    // modestbranding=1 (YouTube ලෝගෝ එක අඩු කරන්න)
-                    // rel=0 (අනෙකුත් Channels වල වීඩියෝ පෙන්නන එක නවත්වන්න)
-                    src={`https://www.youtube.com/embed/${currentVideo.youtubeId}?autoplay=1&modestbranding=1&rel=0&fs=1&controls=1&disablekb=1&playsinline=1`} 
-                    title={currentVideo.title}
-                    frameBorder="0" 
-                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; fullscreen" 
-                    allowFullScreen // අනිවාර්යයෙන්ම Full Screen වැඩ කිරීමට
-                  ></iframe>
+                    <iframe 
+                      ref={playerRef}
+                      className="absolute top-0 left-0 w-full h-full z-0 pointer-events-auto"
+                      src={getSecuredVideoUrl(currentVideo.youtubeId)} 
+                      title={currentVideo.title}
+                      frameBorder="0" 
+                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+                    ></iframe>
+                  </div>
                 </div>
-                {/* ---------------------------------------------------- */}
 
-                <div className="p-6 md:p-8">
-                  <div className="flex flex-wrap items-center justify-between gap-4 mb-4">
-                    <span className="inline-block text-xs px-4 py-1.5 rounded-full font-extrabold bg-purple-600 text-white uppercase tracking-wider shadow-sm">
-                      {currentVideo.category || 'Theory'}
-                    </span>
-                    {currentVideo.lessonName && (
-                      <span className={`text-xs px-3 py-1.5 rounded-md font-bold ${isDarkMode ? 'bg-slate-800 text-slate-300' : 'bg-gray-100 text-gray-700'}`}>
-                        📁 {currentVideo.lessonName}
-                      </span>
-                    )}
+                {/* --- අපගේ අලුත් Control Panel එක සහ PDF Button එක --- */}
+                <div className={`p-4 md:p-5 rounded-2xl border shadow-sm flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 transition-all ${isDarkMode ? 'bg-slate-800/50 border-purple-900/30' : 'bg-purple-50/40 border-purple-100/50'}`}>
+                  
+                  {/* වීඩියෝවේ විස්තර */}
+                  <div className="truncate flex-1">
+                    <span className="text-[10px] md:text-xs font-bold uppercase tracking-wider text-purple-600">දැන් ධාවනය වේ</span>
+                    <h3 className={`text-sm md:text-lg font-bold mt-0.5 truncate ${isDarkMode ? 'text-white' : 'text-slate-900'}`}>{currentVideo.title}</h3>
+                    <div className="flex gap-2 mt-2">
+                      <span className="bg-purple-600 text-white text-[10px] px-2 py-0.5 rounded font-bold uppercase">{currentVideo.category || 'Theory'}</span>
+                      {currentVideo.lessonName && <span className={`text-[10px] px-2 py-0.5 rounded font-bold border ${isDarkMode ? 'bg-slate-800 border-slate-600 text-slate-300' : 'bg-white border-purple-200 text-purple-700'}`}>📁 {currentVideo.lessonName}</span>}
+                    </div>
                   </div>
                   
-                  <h2 className="text-2xl font-black leading-tight mb-6">{currentVideo.title}</h2>
-                  
-                  <div className={`p-5 rounded-2xl border flex flex-col sm:flex-row items-center justify-between gap-4 transition-all ${
-                    isDarkMode ? 'bg-slate-800/50 border-purple-900/30' : 'bg-purple-50/40 border-purple-100/50'
-                  }`}>
-                    <div className="flex items-center gap-4 text-center sm:text-left">
-                      <span className="text-4xl">📚</span>
-                      <div>
-                        <h4 className="font-bold text-base">මෙම පාඩමට අදාළ නිබන්ධනය (Tute PDF)</h4>
-                        <p className={`text-xs mt-0.5 ${textMuted}`}>පන්තියේදී සාකච්ඡා කරන නිබන්ධනය මෙතැනින් ලබාගන්න.</p>
-                      </div>
+                  <div className="flex items-center gap-2 md:gap-3 flex-wrap">
+                    
+                    {/* Volume Controls */}
+                    <div className={`flex items-center rounded-xl border overflow-hidden shadow-sm flex-shrink-0 ${isDarkMode ? 'bg-slate-800 border-slate-600' : 'bg-white border-purple-200'}`}>
+                      <button onClick={handleVolumeDown} className={`px-3 py-2.5 md:py-3 transition-colors ${isDarkMode ? 'hover:bg-slate-700 text-slate-300' : 'hover:bg-purple-50 text-slate-700'}`}>
+                        <svg className="w-4 h-4 md:w-5 md:h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M18 12H6" /></svg>
+                      </button>
+                      <button onClick={handleToggleMute} className={`px-3 py-2.5 md:py-3 transition-colors border-x ${isDarkMode ? 'hover:bg-slate-700 border-slate-600' : 'hover:bg-purple-50 border-purple-200'}`}>
+                        {isMuted ? (
+                          <svg className="w-4 h-4 md:w-5 md:h-5 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2" /></svg>
+                        ) : (
+                          <svg className="w-4 h-4 md:w-5 md:h-5 text-purple-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z" /></svg>
+                        )}
+                      </button>
+                      <button onClick={handleVolumeUp} className={`px-3 py-2.5 md:py-3 transition-colors ${isDarkMode ? 'hover:bg-slate-700 text-slate-300' : 'hover:bg-purple-50 text-slate-700'}`}>
+                        <svg className="w-4 h-4 md:w-5 md:h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M12 6v6m0 0v6m0-6h6m-6 0H6" /></svg>
+                      </button>
                     </div>
+
+                    {/* Full Screen Button */}
+                    <button 
+                      onClick={toggleFullScreen}
+                      className={`flex items-center justify-center gap-2 rounded-xl border px-3 py-2.5 md:px-5 md:py-3 text-xs md:text-sm font-bold transition-all shadow-sm flex-shrink-0 ${isDarkMode ? 'bg-slate-800 border-slate-600 text-white hover:bg-slate-700' : 'bg-white border-purple-200 text-slate-800 hover:bg-purple-50'}`}
+                    >
+                      <svg className="w-4 h-4 md:w-5 md:h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4" /></svg>
+                      Full Screen
+                    </button>
+
+                    {/* Tute (PDF) Download Button */}
                     {currentVideo.tuteUrl ? (
                       <a 
                         href={getDownloadUrl(currentVideo.tuteUrl)} 
                         target="_blank" 
                         rel="noopener noreferrer"
-                        className="bg-gradient-to-r from-purple-600 to-fuchsia-600 hover:from-purple-700 hover:to-fuchsia-700 text-white font-bold text-sm px-6 py-3 rounded-xl shadow-md transition transform hover:-translate-y-0.5 active:translate-y-0 w-full sm:w-auto text-center flex items-center justify-center gap-2"
+                        className="flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-purple-600 to-fuchsia-600 hover:from-purple-700 hover:to-fuchsia-700 text-white px-4 py-2.5 md:px-5 md:py-3 text-xs md:text-sm font-bold transition-all shadow-sm flex-shrink-0"
                       >
-                        📥 PDF එක බාගන්න
+                        <svg className="w-4 h-4 md:w-5 md:h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M12 16l-5-5h3V4h4v7h3l-5 5zm9-2v6H3v-6H1v8h22v-8h-2z"/></svg>
+                        Tute (PDF)
                       </a>
                     ) : (
                       <button 
                         disabled 
-                        className={`text-xs font-bold px-4 py-3 rounded-xl border border-dashed cursor-not-allowed w-full sm:w-auto ${
-                          isDarkMode ? 'border-slate-700 text-slate-500' : 'border-gray-200 text-gray-400'
-                        }`}
+                        className={`flex items-center justify-center gap-2 rounded-xl border border-dashed px-4 py-2.5 md:px-5 md:py-3 text-xs md:text-sm font-bold cursor-not-allowed flex-shrink-0 ${isDarkMode ? 'border-slate-700 text-slate-500' : 'border-gray-300 text-gray-400'}`}
                       >
-                        ⏳ නිබන්ධනය සූදානම් වෙමින් පවතී
+                        ⏳ Tute පසුවට
                       </button>
                     )}
                   </div>
-
                 </div>
+
               </div>
             ) : (
               <div className={`${bgCard} border p-20 text-center rounded-3xl`}>
@@ -269,6 +343,7 @@ export default function VideoLessonsPage() {
             )}
           </div>
 
+          {/* Right Column: Playlist */}
           {videos.length > 0 && (
             <div className="space-y-6">
               
@@ -294,7 +369,7 @@ export default function VideoLessonsPage() {
                 </h3>
                 
                 <div className="flex-1 overflow-y-auto space-y-3 pr-1 custom-scrollbar">
-                  {filteredVideos.map(video => (
+                  {filteredVideos.map((video, index) => (
                     <div 
                       key={video._id} 
                       onClick={() => setCurrentVideo(video)}
