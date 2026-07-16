@@ -16,11 +16,9 @@ export default function VideoLessonsPage() {
   const [loading, setLoading] = useState(true);
   const [userYear, setUserYear] = useState('');
   
-  // පාඩම් අනුව (Lessons) වෙන් කර හඳුනා ගැනීමට
   const [selectedLesson, setSelectedLesson] = useState('All');
 
   useEffect(() => {
-    // Check saved theme
     const savedTheme = localStorage.getItem('theme');
     if (savedTheme === 'dark') setIsDarkMode(true);
 
@@ -76,15 +74,23 @@ export default function VideoLessonsPage() {
     router.push('/auth');
   };
 
-  // විද්‍යුත් පද්ධතියේ ඇති සියලුම වෙනස් පාඩම් (Unique Lessons) ලැයිස්තුව සකසා ගැනීම
+  const getDownloadUrl = (url) => {
+    if (!url) return '#';
+    if (url.includes('drive.google.com/file/d/')) {
+      const match = url.match(/\/d\/(.+?)\//);
+      if (match && match[1]) {
+        return `https://drive.google.com/uc?export=download&id=${match[1]}`;
+      }
+    }
+    return url;
+  };
+
   const uniqueLessons = ['All', ...new Set(videos.map(v => v.lessonName || 'සාමාන්‍ය විෂය කරුණු'))];
 
-  // තෝරාගත් පාඩමට අනුව වීඩියෝ පෙරීම (Filter)
   const filteredVideos = selectedLesson === 'All' 
     ? videos 
-    : videos.filter(v => (v.lessonName || 'Anura') === selectedLesson);
+    : videos.filter(v => (v.lessonName || 'සාමාන්‍ය විෂය කරුණු') === selectedLesson);
 
-  // --- Theme Classes ---
   const bgMain = isDarkMode ? "bg-slate-950 text-slate-100" : "bg-purple-50/30 text-gray-800";
   const bgCard = isDarkMode ? "bg-slate-900 border-slate-800" : "bg-white border-purple-100 shadow-sm";
   const textMuted = isDarkMode ? "text-slate-400" : "text-gray-500";
@@ -94,20 +100,19 @@ export default function VideoLessonsPage() {
   return (
     <div className={`font-sans flex h-screen overflow-hidden transition-colors duration-300 ${bgMain}`}>
       
-      {/* Mobile Overlay */}
       <div className={`fixed inset-0 bg-black/60 z-40 md:hidden transition-opacity ${isSidebarOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'}`} onClick={() => setIsSidebarOpen(false)}></div>
 
-      {/* Sidebar Navigation (නොවෙනස්ව තබා ඇත) */}
       <aside className={`w-64 bg-purple-900 text-white flex flex-col fixed inset-y-0 left-0 z-50 transform ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'} md:translate-x-0 md:static transition-transform duration-300 shadow-2xl`}>
-        <div onClick={() => router.push('/')} className="p-6 border-b border-purple-800 font-bold text-xl tracking-wider cursor-pointer hover:opacity-80 transition col">
+        <div onClick={() => router.push('/')} className="p-6 border-b border-purple-800 font-bold text-xl tracking-wider cursor-pointer hover:opacity-80 transition flex items-center gap-2">
+          <div className="bg-white text-purple-700 font-bold rounded-lg p-1.5 text-xs">YS</div>
           YCS<span className="text-purple-300">Physics</span>
         </div>      
         <nav className="flex-1 p-4 space-y-2 overflow-y-auto custom-scrollbar">
           <a href="#" onClick={(e) => { e.preventDefault(); router.push('/dashboard'); }} className="flex items-center space-x-3 hover:bg-purple-800 px-4 py-3 rounded-lg transition">
             <span className="text-xl">🏠</span><span className="font-medium">මුල් තිරය</span>
           </a>
-          <a href="#" onClick={(e) => { e.preventDefault(); router.push('/videos'); }} className="flex items-center space-x-3 bg-purple-800 px-4 py-3 rounded-lg transition">
-            <span className="text-xl">📺</span><span className="font-medium">වීඩියෝ පාඩම්</span>
+          <a href="#" onClick={(e) => { e.preventDefault(); router.push('/videos'); }} className="flex items-center space-x-3 bg-purple-800 px-4 py-3 rounded-lg transition shadow-inner border border-purple-800/30">
+            <span className="text-xl">📺</span><span className="font-bold text-white">වීඩියෝ පාඩම්</span>
           </a>
           <a href="#" onClick={(e) => { e.preventDefault(); router.push('/exam'); }} className="flex items-center space-x-3 hover:bg-purple-800 px-4 py-3 rounded-lg transition">
             <span className="text-xl">💻</span><span className="font-medium">Online විභාග</span>
@@ -132,8 +137,8 @@ export default function VideoLessonsPage() {
           </a>
         </nav>
         <div className="p-4 border-t border-purple-800">
-          <button onClick={handleLogout} className="w-full flex items-center space-x-3 hover:bg-red-500/20 p-3 rounded-lg transition text-purple-200 hover:text-red-400">
-            <div className="w-8 h-8 rounded-full bg-purple-800 flex items-center justify-center text-white font-bold text-sm">
+          <button onClick={handleLogout} className="w-full flex items-center space-x-3 hover:bg-red-500 text-purple-200 hover:text-white p-3 rounded-xl transition">
+            <div className="w-8 h-8 rounded-full bg-purple-950 flex items-center justify-center text-white font-bold text-sm">
               {userName.charAt(0)}
             </div>
             <span className="font-bold">Logout</span>
@@ -141,10 +146,8 @@ export default function VideoLessonsPage() {
         </div>
       </aside>
 
-      {/* Main Content Area */}
       <main className="flex-1 flex flex-col h-screen overflow-y-auto relative">
         
-        {/* Header */}
         <header className={`${headerBg} p-4 flex justify-between items-center sticky top-0 z-30 transition-colors duration-300`}>
           <div className="flex items-center gap-4">
             <button onClick={() => setIsSidebarOpen(true)} className={`md:hidden p-2 rounded-lg transition ${isDarkMode ? 'text-white hover:bg-slate-800' : 'text-slate-600 hover:bg-slate-100'}`}>
@@ -156,7 +159,6 @@ export default function VideoLessonsPage() {
           </div>
           
           <div className="flex items-center space-x-4 md:space-x-6">
-            {/* Dark Mode Toggle */}
             <button onClick={toggleTheme} className={`p-2 rounded-full transition-all focus:outline-none ${isDarkMode ? 'bg-slate-800 text-yellow-400 hover:bg-slate-700' : 'bg-purple-100 text-purple-600 hover:bg-purple-200'}`}>
               {isDarkMode ? (
                 <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z" /></svg>
@@ -176,32 +178,41 @@ export default function VideoLessonsPage() {
           </div>
         </header>
 
-        {/* Content Container */}
         <div className="p-4 md:p-8 max-w-7xl mx-auto w-full grid grid-cols-1 lg:grid-cols-3 gap-8">
           
-          {/* Left Column: Player & Tute */}
           <div className="lg:col-span-2 space-y-6">
             {loading ? (
-               <div className={`${bgCard} p-20 text-center flex flex-col items-center justify-center rounded-3xl`}>
+               <div className={`${bgCard} p-20 text-center flex flex-col items-center justify-center rounded-3xl border`}>
                  <div className="w-12 h-12 border-4 border-purple-100 border-t-purple-600 rounded-full animate-spin mb-4"></div>
                  <p className={`${textMuted} font-bold`}>වීඩියෝ පූරණය වෙමින් පවතී...</p>
                </div>
             ) : currentVideo ? (
-              <div className={`${bgCard} rounded-3xl overflow-hidden animate-fade-in`}>
+              <div className={`${bgCard} rounded-3xl overflow-hidden border animate-fade-in`}>
                 
-                {/* 20minutes.lk Secured Video Player Style */}
+                {/* --- මෙන්න ආරක්ෂිත (Secured) Player එක --- */}
                 <div className="relative w-full shadow-inner bg-black" style={{ paddingBottom: '56.25%' }}>
+                  
+                  {/* උඩ තියෙන Shield එක (Share Button එක සහ Title එක ඔබන්න බැරි වෙන්න) */}
+                  <div className="absolute top-0 left-0 w-full h-16 z-10 bg-transparent" title={currentVideo.title}></div>
+
+                  {/* දකුණු පැත්තේ Shield එක (YouTube Watermark එක ඔබන්න බැරි වෙන්න) */}
+                  <div className="absolute bottom-12 right-0 w-24 h-16 z-10 bg-transparent"></div>
+
                   <iframe 
-                    className="absolute top-0 left-0 w-full h-full"
-                    src={`https://www.youtube.com/embed/${currentVideo.youtubeId}?autoplay=1&modestbranding=1&rel=0&showinfo=0&iv_load_policy=3&controls=1&disablekb=1`} 
+                    className="absolute top-0 left-0 w-full h-full z-0"
+                    // controls=1 (Volume සහ Full Screen යටින් පෙන්වන්න)
+                    // fs=1 (Full screen වැඩ කරන්න)
+                    // modestbranding=1 (YouTube ලෝගෝ එක අඩු කරන්න)
+                    // rel=0 (අනෙකුත් Channels වල වීඩියෝ පෙන්නන එක නවත්වන්න)
+                    src={`https://www.youtube.com/embed/${currentVideo.youtubeId}?autoplay=1&modestbranding=1&rel=0&fs=1&controls=1&disablekb=1&playsinline=1`} 
                     title={currentVideo.title}
                     frameBorder="0" 
-                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
-                    allowFullScreen
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; fullscreen" 
+                    allowFullScreen // අනිවාර්යයෙන්ම Full Screen වැඩ කිරීමට
                   ></iframe>
                 </div>
+                {/* ---------------------------------------------------- */}
 
-                {/* Video Info Body */}
                 <div className="p-6 md:p-8">
                   <div className="flex flex-wrap items-center justify-between gap-4 mb-4">
                     <span className="inline-block text-xs px-4 py-1.5 rounded-full font-extrabold bg-purple-600 text-white uppercase tracking-wider shadow-sm">
@@ -216,7 +227,6 @@ export default function VideoLessonsPage() {
                   
                   <h2 className="text-2xl font-black leading-tight mb-6">{currentVideo.title}</h2>
                   
-                  {/* --- නිබන්ධන භාගත කිරීමේ කොටස (Tute Section) --- */}
                   <div className={`p-5 rounded-2xl border flex flex-col sm:flex-row items-center justify-between gap-4 transition-all ${
                     isDarkMode ? 'bg-slate-800/50 border-purple-900/30' : 'bg-purple-50/40 border-purple-100/50'
                   }`}>
@@ -229,10 +239,10 @@ export default function VideoLessonsPage() {
                     </div>
                     {currentVideo.tuteUrl ? (
                       <a 
-                        href={currentVideo.tuteUrl} 
+                        href={getDownloadUrl(currentVideo.tuteUrl)} 
                         target="_blank" 
                         rel="noopener noreferrer"
-                        className="bg-gradient-to-r from-purple-600 to-fuchsia-600 hover:from-purple-700 hover:to-fuchsia-700 text-white font-bold text-sm px-6 py-3 rounded-xl shadow-md transition transform hover:-translate-y-0.5 active:translate-y-0 w-full sm:w-auto text-center"
+                        className="bg-gradient-to-r from-purple-600 to-fuchsia-600 hover:from-purple-700 hover:to-fuchsia-700 text-white font-bold text-sm px-6 py-3 rounded-xl shadow-md transition transform hover:-translate-y-0.5 active:translate-y-0 w-full sm:w-auto text-center flex items-center justify-center gap-2"
                       >
                         📥 PDF එක බාගන්න
                       </a>
@@ -251,7 +261,7 @@ export default function VideoLessonsPage() {
                 </div>
               </div>
             ) : (
-              <div className={`${bgCard} p-20 text-center rounded-3xl`}>
+              <div className={`${bgCard} border p-20 text-center rounded-3xl`}>
                 <span className="text-6xl block mb-4 opacity-50">📭</span>
                 <h3 className="text-xl font-bold mb-2">වීඩියෝ කිසිවක් නැත</h3>
                 <p className={textMuted}>ඔබේ පන්තියට ({userYear}) අදාළව දැනට වීඩියෝ කිසිවක් පද්ධතියට එක් කර නොමැත.</p>
@@ -259,12 +269,10 @@ export default function VideoLessonsPage() {
             )}
           </div>
 
-          {/* Right Column: Lesson Selector & Playlist */}
           {videos.length > 0 && (
             <div className="space-y-6">
               
-              {/* --- පාඩම් පෙරහන (Subject Lessons Dropdown Filter) --- */}
-              <div className={`${bgCard} p-4 rounded-2xl`}>
+              <div className={`${bgCard} border p-4 rounded-2xl`}>
                 <label className="block text-xs font-black uppercase tracking-wider mb-2 text-purple-500">🔖 විෂය නිර්දේශයේ පාඩම් අනුව තෝරන්න</label>
                 <select 
                   value={selectedLesson} 
@@ -279,8 +287,7 @@ export default function VideoLessonsPage() {
                 </select>
               </div>
 
-              {/* Playlist Body */}
-              <div className={`${bgCard} p-5 rounded-3xl h-fit max-h-[70vh] flex flex-col`}>
+              <div className={`${bgCard} border p-5 rounded-3xl h-fit max-h-[70vh] flex flex-col`}>
                 <h3 className="text-base font-black mb-4 border-b pb-4 flex items-center justify-between">
                   <span className="flex items-center gap-2"><span>🎬</span> වීඩියෝ ලැයිස්තුව</span>
                   <span className="bg-purple-100 text-purple-800 text-xs font-extrabold px-2.5 py-1 rounded-md">{filteredVideos.length}</span>
@@ -297,7 +304,6 @@ export default function VideoLessonsPage() {
                           : 'border-transparent hover:bg-purple-50/20 hover:border-purple-100/30'
                       }`}
                     >
-                      {/* Video Thumbnail Section */}
                       <div className="w-28 h-16 bg-slate-800 rounded-xl overflow-hidden flex-shrink-0 relative shadow-sm">
                         <img 
                           src={`https://img.youtube.com/vi/${video.youtubeId}/mqdefault.jpg`} 
@@ -311,7 +317,6 @@ export default function VideoLessonsPage() {
                         )}
                       </div>
                       
-                      {/* Video Context Title */}
                       <div className="flex-1 py-0.5 flex flex-col justify-center">
                         <h4 className={`text-xs line-clamp-2 leading-tight ${currentVideo?._id === video._id ? 'text-purple-600 font-black' : ''}`}>
                           {video.title}
@@ -322,7 +327,6 @@ export default function VideoLessonsPage() {
                           {video.category || 'Theory'}
                         </span>
                       </div>
-
                     </div>
                   ))}
                   
