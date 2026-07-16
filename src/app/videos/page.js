@@ -18,12 +18,17 @@ export default function VideoLessonsPage() {
   
   const [selectedLesson, setSelectedLesson] = useState('All');
 
-  // --- Video Player Controls States ---
+  // --- Video Player Custom Controls States ---
   const playerRef = useRef(null);
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [isMuted, setIsMuted] = useState(false);
   const [volumeLevel, setVolumeLevel] = useState(100);
+  const [currentTime, setCurrentTime] = useState(0);
+  const [duration, setDuration] = useState(0);
+  const [playbackRate, setPlaybackRate] = useState(1);
+  const [isPlaying, setIsPlaying] = useState(true);
 
+  // Theme & User Auth
   useEffect(() => {
     const savedTheme = localStorage.getItem('theme');
     if (savedTheme === 'dark') setIsDarkMode(true);
@@ -45,10 +50,7 @@ export default function VideoLessonsPage() {
         const year = userObj.alYear || 'All'; 
         setUserYear(year);
 
-        const response = await fetch(`/api/videos?year=${year}`, {
-          cache: 'no-store' 
-        });
-        
+        const response = await fetch(`/api/videos?year=${year}`, { cache: 'no-store' });
         const data = await response.json();
         
         if (data.videos && data.videos.length > 0) {
@@ -68,6 +70,23 @@ export default function VideoLessonsPage() {
     fetchVideos();
   }, [router]);
 
+  // YouTube IFrame වෙතින් දත්ත (Time, Duration) ලබාගැනීමේ පද්ධතිය
+  useEffect(() => {
+    const handleMessage = (event) => {
+      try {
+        const data = JSON.parse(event.data);
+        if (data.event === 'infoDelivery' && data.info) {
+          if (data.info.currentTime !== undefined) setCurrentTime(data.info.currentTime);
+          if (data.info.duration !== undefined) setDuration(data.info.duration);
+          if (data.info.playbackRate !== undefined) setPlaybackRate(data.info.playbackRate);
+          if (data.info.playerState !== undefined) setIsPlaying(data.info.playerState === 1);
+        }
+      } catch (e) {}
+    };
+    window.addEventListener('message', handleMessage);
+    return () => window.removeEventListener('message', handleMessage);
+  }, []);
+
   const toggleTheme = () => {
     const newTheme = !isDarkMode;
     setIsDarkMode(newTheme);
@@ -84,19 +103,22 @@ export default function VideoLessonsPage() {
     if (!url) return '#';
     if (url.includes('drive.google.com/file/d/')) {
       const match = url.match(/\/d\/(.+?)\//);
-      if (match && match[1]) {
-        return `https://drive.google.com/uc?export=download&id=${match[1]}`;
-      }
+      if (match && match[1]) return `https://drive.google.com/uc?export=download&id=${match[1]}`;
     }
     return url;
   };
 
-  // --- Player Custom Functions ---
+  // --- Custom Video Player Functions ---
   const getSecuredVideoUrl = (ytId) => {
     if(!ytId) return "";
-    // controls=0 මගින් YouTube හි සාමාන්‍ය බොත්තම් සම්පූර්ණයෙන්ම සඟවයි.
-    // enablejsapi=1 මගින් අපගේ අලුත් බොත්තම් වලට වීඩියෝව පාලනය කිරීමට ඉඩ දෙයි.
+    // controls=0 මගින් සාමාන්‍ය බොත්තම් සම්පූර්ණයෙන්ම සඟවා, අපගේ Custom බොත්තම් සඳහා ඉඩ ලබා දේ.
     return `https://www.youtube.com/embed/${ytId}?autoplay=1&rel=0&modestbranding=1&showinfo=0&controls=0&disablekb=1&iv_load_policy=3&fs=0&enablejsapi=1`;
+  };
+
+  const onIframeLoad = () => {
+    if (playerRef.current && playerRef.current.contentWindow) {
+      playerRef.current.contentWindow.postMessage(JSON.stringify({ event: "listening" }), "*");
+    }
   };
 
   const sendYouTubeCommand = (func, args = []) => {
@@ -105,25 +127,47 @@ export default function VideoLessonsPage() {
     }
   };
 
+  // Play / Pause
+  const togglePlay = () => {
+    if (isPlaying) sendYouTubeCommand("pauseVideo");
+    else sendYouTubeCommand("playVideo");
+  };
+
+  // +10s / -10s Skip
+  const skipForward = () => sendYouTubeCommand("seekTo", [currentTime + 10, true]);
+  const skipBackward = () => sendYouTubeCommand("seekTo", [Math.max(currentTime - 10, 0), true]);
+
+  // Speed Control (1x -> 1.5x -> 2x -> 0.5x -> 1x)
+  const toggleSpeed = () => {
+    const nextSpeed = playbackRate >= 2 ? 0.5 : playbackRate + 0.5;
+    sendYouTubeCommand("setPlaybackRate", [nextSpeed]);
+    setPlaybackRate(nextSpeed);
+  };
+
+  // Seek Bar Drag Control
+  const handleSeek = (e) => {
+    const time = parseFloat(e.target.value);
+    setCurrentTime(time);
+    sendYouTubeCommand("seekTo", [time, true]);
+  };
+
+  // Volume & Fullscreen
   const handleToggleMute = () => {
     if (isMuted) { sendYouTubeCommand("unMute"); setIsMuted(false); } 
     else { sendYouTubeCommand("mute"); setIsMuted(true); }
   };
-
   const handleVolumeDown = () => {
     const newVol = Math.max(volumeLevel - 10, 0);
     setVolumeLevel(newVol);
     sendYouTubeCommand("setVolume", [newVol]);
     if (newVol === 0) { sendYouTubeCommand("mute"); setIsMuted(true); }
   };
-
   const handleVolumeUp = () => {
     const newVol = Math.min(volumeLevel + 10, 100);
     setVolumeLevel(newVol);
     sendYouTubeCommand("setVolume", [newVol]);
     if (isMuted) { sendYouTubeCommand("unMute"); setIsMuted(false); }
   };
-
   const toggleFullScreen = () => {
     if (!isFullscreen) {
       setIsFullscreen(true);
@@ -134,11 +178,16 @@ export default function VideoLessonsPage() {
     }
   };
 
-  const uniqueLessons = ['All', ...new Set(videos.map(v => v.lessonName || 'සාමාන්‍ය විෂය කරුණු'))];
+  // Time Formatter
+  const formatTime = (timeInSeconds) => {
+    if (!timeInSeconds || isNaN(timeInSeconds)) return "0:00";
+    const m = Math.floor(timeInSeconds / 60);
+    const s = Math.floor(timeInSeconds % 60);
+    return `${m}:${s < 10 ? '0' : ''}${s}`;
+  };
 
-  const filteredVideos = selectedLesson === 'All' 
-    ? videos 
-    : videos.filter(v => (v.lessonName || 'සාමාන්‍ය විෂය කරුණු') === selectedLesson);
+  const uniqueLessons = ['All', ...new Set(videos.map(v => v.lessonName || 'සාමාන්‍ය විෂය කරුණු'))];
+  const filteredVideos = selectedLesson === 'All' ? videos : videos.filter(v => (v.lessonName || 'සාමාන්‍ය විෂය කරුණු') === selectedLesson);
 
   const bgMain = isDarkMode ? "bg-slate-950 text-slate-100" : "bg-purple-50/30 text-gray-800";
   const bgCard = isDarkMode ? "bg-slate-900 border-slate-800" : "bg-white border-purple-100 shadow-sm";
@@ -151,7 +200,7 @@ export default function VideoLessonsPage() {
       
       <div className={`fixed inset-0 bg-black/60 z-40 md:hidden transition-opacity ${isSidebarOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'}`} onClick={() => setIsSidebarOpen(false)}></div>
 
-      {/* --- Sidebar Navigation (නොවෙනස්ව) --- */}
+      {/* --- Sidebar (ඔබ ඉල්ලූ පරිදි කිසිදු වෙනසක් කර නොමැත) --- */}
       <aside className={`w-64 bg-purple-900 text-white flex flex-col fixed inset-y-0 left-0 z-50 transform ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'} md:translate-x-0 md:static transition-transform duration-300 shadow-2xl`}>
         <div onClick={() => router.push('/')} className="p-6 border-b border-purple-800 font-bold text-xl tracking-wider cursor-pointer hover:opacity-80 transition flex items-center gap-2">
           <div className="bg-white text-purple-700 font-bold rounded-lg p-1.5 text-xs">YS</div>
@@ -176,9 +225,7 @@ export default function VideoLessonsPage() {
           <a href="#" onClick={(e) => { e.preventDefault(); router.push('/dashboard/marks'); }} className="flex items-center space-x-3 hover:bg-purple-800 px-4 py-3 rounded-lg transition">
             <span className="text-xl">📊</span><span className="font-medium">ප්‍රගති වාර්තාව</span>
           </a>
-          
           <div className="pt-4 border-t border-purple-800/50 mt-4 mb-2"></div>
-
           <a href="#" onClick={(e) => { e.preventDefault(); router.push('/notifications'); }} className="flex items-center space-x-3 hover:bg-purple-800 px-4 py-3 rounded-lg transition">
             <span className="text-xl">🔔</span><span className="font-medium">දැනුම්දීම්</span>
           </a>
@@ -197,7 +244,6 @@ export default function VideoLessonsPage() {
       </aside>
 
       <main className="flex-1 flex flex-col h-screen overflow-y-auto relative">
-        
         <header className={`${headerBg} p-4 flex justify-between items-center sticky top-0 z-30 transition-colors duration-300`}>
           <div className="flex items-center gap-4">
             <button onClick={() => setIsSidebarOpen(true)} className={`md:hidden p-2 rounded-lg transition ${isDarkMode ? 'text-white hover:bg-slate-800' : 'text-slate-600 hover:bg-slate-100'}`}>
@@ -207,7 +253,6 @@ export default function VideoLessonsPage() {
               <span className="text-2xl hidden sm:block">📺</span> වීඩියෝ පාඩම්
             </h1>
           </div>
-          
           <div className="flex items-center space-x-4 md:space-x-6">
             <button onClick={toggleTheme} className={`p-2 rounded-full transition-all focus:outline-none ${isDarkMode ? 'bg-slate-800 text-yellow-400 hover:bg-slate-700' : 'bg-purple-100 text-purple-600 hover:bg-purple-200'}`}>
               {isDarkMode ? (
@@ -216,7 +261,6 @@ export default function VideoLessonsPage() {
                 <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" /></svg>
               )}
             </button>
-
             <div className={`flex items-center gap-3 px-4 py-2 rounded-full border ${isDarkMode ? 'bg-slate-800 border-slate-700' : 'bg-purple-50 border-purple-100'}`}>
               <div className="text-right hidden sm:block">
                 <p className={`font-bold text-sm ${isDarkMode ? 'text-purple-400' : 'text-purple-900'}`}>{userYear} A/L</p>
@@ -239,11 +283,12 @@ export default function VideoLessonsPage() {
             ) : currentVideo ? (
               <div className="animate-fade-in space-y-4">
                 
-                {/* --- 20minutes.lk Style Player Wrapper --- */}
+                {/* --- 1. අතිශය ආරක්ෂිත Video Player කොටස --- */}
                 <div 
                   className={isFullscreen ? "fixed inset-0 z-[99999] bg-black w-screen h-[100dvh] flex flex-col justify-center select-none" : "aspect-video w-full bg-black relative rounded-2xl overflow-hidden shadow-lg select-none"}
                   onContextMenu={(e) => e.preventDefault()}
                 >
+                  {/* Full screen එකේදී පිටවීමේ බොත්තම */}
                   {isFullscreen && (
                     <button onClick={toggleFullScreen} className="absolute top-4 right-4 z-[1000] bg-white/20 p-2 rounded-full text-white hover:bg-white/40 border border-white/30 backdrop-blur-sm transition-all">
                       <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
@@ -251,16 +296,12 @@ export default function VideoLessonsPage() {
                   )}
 
                   <div className="relative w-full h-full flex-grow">
-                    {/* Top Shield - Blocks Video Title */}
-                    <div className="absolute top-0 left-0 w-full h-[65px] md:h-[75px] z-[999] bg-black pointer-events-none"></div>
+                    {/* Share බොත්තම අවහිර කරන Shield එක */}
+                    <div className="absolute top-0 left-0 w-full h-[65px] md:h-[75px] z-[999] bg-transparent pointer-events-auto" title={currentVideo.title}></div>
                     
-                    {/* Bottom Shield - Blocks Youtube Logo/Watermark */}
-                    <div className="absolute bottom-0 left-0 w-full h-[60px] md:h-[65px] z-[999] bg-black pointer-events-none flex items-center justify-end px-3 md:px-5">
-                      <span className="text-[10px] md:text-xs font-bold text-slate-500/80 mb-2 mr-1">YCS Physics</span>
-                    </div>
-
                     <iframe 
                       ref={playerRef}
+                      onLoad={onIframeLoad}
                       className="absolute top-0 left-0 w-full h-full z-0 pointer-events-auto"
                       src={getSecuredVideoUrl(currentVideo.youtubeId)} 
                       title={currentVideo.title}
@@ -270,67 +311,106 @@ export default function VideoLessonsPage() {
                   </div>
                 </div>
 
-                {/* --- අපගේ අලුත් Control Panel එක සහ PDF Button එක --- */}
-                <div className={`p-4 md:p-5 rounded-2xl border shadow-sm flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 transition-all ${isDarkMode ? 'bg-slate-800/50 border-purple-900/30' : 'bg-purple-50/40 border-purple-100/50'}`}>
+                {/* --- 2. අපගේ අලුත් Custom Control Panel එක --- */}
+                <div className={`p-4 md:p-5 rounded-2xl border shadow-sm flex flex-col gap-4 transition-all ${isDarkMode ? 'bg-slate-800/50 border-purple-900/30' : 'bg-purple-50/40 border-purple-100/50'}`}>
                   
-                  {/* වීඩියෝවේ විස්තර */}
-                  <div className="truncate flex-1">
-                    <span className="text-[10px] md:text-xs font-bold uppercase tracking-wider text-purple-600">දැන් ධාවනය වේ</span>
-                    <h3 className={`text-sm md:text-lg font-bold mt-0.5 truncate ${isDarkMode ? 'text-white' : 'text-slate-900'}`}>{currentVideo.title}</h3>
-                    <div className="flex gap-2 mt-2">
-                      <span className="bg-purple-600 text-white text-[10px] px-2 py-0.5 rounded font-bold uppercase">{currentVideo.category || 'Theory'}</span>
-                      {currentVideo.lessonName && <span className={`text-[10px] px-2 py-0.5 rounded font-bold border ${isDarkMode ? 'bg-slate-800 border-slate-600 text-slate-300' : 'bg-white border-purple-200 text-purple-700'}`}>📁 {currentVideo.lessonName}</span>}
+                  {/* Progress Bar (Seek Bar) */}
+                  <div className="flex items-center gap-3 w-full">
+                    <span className={`text-xs font-bold w-10 text-right ${textMuted}`}>{formatTime(currentTime)}</span>
+                    <input 
+                      type="range" 
+                      min="0" 
+                      max={duration || 100} 
+                      value={currentTime} 
+                      onChange={handleSeek}
+                      style={{
+                        // රතු පාට ලස්සන Progress line එක
+                        background: `linear-gradient(to right, #dc2626 ${(currentTime / duration) * 100}%, ${isDarkMode ? '#334155' : '#e2e8f0'} ${(currentTime / duration) * 100}%)`
+                      }}
+                      className="flex-1 h-2 rounded-lg appearance-none cursor-pointer accent-red-600 focus:outline-none"
+                    />
+                    <span className={`text-xs font-bold w-10 ${textMuted}`}>{formatTime(duration)}</span>
+                  </div>
+
+                  {/* Buttons Row */}
+                  <div className="flex flex-col xl:flex-row xl:items-center xl:justify-between gap-4">
+                    
+                    <div className="flex items-center gap-2 md:gap-3 flex-wrap">
+                      {/* Play/Pause සහ Skip බොත්තම් */}
+                      <div className={`flex items-center rounded-xl border overflow-hidden shadow-sm flex-shrink-0 ${isDarkMode ? 'bg-slate-800 border-slate-600' : 'bg-white border-purple-200'}`}>
+                        <button onClick={togglePlay} className={`px-4 py-2.5 md:py-3 transition-colors ${isDarkMode ? 'hover:bg-slate-700 text-purple-400' : 'hover:bg-purple-50 text-purple-700'}`} title={isPlaying ? "නවත්වන්න" : "ධාවනය කරන්න"}>
+                          {isPlaying ? (
+                            <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zM7 8a1 1 0 012 0v4a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v4a1 1 0 102 0V8a1 1 0 00-1-1z" clipRule="evenodd" /></svg>
+                          ) : (
+                            <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" clipRule="evenodd" /></svg>
+                          )}
+                        </button>
+                        <button onClick={skipBackward} className={`px-3 py-2.5 md:py-3 transition-colors border-l ${isDarkMode ? 'hover:bg-slate-700 border-slate-600 text-slate-300' : 'hover:bg-purple-50 border-purple-200 text-slate-700'}`} title="තත්පර 10ක් ආපස්සට">
+                          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12.066 11.2a1 1 0 000 1.6l5.334 4A1 1 0 0019 16V8a1 1 0 00-1.6-.8l-5.333 4zM4.066 11.2a1 1 0 000 1.6l5.334 4A1 1 0 0011 16V8a1 1 0 00-1.6-.8l-5.334 4z" /></svg>
+                        </button>
+                        <button onClick={skipForward} className={`px-3 py-2.5 md:py-3 transition-colors border-l ${isDarkMode ? 'hover:bg-slate-700 border-slate-600 text-slate-300' : 'hover:bg-purple-50 border-purple-200 text-slate-700'}`} title="තත්පර 10ක් ඉදිරියට">
+                          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M11.933 12.8a1 1 0 000-1.6l-5.333-4A1 1 0 005 8v8a1 1 0 001.6.8l5.333-4zM19.933 12.8a1 1 0 000-1.6l-5.334-4A1 1 0 0013 8v8a1 1 0 001.6.8l5.334-4z" /></svg>
+                        </button>
+                      </div>
+
+                      {/* Speed Control Button */}
+                      <button onClick={toggleSpeed} className={`px-4 py-2.5 md:py-3 rounded-xl border font-bold text-sm transition-colors shadow-sm flex-shrink-0 ${isDarkMode ? 'bg-slate-800 border-slate-600 text-amber-400 hover:bg-slate-700' : 'bg-white border-purple-200 text-amber-600 hover:bg-purple-50'}`} title="ධාවන වේගය වෙනස් කරන්න">
+                        {playbackRate}x Speed
+                      </button>
+                    </div>
+
+                    <div className="flex items-center gap-2 md:gap-3 flex-wrap">
+                      {/* Volume Controls */}
+                      <div className={`flex items-center rounded-xl border overflow-hidden shadow-sm flex-shrink-0 ${isDarkMode ? 'bg-slate-800 border-slate-600' : 'bg-white border-purple-200'}`}>
+                        <button onClick={handleVolumeDown} className={`px-3 py-2.5 md:py-3 transition-colors ${isDarkMode ? 'hover:bg-slate-700 text-slate-300' : 'hover:bg-purple-50 text-slate-700'}`}>
+                          <svg className="w-4 h-4 md:w-5 md:h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M18 12H6" /></svg>
+                        </button>
+                        <button onClick={handleToggleMute} className={`px-3 py-2.5 md:py-3 transition-colors border-x ${isDarkMode ? 'hover:bg-slate-700 border-slate-600' : 'hover:bg-purple-50 border-purple-200'}`}>
+                          {isMuted ? (
+                            <svg className="w-4 h-4 md:w-5 md:h-5 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2" /></svg>
+                          ) : (
+                            <svg className="w-4 h-4 md:w-5 md:h-5 text-purple-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z" /></svg>
+                          )}
+                        </button>
+                        <button onClick={handleVolumeUp} className={`px-3 py-2.5 md:py-3 transition-colors ${isDarkMode ? 'hover:bg-slate-700 text-slate-300' : 'hover:bg-purple-50 text-slate-700'}`}>
+                          <svg className="w-4 h-4 md:w-5 md:h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M12 6v6m0 0v6m0-6h6m-6 0H6" /></svg>
+                        </button>
+                      </div>
+
+                      {/* Full Screen Button */}
+                      <button onClick={toggleFullScreen} className={`flex items-center justify-center gap-2 rounded-xl border px-3 py-2.5 md:px-5 md:py-3 text-xs md:text-sm font-bold transition-all shadow-sm flex-shrink-0 ${isDarkMode ? 'bg-slate-800 border-slate-600 text-white hover:bg-slate-700' : 'bg-white border-purple-200 text-slate-800 hover:bg-purple-50'}`}>
+                        <svg className="w-4 h-4 md:w-5 md:h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4" /></svg>
+                        Full Screen
+                      </button>
+
+                      {/* Tute Button */}
+                      {currentVideo.tuteUrl ? (
+                        <a href={getDownloadUrl(currentVideo.tuteUrl)} target="_blank" rel="noopener noreferrer" className="flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-purple-600 to-fuchsia-600 hover:from-purple-700 hover:to-fuchsia-700 text-white px-4 py-2.5 md:px-5 md:py-3 text-xs md:text-sm font-bold transition-all shadow-sm flex-shrink-0">
+                          <svg className="w-4 h-4 md:w-5 md:h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M12 16l-5-5h3V4h4v7h3l-5 5zm9-2v6H3v-6H1v8h22v-8h-2z"/></svg>
+                          Tute (PDF)
+                        </a>
+                      ) : (
+                        <button disabled className={`flex items-center justify-center gap-2 rounded-xl border border-dashed px-4 py-2.5 md:px-5 md:py-3 text-xs md:text-sm font-bold cursor-not-allowed flex-shrink-0 ${isDarkMode ? 'border-slate-700 text-slate-500' : 'border-gray-300 text-gray-400'}`}>
+                          ⏳ Tute පසුවට
+                        </button>
+                      )}
                     </div>
                   </div>
-                  
-                  <div className="flex items-center gap-2 md:gap-3 flex-wrap">
-                    
-                    {/* Volume Controls */}
-                    <div className={`flex items-center rounded-xl border overflow-hidden shadow-sm flex-shrink-0 ${isDarkMode ? 'bg-slate-800 border-slate-600' : 'bg-white border-purple-200'}`}>
-                      <button onClick={handleVolumeDown} className={`px-3 py-2.5 md:py-3 transition-colors ${isDarkMode ? 'hover:bg-slate-700 text-slate-300' : 'hover:bg-purple-50 text-slate-700'}`}>
-                        <svg className="w-4 h-4 md:w-5 md:h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M18 12H6" /></svg>
-                      </button>
-                      <button onClick={handleToggleMute} className={`px-3 py-2.5 md:py-3 transition-colors border-x ${isDarkMode ? 'hover:bg-slate-700 border-slate-600' : 'hover:bg-purple-50 border-purple-200'}`}>
-                        {isMuted ? (
-                          <svg className="w-4 h-4 md:w-5 md:h-5 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2" /></svg>
-                        ) : (
-                          <svg className="w-4 h-4 md:w-5 md:h-5 text-purple-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z" /></svg>
-                        )}
-                      </button>
-                      <button onClick={handleVolumeUp} className={`px-3 py-2.5 md:py-3 transition-colors ${isDarkMode ? 'hover:bg-slate-700 text-slate-300' : 'hover:bg-purple-50 text-slate-700'}`}>
-                        <svg className="w-4 h-4 md:w-5 md:h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M12 6v6m0 0v6m0-6h6m-6 0H6" /></svg>
-                      </button>
-                    </div>
+                </div>
 
-                    {/* Full Screen Button */}
-                    <button 
-                      onClick={toggleFullScreen}
-                      className={`flex items-center justify-center gap-2 rounded-xl border px-3 py-2.5 md:px-5 md:py-3 text-xs md:text-sm font-bold transition-all shadow-sm flex-shrink-0 ${isDarkMode ? 'bg-slate-800 border-slate-600 text-white hover:bg-slate-700' : 'bg-white border-purple-200 text-slate-800 hover:bg-purple-50'}`}
-                    >
-                      <svg className="w-4 h-4 md:w-5 md:h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4" /></svg>
-                      Full Screen
-                    </button>
-
-                    {/* Tute (PDF) Download Button */}
-                    {currentVideo.tuteUrl ? (
-                      <a 
-                        href={getDownloadUrl(currentVideo.tuteUrl)} 
-                        target="_blank" 
-                        rel="noopener noreferrer"
-                        className="flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-purple-600 to-fuchsia-600 hover:from-purple-700 hover:to-fuchsia-700 text-white px-4 py-2.5 md:px-5 md:py-3 text-xs md:text-sm font-bold transition-all shadow-sm flex-shrink-0"
-                      >
-                        <svg className="w-4 h-4 md:w-5 md:h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M12 16l-5-5h3V4h4v7h3l-5 5zm9-2v6H3v-6H1v8h22v-8h-2z"/></svg>
-                        Tute (PDF)
-                      </a>
-                    ) : (
-                      <button 
-                        disabled 
-                        className={`flex items-center justify-center gap-2 rounded-xl border border-dashed px-4 py-2.5 md:px-5 md:py-3 text-xs md:text-sm font-bold cursor-not-allowed flex-shrink-0 ${isDarkMode ? 'border-slate-700 text-slate-500' : 'border-gray-300 text-gray-400'}`}
-                      >
-                        ⏳ Tute පසුවට
-                      </button>
+                {/* --- වීඩියෝවට අදාළ විස්තර (Title / Category) --- */}
+                <div className={`p-5 rounded-2xl border ${bgCard}`}>
+                  <div className="flex flex-wrap items-center gap-3 mb-3">
+                    <span className="inline-block text-xs px-3 py-1 rounded-full font-bold bg-purple-600 text-white uppercase tracking-wider">
+                      {currentVideo.category || 'Theory'}
+                    </span>
+                    {currentVideo.lessonName && (
+                      <span className={`text-xs px-3 py-1 rounded-md font-bold ${isDarkMode ? 'bg-slate-800 text-slate-300' : 'bg-gray-100 text-gray-700'}`}>
+                        📁 {currentVideo.lessonName}
+                      </span>
                     )}
                   </div>
+                  <h2 className={`text-xl md:text-2xl font-black leading-tight ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>{currentVideo.title}</h2>
                 </div>
 
               </div>
@@ -369,7 +449,7 @@ export default function VideoLessonsPage() {
                 </h3>
                 
                 <div className="flex-1 overflow-y-auto space-y-3 pr-1 custom-scrollbar">
-                  {filteredVideos.map((video, index) => (
+                  {filteredVideos.map(video => (
                     <div 
                       key={video._id} 
                       onClick={() => setCurrentVideo(video)}
