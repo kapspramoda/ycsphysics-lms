@@ -107,7 +107,7 @@ export default function DashboardPage() {
   const toggleTodo = (id) => setTodos(todos.map(todo => todo.id === id ? { ...todo, completed: !todo.completed } : todo));
   const deleteTodo = (id) => setTodos(todos.filter(todo => todo.id !== id));
 
-  // --- Theme Classes ---
+  // --- Theme Classes (දකුණු පැත්තේ ප්‍රධාන කොටසට අදාළව) ---
   const bgMain = isDarkMode ? "bg-slate-950 text-slate-100" : "bg-purple-50/30 text-gray-800";
   const bgCard = isDarkMode ? "bg-slate-900 border-slate-800" : "bg-white border-purple-100";
   const textMuted = isDarkMode ? "text-slate-400" : "text-gray-500";
@@ -119,7 +119,7 @@ export default function DashboardPage() {
     datasets: [{
       label: 'ලකුණු (%)',
       data: chartScores,
-      borderColor: '#9333EA', // Purple
+      borderColor: '#9333EA', 
       backgroundColor: isDarkMode ? 'rgba(147, 51, 234, 0.2)' : 'rgba(147, 51, 234, 0.1)',
       borderWidth: 2,
       pointBackgroundColor: '#FACC15',
@@ -150,45 +150,46 @@ export default function DashboardPage() {
       
       <div className={`fixed inset-0 bg-black/60 z-40 md:hidden transition-opacity ${isSidebarOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'}`} onClick={() => setIsSidebarOpen(false)}></div>
 
-      <aside className={`w-64 bg-slate-950 text-white flex flex-col fixed inset-y-0 left-0 z-50 transform ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'} md:translate-x-0 md:static transition-transform duration-300 border-r border-slate-800`}>
-        <div onClick={() => router.push('/')} className="p-6 border-b border-slate-800 font-bold text-xl tracking-wider cursor-pointer hover:opacity-80 transition flex items-center gap-2">
-          <div className="bg-purple-600 text-white font-bold rounded-lg p-1.5 text-xs">YS</div>
-          YCS<span className="text-purple-400">Physics</span>
+      {/* --- මෙන්න මේ කොටස තමයි සම්පූර්ණයෙන්ම දම් පාට කළේ --- */}
+      <aside className={`w-64 bg-purple-900 text-white flex flex-col fixed inset-y-0 left-0 z-50 transform ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'} md:translate-x-0 md:static transition-transform duration-300 shadow-xl shadow-purple-900/20`}>
+        <div onClick={() => router.push('/')} className="p-6 border-b border-purple-800 font-bold text-xl tracking-wider cursor-pointer hover:opacity-80 transition flex items-center gap-2">
+          <div className="bg-white text-purple-700 font-bold rounded-lg p-1.5 text-xs">YS</div>
+          YCS<span className="text-purple-300">Physics</span>
         </div>
         <nav className="flex-1 p-4 space-y-2 overflow-y-auto custom-scrollbar">
-          <a href="#" onClick={(e) => { e.preventDefault(); router.push('/dashboard'); }} className="flex items-center space-x-3 bg-purple-900/50 text-purple-300 px-4 py-3 rounded-xl transition border border-purple-800/30">
+          <a href="#" onClick={(e) => { e.preventDefault(); router.push('/dashboard'); }} className="flex items-center space-x-3 bg-purple-800 text-white px-4 py-3 rounded-xl transition shadow-inner">
             <span className="text-xl">🏠</span><span className="font-bold">මුල් තිරය</span>
           </a>
-          <a href="#" onClick={(e) => { e.preventDefault(); router.push('/videos'); }} className="flex items-center space-x-3 hover:bg-slate-900 text-slate-300 hover:text-white px-4 py-3 rounded-xl transition">
+          <a href="#" onClick={(e) => { e.preventDefault(); router.push('/videos'); }} className="flex items-center space-x-3 hover:bg-purple-800/80 text-purple-200 hover:text-white px-4 py-3 rounded-xl transition">
             <span className="text-xl">📺</span><span className="font-medium">වීඩියෝ පාඩම්</span>
           </a>
-          <a href="#" onClick={(e) => { e.preventDefault(); router.push('/simulation'); }} className="flex items-center space-x-3 hover:bg-slate-900 text-slate-300 hover:text-white px-4 py-3 rounded-xl transition">
+          <a href="#" onClick={(e) => { e.preventDefault(); router.push('/simulation'); }} className="flex items-center space-x-3 hover:bg-purple-800/80 text-purple-200 hover:text-white px-4 py-3 rounded-xl transition">
             <span className="text-xl">🧪</span><span className="font-medium">Simulations</span>
           </a>
-          <a href="#" onClick={(e) => { e.preventDefault(); router.push('/exam'); }} className="flex items-center space-x-3 hover:bg-slate-900 text-slate-300 hover:text-white px-4 py-3 rounded-xl transition">
+          <a href="#" onClick={(e) => { e.preventDefault(); router.push('/exam'); }} className="flex items-center space-x-3 hover:bg-purple-800/80 text-purple-200 hover:text-white px-4 py-3 rounded-xl transition">
             <span className="text-xl">💻</span><span className="font-medium">Online විභාග</span>
           </a>
-          <a href="#" onClick={(e) => { e.preventDefault(); router.push('/tutes'); }} className="flex items-center space-x-3 hover:bg-slate-900 text-slate-300 hover:text-white px-4 py-3 rounded-xl transition">
+          <a href="#" onClick={(e) => { e.preventDefault(); router.push('/tutes'); }} className="flex items-center space-x-3 hover:bg-purple-800/80 text-purple-200 hover:text-white px-4 py-3 rounded-xl transition">
             <span className="text-xl">📚</span><span className="font-medium">නිබන්ධන</span>
           </a>
-          <a href="#" onClick={(e) => { e.preventDefault(); router.push('/marking'); }} className="flex items-center space-x-3 hover:bg-slate-900 text-slate-300 hover:text-white px-4 py-3 rounded-xl transition">
+          <a href="#" onClick={(e) => { e.preventDefault(); router.push('/marking'); }} className="flex items-center space-x-3 hover:bg-purple-800/80 text-purple-200 hover:text-white px-4 py-3 rounded-xl transition">
             <span className="text-xl">✅</span><span className="font-medium">Marking Schemes</span>
           </a>
-          <a href="#" onClick={(e) => { e.preventDefault(); router.push('/dashboard/marks'); }} className="flex items-center space-x-3 hover:bg-slate-900 text-slate-300 hover:text-white px-4 py-3 rounded-xl transition">
+          <a href="#" onClick={(e) => { e.preventDefault(); router.push('/dashboard/marks'); }} className="flex items-center space-x-3 hover:bg-purple-800/80 text-purple-200 hover:text-white px-4 py-3 rounded-xl transition">
             <span className="text-xl">📊</span><span className="font-medium">ප්‍රගති වාර්තාව</span>
           </a>
           
-          <div className="pt-4 border-t border-slate-800 mt-4 mb-2"></div>
+          <div className="pt-4 border-t border-purple-800 mt-4 mb-2"></div>
 
-          <a href="#" onClick={(e) => { e.preventDefault(); router.push('/notifications'); }} className="flex items-center space-x-3 hover:bg-slate-900 text-slate-300 hover:text-white px-4 py-3 rounded-xl transition">
+          <a href="#" onClick={(e) => { e.preventDefault(); router.push('/notifications'); }} className="flex items-center space-x-3 hover:bg-purple-800/80 text-purple-200 hover:text-white px-4 py-3 rounded-xl transition">
             <span className="text-xl">🔔</span><span className="font-medium">දැනුම්දීම්</span>
           </a>
-          <a href="#" onClick={(e) => { e.preventDefault(); router.push('/settings'); }} className="flex items-center space-x-3 hover:bg-slate-900 text-slate-300 hover:text-white px-4 py-3 rounded-xl transition">
+          <a href="#" onClick={(e) => { e.preventDefault(); router.push('/settings'); }} className="flex items-center space-x-3 hover:bg-purple-800/80 text-purple-200 hover:text-white px-4 py-3 rounded-xl transition">
             <span className="text-xl">⚙️</span><span className="font-medium">සැකසුම්</span>
           </a>
         </nav>
-        <div className="p-4 border-t border-slate-800">
-          <button onClick={handleLogout} className="w-full flex items-center space-x-3 hover:bg-red-500/20 text-slate-400 hover:text-red-400 p-3 rounded-xl transition border border-transparent hover:border-red-500/30"><span>🚪</span><span className="font-bold">Logout</span></button>
+        <div className="p-4 border-t border-purple-800">
+          <button onClick={handleLogout} className="w-full flex items-center space-x-3 hover:bg-red-500 text-purple-200 hover:text-white p-3 rounded-xl transition"><span>🚪</span><span className="font-bold">Logout</span></button>
         </div>
       </aside>
 
