@@ -10,18 +10,17 @@ export default function DashboardPage() {
   const router = useRouter();
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   
-  // --- Dark Mode State ---
   const [isDarkMode, setIsDarkMode] = useState(false);
-  
   const [userName, setUserName] = useState('');
   const [alYear, setAlYear] = useState('');
   const [center, setCenter] = useState('');
-  
   const [isAuthorized, setIsAuthorized] = useState(false);
   const [avatar, setAvatar] = useState(null); 
-
   const [todos, setTodos] = useState([]);
   const [newTodo, setNewTodo] = useState('');
+
+  // අලුත් Notification State
+  const [systemNotification, setSystemNotification] = useState(null);
 
   const [chartLabels, setChartLabels] = useState(['දත්ත නැත']);
   const [chartScores, setChartScores] = useState([0]);
@@ -32,7 +31,6 @@ export default function DashboardPage() {
   const [onlineAverage, setOnlineAverage] = useState(0);
 
   useEffect(() => {
-    // Check saved theme
     const savedTheme = localStorage.getItem('theme');
     if (savedTheme === 'dark') setIsDarkMode(true);
 
@@ -52,12 +50,21 @@ export default function DashboardPage() {
       const storedTodos = localStorage.getItem('userTodos');
       if (storedTodos) setTodos(JSON.parse(storedTodos));
 
+      // Fetch Notification
+      const fetchNotification = async () => {
+        try {
+          const res = await fetch(`/api/notifications?year=${userObj.alYear || 'All'}`);
+          const data = await res.json();
+          if(data.notification) setSystemNotification(data.notification.message);
+        } catch(e) {}
+      };
+      fetchNotification();
+
       const fetchMarks = async () => {
         try {
           const response = await fetch(`/api/marks?email=${userObj.email || userObj.username}`);
           const data = await response.json();
           if (data.marks && data.marks.length > 0) {
-            
             const physical = data.marks.filter(m => m.examType !== 'Online');
             if (physical.length > 0) {
               setChartLabels(physical.map(m => m.paperName));
@@ -65,7 +72,6 @@ export default function DashboardPage() {
               setChartScores(pScores);
               setAverageMark(Math.round(pScores.reduce((sum, mark) => sum + mark, 0) / pScores.length));
             }
-
             const online = data.marks.filter(m => m.examType === 'Online');
             if (online.length > 0) {
               setOnlineLabels(online.map(m => m.paperName));
@@ -84,7 +90,6 @@ export default function DashboardPage() {
     if (isAuthorized) localStorage.setItem('userTodos', JSON.stringify(todos));
   }, [todos, isAuthorized]);
 
-  // Handle Theme Toggle
   const toggleTheme = () => {
     const newTheme = !isDarkMode;
     setIsDarkMode(newTheme);
@@ -107,39 +112,26 @@ export default function DashboardPage() {
   const toggleTodo = (id) => setTodos(todos.map(todo => todo.id === id ? { ...todo, completed: !todo.completed } : todo));
   const deleteTodo = (id) => setTodos(todos.filter(todo => todo.id !== id));
 
-  // --- Theme Classes (දකුණු පැත්තේ ප්‍රධාන කොටසට අදාළව) ---
   const bgMain = isDarkMode ? "bg-slate-950 text-slate-100" : "bg-purple-50/30 text-gray-800";
   const bgCard = isDarkMode ? "bg-slate-900 border-slate-800" : "bg-white border-purple-100";
   const textMuted = isDarkMode ? "text-slate-400" : "text-gray-500";
   const headerBg = isDarkMode ? "bg-slate-900 border-b border-slate-800" : "bg-white shadow-sm";
 
-  // --- Physical Chart Data (Purple Theme) ---
   const chartData = {
     labels: chartLabels,
     datasets: [{
-      label: 'ලකුණු (%)',
-      data: chartScores,
-      borderColor: '#9333EA', 
+      label: 'ලකුණු (%)', data: chartScores, borderColor: '#9333EA', 
       backgroundColor: isDarkMode ? 'rgba(147, 51, 234, 0.2)' : 'rgba(147, 51, 234, 0.1)',
-      borderWidth: 2,
-      pointBackgroundColor: '#FACC15',
-      fill: true,
-      tension: 0.4
+      borderWidth: 2, pointBackgroundColor: '#FACC15', fill: true, tension: 0.4
     }]
   };
 
-  // --- Online Chart Data ---
   const onlineChartData = {
     labels: onlineLabels,
     datasets: [{
-      label: 'Online ලකුණු (%)',
-      data: onlineScores,
-      borderColor: '#10B981', 
+      label: 'Online ලකුණු (%)', data: onlineScores, borderColor: '#10B981', 
       backgroundColor: isDarkMode ? 'rgba(16, 185, 129, 0.2)' : 'rgba(16, 185, 129, 0.1)',
-      borderWidth: 2,
-      pointBackgroundColor: '#FACC15',
-      fill: true,
-      tension: 0.4
+      borderWidth: 2, pointBackgroundColor: '#FACC15', fill: true, tension: 0.4
     }]
   };
 
@@ -150,7 +142,6 @@ export default function DashboardPage() {
       
       <div className={`fixed inset-0 bg-black/60 z-40 md:hidden transition-opacity ${isSidebarOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'}`} onClick={() => setIsSidebarOpen(false)}></div>
 
-      {/* --- මෙන්න මේ කොටස තමයි සම්පූර්ණයෙන්ම දම් පාට කළේ --- */}
       <aside className={`w-64 bg-purple-900 text-white flex flex-col fixed inset-y-0 left-0 z-50 transform ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'} md:translate-x-0 md:static transition-transform duration-300 shadow-xl shadow-purple-900/20`}>
         <div onClick={() => router.push('/')} className="p-6 border-b border-purple-800 font-bold text-xl tracking-wider cursor-pointer hover:opacity-80 transition flex items-center gap-2">
           <div className="bg-white text-purple-700 font-bold rounded-lg p-1.5 text-xs">YS</div>
@@ -189,7 +180,7 @@ export default function DashboardPage() {
           </a>
         </nav>
         <div className="p-4 border-t border-purple-800">
-          <button onClick={handleLogout} className="w-full flex items-center space-x-3 hover:bg-red-500 text-purple-200 hover:text-white p-3 rounded-xl transition"><span>🚪</span><span className="font-bold">Logout</span></button>
+          <button onClick={handleLogout} className="w-full flex items-center space-x-3 hover:bg-red-500 text-purple-200 hover:text-white p-3 rounded-xl transition border border-transparent hover:border-red-500/30"><span>🚪</span><span className="font-bold">Logout</span></button>
         </div>
       </aside>
 
@@ -199,18 +190,8 @@ export default function DashboardPage() {
           <div className={`hidden md:block font-medium ${isDarkMode ? 'text-slate-400' : 'text-gray-400'}`}>A/L Physics අඛණ්ඩ අධ්‍යයන පද්ධතිය</div>
           
           <div className="flex items-center space-x-4 md:space-x-6">
-            
-            {/* Dark Mode Toggle Button */}
-            <button 
-              onClick={toggleTheme} 
-              className={`p-2 rounded-full transition-all focus:outline-none ${isDarkMode ? 'bg-slate-800 text-yellow-400 hover:bg-slate-700' : 'bg-purple-100 text-purple-600 hover:bg-purple-200'}`}
-              title={isDarkMode ? "Light Mode" : "Dark Mode"}
-            >
-              {isDarkMode ? (
-                <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z" /></svg>
-              ) : (
-                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" /></svg>
-              )}
+            <button onClick={toggleTheme} className={`p-2 rounded-full transition-all focus:outline-none ${isDarkMode ? 'bg-slate-800 text-yellow-400 hover:bg-slate-700' : 'bg-purple-100 text-purple-600 hover:bg-purple-200'}`}>
+              {isDarkMode ? <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z" /></svg> : <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" /></svg>}
             </button>
 
             <div className="flex items-center space-x-3 cursor-pointer">
@@ -225,9 +206,20 @@ export default function DashboardPage() {
           </div>
         </header>
 
-        <div className="p-6 md:p-10 space-y-10 max-w-7xl mx-auto w-full">
+        <div className="p-6 md:p-10 space-y-8 max-w-7xl mx-auto w-full">
           
-          <div className="bg-gradient-to-r from-purple-700 to-fuchsia-600 rounded-3xl p-8 md:p-10 text-white shadow-lg shadow-purple-900/20 relative overflow-hidden">
+          {/* අලුතින් එක් කළ System Notification Banner එක */}
+          {systemNotification && (
+            <div className="bg-amber-100 dark:bg-amber-900/40 border-l-8 border-amber-500 p-4 md:p-5 rounded-r-2xl shadow-sm flex items-start gap-4 animate-fade-in">
+              <span className="text-3xl mt-1">📢</span>
+              <div>
+                <h4 className="text-amber-800 dark:text-amber-400 font-extrabold text-sm md:text-base mb-1">විශේෂ පණිවිඩයයි</h4>
+                <p className="text-amber-900/80 dark:text-amber-200 text-sm font-bold whitespace-pre-wrap">{systemNotification}</p>
+              </div>
+            </div>
+          )}
+
+          <div className="bg-gradient-to-r from-purple-700 to-fuchsia-600 rounded-3xl p-8 md:p-10 text-white shadow-lg shadow-purple-900/20 relative overflow-hidden mt-2">
             <div className="relative z-10">
               <h2 className="text-3xl md:text-4xl font-extrabold tracking-tight">ආයුබෝවන් {userName.split(' ')[0]}! 👋</h2>
               
@@ -271,8 +263,7 @@ export default function DashboardPage() {
             
             <div onClick={() => router.push('/dashboard/marks')} className={`${bgCard} p-6 rounded-2xl shadow-sm border border-t-4 border-t-amber-500 hover:shadow-lg transition duration-300 transform hover:-translate-y-1 cursor-pointer group flex flex-col items-center text-center lg:col-span-1 sm:col-span-2`}>
               <div className="w-14 h-14 bg-amber-50 text-amber-600 rounded-2xl flex items-center justify-center text-3xl mb-4 group-hover:scale-110 transition duration-300 relative">
-                 📊
-                 <span className="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full animate-pulse border-2 border-white"></span>
+                 📊<span className="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full animate-pulse border-2 border-white"></span>
               </div>
               <h3 className="text-lg font-bold mb-1 group-hover:text-amber-500 transition">ප්‍රගති වාර්තාව</h3>
               <p className={`text-xs ${textMuted}`}>මගේ ලකුණු සහ ප්‍රස්ථාර</p>
@@ -288,9 +279,7 @@ export default function DashboardPage() {
                   <p className={`text-sm mt-2 ${textMuted}`}>සාමාන්‍යය: <span className="bg-purple-100 text-purple-800 px-2.5 py-0.5 rounded-md font-bold">{averageMark}%</span></p>
                 </div>
               </div>
-              <div className="h-48 w-full">
-                <Line data={chartData} options={{ responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { display: false }, x: { display: true, grid: { display: false } } } }} />
-              </div>
+              <div className="h-48 w-full"><Line data={chartData} options={{ responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { display: false }, x: { display: true, grid: { display: false } } } }} /></div>
             </div>
 
             <div className={`${bgCard} p-6 rounded-2xl shadow-sm border hover:shadow-md transition`}>
@@ -300,9 +289,7 @@ export default function DashboardPage() {
                   <p className={`text-sm mt-2 ${textMuted}`}>සාමාන්‍යය: <span className="bg-green-100 text-green-800 px-2.5 py-0.5 rounded-md font-bold">{onlineAverage}%</span></p>
                 </div>
               </div>
-              <div className="h-48 w-full">
-                <Line data={onlineChartData} options={{ responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { display: false }, x: { display: true, grid: { display: false } } } }} />
-              </div>
+              <div className="h-48 w-full"><Line data={onlineChartData} options={{ responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { display: false }, x: { display: true, grid: { display: false } } } }} /></div>
             </div>
           </div>
 
