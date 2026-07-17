@@ -191,9 +191,11 @@ export default function VideoLessonsPage() {
   return (
     <div className={`font-sans flex h-screen overflow-hidden transition-colors duration-300 ${bgMain}`}>
       
-      <div className={`fixed inset-0 bg-black/60 z-40 md:hidden transition-opacity ${isSidebarOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'}`} onClick={() => setIsSidebarOpen(false)}></div>
+      {/* 🔴 Mobile Overlay: z-index එක z-[9998] බවට වෙනස් කර ඇත */}
+      <div className={`fixed inset-0 bg-black/60 z-[9998] md:hidden transition-opacity ${isSidebarOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'}`} onClick={() => setIsSidebarOpen(false)}></div>
 
-      <aside className={`w-64 bg-purple-900 text-white flex flex-col fixed inset-y-0 left-0 z-50 transform ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'} md:translate-x-0 md:static transition-transform duration-300 shadow-2xl`}>
+      {/* 🔴 Sidebar Navigation: z-index එක z-[9999] බවට වෙනස් කර ඇත */}
+      <aside className={`w-64 bg-purple-900 text-white flex flex-col fixed inset-y-0 left-0 z-[9999] transform ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'} md:translate-x-0 md:static transition-transform duration-300 shadow-2xl`}>
         <div onClick={() => router.push('/')} className="p-6 border-b border-purple-800 font-bold text-xl tracking-wider cursor-pointer hover:opacity-80 transition flex items-center gap-2">
           <div className="bg-white text-purple-700 font-bold rounded-lg p-1.5 text-xs">YS</div>
           YCS<span className="text-purple-300">Physics</span>
@@ -288,17 +290,16 @@ export default function VideoLessonsPage() {
 
                   <div className="relative w-full h-full flex-grow">
                     
-                    {/* 🔴 උඩ කළු තීරුව (Top Shield) - YouTube Share & Title සඟවයි */}
+                    {/* උඩ කළු තීරුව (Top Shield) */}
                     <div className="absolute top-0 left-0 w-full h-[65px] md:h-[75px] z-[99] bg-black pointer-events-auto flex items-center px-4 md:px-5">
                       <span className="text-white/60 text-xs font-bold truncate max-w-xs md:max-w-md">{currentVideo.title}</span>
                     </div>
 
-                    {/* 🔴 පහළ කළු තීරුව (Bottom Shield) - YouTube Logo සඟවයි */}
+                    {/* පහළ කළු තීරුව (Bottom Shield) */}
                     <div className="absolute bottom-0 left-0 w-full h-[60px] md:h-[65px] z-[99] bg-black pointer-events-auto flex items-center justify-end px-4 md:px-5">
                       <span className="text-[10px] md:text-xs font-bold text-slate-500/80 mt-2 mr-1">YCS Physics</span>
                     </div>
 
-                    {/* IFrame Video */}
                     <iframe 
                       ref={playerRef}
                       onLoad={onIframeLoad}
@@ -346,7 +347,6 @@ export default function VideoLessonsPage() {
                           <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M11.933 12.8a1 1 0 000-1.6l-5.333-4A1 1 0 005 8v8a1 1 0 001.6.8l5.333-4zM19.933 12.8a1 1 0 000-1.6l-5.334-4A1 1 0 0013 8v8a1 1 0 001.6.8l5.334-4z" /></svg>
                         </button>
                       </div>
-
                       <button onClick={toggleSpeed} className={`px-4 py-2.5 md:py-3 rounded-xl border font-bold text-sm transition-colors shadow-sm flex-shrink-0 ${isDarkMode ? 'bg-slate-800 border-slate-600 text-amber-400 hover:bg-slate-700' : 'bg-white border-purple-200 text-amber-600 hover:bg-purple-50'}`} title="ධාවන වේගය වෙනස් කරන්න">
                         {playbackRate}x Speed
                       </button>
@@ -388,7 +388,6 @@ export default function VideoLessonsPage() {
                   </div>
                 </div>
 
-                {/* --- වීඩියෝවට අදාළ විස්තර --- */}
                 <div className={`p-5 rounded-2xl border ${bgCard}`}>
                   <div className="flex flex-wrap items-center gap-3 mb-3">
                     <span className="inline-block text-xs px-3 py-1 rounded-full font-bold bg-purple-600 text-white uppercase tracking-wider">
