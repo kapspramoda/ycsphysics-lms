@@ -111,7 +111,6 @@ export default function VideoLessonsPage() {
   // --- Custom Video Player Functions ---
   const getSecuredVideoUrl = (ytId) => {
     if(!ytId) return "";
-    // controls=0 මගින් සාමාන්‍ය බොත්තම් සම්පූර්ණයෙන්ම සඟවා, අපගේ Custom බොත්තම් සඳහා ඉඩ ලබා දේ.
     return `https://www.youtube.com/embed/${ytId}?autoplay=1&rel=0&modestbranding=1&showinfo=0&controls=0&disablekb=1&iv_load_policy=3&fs=0&enablejsapi=1`;
   };
 
@@ -127,31 +126,26 @@ export default function VideoLessonsPage() {
     }
   };
 
-  // Play / Pause
   const togglePlay = () => {
     if (isPlaying) sendYouTubeCommand("pauseVideo");
     else sendYouTubeCommand("playVideo");
   };
 
-  // +10s / -10s Skip
   const skipForward = () => sendYouTubeCommand("seekTo", [currentTime + 10, true]);
   const skipBackward = () => sendYouTubeCommand("seekTo", [Math.max(currentTime - 10, 0), true]);
 
-  // Speed Control (1x -> 1.5x -> 2x -> 0.5x -> 1x)
   const toggleSpeed = () => {
     const nextSpeed = playbackRate >= 2 ? 0.5 : playbackRate + 0.5;
     sendYouTubeCommand("setPlaybackRate", [nextSpeed]);
     setPlaybackRate(nextSpeed);
   };
 
-  // Seek Bar Drag Control
   const handleSeek = (e) => {
     const time = parseFloat(e.target.value);
     setCurrentTime(time);
     sendYouTubeCommand("seekTo", [time, true]);
   };
 
-  // Volume & Fullscreen
   const handleToggleMute = () => {
     if (isMuted) { sendYouTubeCommand("unMute"); setIsMuted(false); } 
     else { sendYouTubeCommand("mute"); setIsMuted(true); }
@@ -178,7 +172,6 @@ export default function VideoLessonsPage() {
     }
   };
 
-  // Time Formatter
   const formatTime = (timeInSeconds) => {
     if (!timeInSeconds || isNaN(timeInSeconds)) return "0:00";
     const m = Math.floor(timeInSeconds / 60);
@@ -200,7 +193,6 @@ export default function VideoLessonsPage() {
       
       <div className={`fixed inset-0 bg-black/60 z-40 md:hidden transition-opacity ${isSidebarOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'}`} onClick={() => setIsSidebarOpen(false)}></div>
 
-      {/* --- Sidebar (ඔබ ඉල්ලූ පරිදි කිසිදු වෙනසක් කර නොමැත) --- */}
       <aside className={`w-64 bg-purple-900 text-white flex flex-col fixed inset-y-0 left-0 z-50 transform ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'} md:translate-x-0 md:static transition-transform duration-300 shadow-2xl`}>
         <div onClick={() => router.push('/')} className="p-6 border-b border-purple-800 font-bold text-xl tracking-wider cursor-pointer hover:opacity-80 transition flex items-center gap-2">
           <div className="bg-white text-purple-700 font-bold rounded-lg p-1.5 text-xs">YS</div>
@@ -283,12 +275,11 @@ export default function VideoLessonsPage() {
             ) : currentVideo ? (
               <div className="animate-fade-in space-y-4">
                 
-                {/* --- 1. අතිශය ආරක්ෂිත Video Player කොටස --- */}
+                {/* --- ආරක්ෂිත Video Player කොටස --- */}
                 <div 
                   className={isFullscreen ? "fixed inset-0 z-[99999] bg-black w-screen h-[100dvh] flex flex-col justify-center select-none" : "aspect-video w-full bg-black relative rounded-2xl overflow-hidden shadow-lg select-none"}
                   onContextMenu={(e) => e.preventDefault()}
                 >
-                  {/* Full screen එකේදී පිටවීමේ බොත්තම */}
                   {isFullscreen && (
                     <button onClick={toggleFullScreen} className="absolute top-4 right-4 z-[1000] bg-white/20 p-2 rounded-full text-white hover:bg-white/40 border border-white/30 backdrop-blur-sm transition-all">
                       <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
@@ -296,9 +287,18 @@ export default function VideoLessonsPage() {
                   )}
 
                   <div className="relative w-full h-full flex-grow">
-                    {/* Share බොත්තම අවහිර කරන Shield එක */}
-                    <div className="absolute top-0 left-0 w-full h-[65px] md:h-[75px] z-[999] bg-transparent pointer-events-auto" title={currentVideo.title}></div>
                     
+                    {/* 🔴 උඩ කළු තීරුව (Top Shield) - YouTube Share & Title සඟවයි */}
+                    <div className="absolute top-0 left-0 w-full h-[65px] md:h-[75px] z-[99] bg-black pointer-events-auto flex items-center px-4 md:px-5">
+                      <span className="text-white/60 text-xs font-bold truncate max-w-xs md:max-w-md">{currentVideo.title}</span>
+                    </div>
+
+                    {/* 🔴 පහළ කළු තීරුව (Bottom Shield) - YouTube Logo සඟවයි */}
+                    <div className="absolute bottom-0 left-0 w-full h-[60px] md:h-[65px] z-[99] bg-black pointer-events-auto flex items-center justify-end px-4 md:px-5">
+                      <span className="text-[10px] md:text-xs font-bold text-slate-500/80 mt-2 mr-1">YCS Physics</span>
+                    </div>
+
+                    {/* IFrame Video */}
                     <iframe 
                       ref={playerRef}
                       onLoad={onIframeLoad}
@@ -311,10 +311,9 @@ export default function VideoLessonsPage() {
                   </div>
                 </div>
 
-                {/* --- 2. අපගේ අලුත් Custom Control Panel එක --- */}
+                {/* --- Custom Controls Panel --- */}
                 <div className={`p-4 md:p-5 rounded-2xl border shadow-sm flex flex-col gap-4 transition-all ${isDarkMode ? 'bg-slate-800/50 border-purple-900/30' : 'bg-purple-50/40 border-purple-100/50'}`}>
                   
-                  {/* Progress Bar (Seek Bar) */}
                   <div className="flex items-center gap-3 w-full">
                     <span className={`text-xs font-bold w-10 text-right ${textMuted}`}>{formatTime(currentTime)}</span>
                     <input 
@@ -323,20 +322,15 @@ export default function VideoLessonsPage() {
                       max={duration || 100} 
                       value={currentTime} 
                       onChange={handleSeek}
-                      style={{
-                        // රතු පාට ලස්සන Progress line එක
-                        background: `linear-gradient(to right, #dc2626 ${(currentTime / duration) * 100}%, ${isDarkMode ? '#334155' : '#e2e8f0'} ${(currentTime / duration) * 100}%)`
-                      }}
+                      style={{ background: `linear-gradient(to right, #dc2626 ${(currentTime / duration) * 100}%, ${isDarkMode ? '#334155' : '#e2e8f0'} ${(currentTime / duration) * 100}%)` }}
                       className="flex-1 h-2 rounded-lg appearance-none cursor-pointer accent-red-600 focus:outline-none"
                     />
                     <span className={`text-xs font-bold w-10 ${textMuted}`}>{formatTime(duration)}</span>
                   </div>
 
-                  {/* Buttons Row */}
                   <div className="flex flex-col xl:flex-row xl:items-center xl:justify-between gap-4">
                     
                     <div className="flex items-center gap-2 md:gap-3 flex-wrap">
-                      {/* Play/Pause සහ Skip බොත්තම් */}
                       <div className={`flex items-center rounded-xl border overflow-hidden shadow-sm flex-shrink-0 ${isDarkMode ? 'bg-slate-800 border-slate-600' : 'bg-white border-purple-200'}`}>
                         <button onClick={togglePlay} className={`px-4 py-2.5 md:py-3 transition-colors ${isDarkMode ? 'hover:bg-slate-700 text-purple-400' : 'hover:bg-purple-50 text-purple-700'}`} title={isPlaying ? "නවත්වන්න" : "ධාවනය කරන්න"}>
                           {isPlaying ? (
@@ -353,14 +347,12 @@ export default function VideoLessonsPage() {
                         </button>
                       </div>
 
-                      {/* Speed Control Button */}
                       <button onClick={toggleSpeed} className={`px-4 py-2.5 md:py-3 rounded-xl border font-bold text-sm transition-colors shadow-sm flex-shrink-0 ${isDarkMode ? 'bg-slate-800 border-slate-600 text-amber-400 hover:bg-slate-700' : 'bg-white border-purple-200 text-amber-600 hover:bg-purple-50'}`} title="ධාවන වේගය වෙනස් කරන්න">
                         {playbackRate}x Speed
                       </button>
                     </div>
 
                     <div className="flex items-center gap-2 md:gap-3 flex-wrap">
-                      {/* Volume Controls */}
                       <div className={`flex items-center rounded-xl border overflow-hidden shadow-sm flex-shrink-0 ${isDarkMode ? 'bg-slate-800 border-slate-600' : 'bg-white border-purple-200'}`}>
                         <button onClick={handleVolumeDown} className={`px-3 py-2.5 md:py-3 transition-colors ${isDarkMode ? 'hover:bg-slate-700 text-slate-300' : 'hover:bg-purple-50 text-slate-700'}`}>
                           <svg className="w-4 h-4 md:w-5 md:h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M18 12H6" /></svg>
@@ -377,13 +369,11 @@ export default function VideoLessonsPage() {
                         </button>
                       </div>
 
-                      {/* Full Screen Button */}
                       <button onClick={toggleFullScreen} className={`flex items-center justify-center gap-2 rounded-xl border px-3 py-2.5 md:px-5 md:py-3 text-xs md:text-sm font-bold transition-all shadow-sm flex-shrink-0 ${isDarkMode ? 'bg-slate-800 border-slate-600 text-white hover:bg-slate-700' : 'bg-white border-purple-200 text-slate-800 hover:bg-purple-50'}`}>
                         <svg className="w-4 h-4 md:w-5 md:h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4" /></svg>
                         Full Screen
                       </button>
 
-                      {/* Tute Button */}
                       {currentVideo.tuteUrl ? (
                         <a href={getDownloadUrl(currentVideo.tuteUrl)} target="_blank" rel="noopener noreferrer" className="flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-purple-600 to-fuchsia-600 hover:from-purple-700 hover:to-fuchsia-700 text-white px-4 py-2.5 md:px-5 md:py-3 text-xs md:text-sm font-bold transition-all shadow-sm flex-shrink-0">
                           <svg className="w-4 h-4 md:w-5 md:h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M12 16l-5-5h3V4h4v7h3l-5 5zm9-2v6H3v-6H1v8h22v-8h-2z"/></svg>
@@ -398,7 +388,7 @@ export default function VideoLessonsPage() {
                   </div>
                 </div>
 
-                {/* --- වීඩියෝවට අදාළ විස්තර (Title / Category) --- */}
+                {/* --- වීඩියෝවට අදාළ විස්තර --- */}
                 <div className={`p-5 rounded-2xl border ${bgCard}`}>
                   <div className="flex flex-wrap items-center gap-3 mb-3">
                     <span className="inline-block text-xs px-3 py-1 rounded-full font-bold bg-purple-600 text-white uppercase tracking-wider">
@@ -449,7 +439,7 @@ export default function VideoLessonsPage() {
                 </h3>
                 
                 <div className="flex-1 overflow-y-auto space-y-3 pr-1 custom-scrollbar">
-                  {filteredVideos.map(video => (
+                  {filteredVideos.map((video) => (
                     <div 
                       key={video._id} 
                       onClick={() => setCurrentVideo(video)}
