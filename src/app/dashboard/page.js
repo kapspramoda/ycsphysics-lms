@@ -172,9 +172,9 @@ export default function DashboardPage() {
           
           <div className="pt-4 border-t border-purple-800 mt-4 mb-2"></div>
 
-          <a href="#" onClick={(e) => { e.preventDefault(); router.push('/notifications'); }} className="flex items-center space-x-3 hover:bg-purple-800/80 text-purple-200 hover:text-white px-4 py-3 rounded-xl transition">
+          {/* <a href="#" onClick={(e) => { e.preventDefault(); router.push('/notifications'); }} className="flex items-center space-x-3 hover:bg-purple-800/80 text-purple-200 hover:text-white px-4 py-3 rounded-xl transition">
             <span className="text-xl">🔔</span><span className="font-medium">දැනුම්දීම්</span>
-          </a>
+          </a> */}
           <a href="#" onClick={(e) => { e.preventDefault(); router.push('/settings'); }} className="flex items-center space-x-3 hover:bg-purple-800/80 text-purple-200 hover:text-white px-4 py-3 rounded-xl transition">
             <span className="text-xl">⚙️</span><span className="font-medium">සැකසුම්</span>
           </a>
