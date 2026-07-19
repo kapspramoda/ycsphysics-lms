@@ -19,15 +19,18 @@ export default function AdminAttendancePage() {
   
   const [allStudents, setAllStudents] = useState([]); 
   const [attendanceRecords, setAttendanceRecords] = useState([]);
+  
+  // Table View States
   const [viewMonth, setViewMonth] = useState(currentMonth); 
   const [selectedYearView, setSelectedYearView] = useState('2026'); 
+  const [selectedCenterView, setSelectedCenterView] = useState(''); // මධ්‍යස්ථානය තේරීමට
 
   // Quick Mark States
   const [quickMarkDate, setQuickMarkDate] = useState(today);
   const [quickMarkNote, setQuickMarkNote] = useState('');
 
+  // 1. Load Data
   useEffect(() => {
-    // Check saved theme
     const savedTheme = localStorage.getItem('theme');
     if (savedTheme === 'dark') setIsDarkMode(true);
 
@@ -65,8 +68,28 @@ export default function AdminAttendancePage() {
     if (isAuthorized) fetchAttendance(); 
   }, [viewMonth, selectedYearView, isAuthorized]);
 
+  // --- Data Calculations ---
+  // පද්ධතියේ ඇති සියලුම මධ්‍යස්ථාන ලැයිස්තුව (Form එකේ Datalist එකට)
+  const allUniqueCenters = [...new Set(allStudents.map(s => s.center || 'Online'))];
+  
+  // තෝරාගත් වර්ෂයේ ඉන්න සිසුන් සහ මධ්‍යස්ථාන
+  const studentsInYear = allStudents.filter(s => s.alYear === selectedYearView);
+  const uniqueCentersInYear = [...new Set(studentsInYear.map(s => s.center || 'Online'))];
+
+  // අදාළ වර්ෂයේ දැනට තෝරාගෙන ඇති මධ්‍යස්ථානය නිවැරදි කිරීම
+  const activeCenter = uniqueCentersInYear.includes(selectedCenterView) ? selectedCenterView : (uniqueCentersInYear[0] || '');
+
+  // වර්ෂය හෝ මධ්‍යස්ථානය වෙනස් වූ විට Quick Mark Note එක Auto වෙනස් වීම
+  useEffect(() => {
+    setQuickMarkNote(activeCenter);
+  }, [activeCenter]);
+
+  // Table එක සඳහා තෝරාගත් වර්ෂයේ සහ මධ්‍යස්ථානයේ සිසුන් පමණක් පෙරීම
+  const centerStudents = studentsInYear.filter(s => (s.center || 'Online') === activeCenter);
+  
   const currentYearStudents = allStudents.filter(s => s.alYear === formData.alYear);
 
+  // --- Actions ---
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!formData.email) {
@@ -109,7 +132,7 @@ export default function AdminAttendancePage() {
           alYear: selectedYearView, 
           email: email, 
           status: status, 
-          note: quickMarkNote 
+          note: quickMarkNote // Auto-filled center name
         }),
       });
       fetchAttendance(); 
@@ -124,11 +147,6 @@ export default function AdminAttendancePage() {
   };
 
   const uniqueDates = [...new Set(attendanceRecords.map(r => r.date))].sort();
-  
-  // තෝරාගත් වර්ෂයේ සිටින සියලුම සිසුන් සහ මධ්‍යස්ථාන වෙන් කිරීම
-  const studentsInYear = allStudents.filter(s => s.alYear === selectedYearView);
-  const uniqueCentersInYear = [...new Set(studentsInYear.map(s => s.center || 'Online'))];
-
   const attendanceMap = {};
   const dateNotes = {}; 
 
@@ -205,7 +223,11 @@ export default function AdminAttendancePage() {
               
               <div>
                 <label className={`block text-sm font-bold mb-1 ${isDarkMode ? 'text-slate-300' : 'text-gray-700'}`}>ස්ථානය / පන්ති සටහන</label>
-                <input type="text" value={formData.note} onChange={(e) => setFormData({...formData, note: e.target.value})} className={`w-full px-4 py-3 rounded-xl border outline-none focus:ring-2 focus:ring-teal-500/50 text-sm ${inputBg}`} placeholder="උදා: මහරගම - Theory"/>
+                {/* 🔴 අලුත්: මධ්‍යස්ථානය තෝරන්න Datalist එක */}
+                <input type="text" list="centers" value={formData.note} onChange={(e) => setFormData({...formData, note: e.target.value})} className={`w-full px-4 py-3 rounded-xl border outline-none focus:ring-2 focus:ring-teal-500/50 text-sm ${inputBg}`} placeholder="මධ්‍යස්ථානය තෝරන්න හෝ ටයිප් කරන්න"/>
+                <datalist id="centers">
+                  {allUniqueCenters.map(center => <option key={center} value={center} />)}
+                </datalist>
               </div>
 
               <div>
@@ -245,20 +267,30 @@ export default function AdminAttendancePage() {
             </form>
           </div>
 
-          {/* දකුණු පැත්ත: Attendance Tables (Center අනුව වෙන් කර ඇත) */}
+          {/* දකුණු පැත්ත: Attendance Table */}
           <div className={`${bgCard} p-6 md:p-8 rounded-3xl lg:col-span-3 min-h-[500px]`}>
             
-            {/* Top Filters */}
+            {/* Top Filters (අවුරුද්ද සහ මධ්‍යස්ථානය තේරීම) */}
             <div className={`flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8 border-b pb-6 ${isDarkMode ? 'border-slate-800' : 'border-gray-200'}`}>
               <h2 className="text-xl md:text-2xl font-bold flex items-center">
                 <span className="mr-2">📅</span> මාසික පැමිණීමේ වාර්තා
               </h2>
-              <div className="flex gap-3 w-full sm:w-auto">
+              <div className="flex flex-wrap gap-3 w-full sm:w-auto">
                 <input type="month" value={viewMonth} onChange={(e) => setViewMonth(e.target.value)} className={`px-4 py-2 border rounded-xl text-sm font-bold outline-none focus:ring-2 focus:ring-teal-500/50 flex-1 ${inputBg}`}/>
+                
                 <select value={selectedYearView} onChange={(e) => setSelectedYearView(e.target.value)} className={`px-4 py-2 border rounded-xl text-sm font-bold outline-none focus:ring-2 focus:ring-teal-500/50 w-28 ${inputBg}`}>
                   <option value="2026">2026</option>
                   <option value="2027">2027</option>
                   <option value="2028">2028</option>
+                </select>
+
+                {/* 🔴 අලුත්: මධ්‍යස්ථානය අනුව Table එක තේරීමේ Dropdown එක */}
+                <select value={activeCenter} onChange={(e) => setSelectedCenterView(e.target.value)} className={`px-4 py-2 border rounded-xl text-sm font-bold outline-none focus:ring-2 focus:ring-teal-500/50 min-w-[150px] ${inputBg}`}>
+                  {uniqueCentersInYear.length === 0 ? (
+                    <option value="" disabled>මධ්‍යස්ථාන නැත</option>
+                  ) : (
+                    uniqueCentersInYear.map(c => <option key={c} value={c}>{c}</option>)
+                  )}
                 </select>
               </div>
             </div>
@@ -268,111 +300,98 @@ export default function AdminAttendancePage() {
               <span className={`font-bold text-sm ${isDarkMode ? 'text-teal-400' : 'text-teal-800'}`}>⚡ අලුත් දිනයක් සකසන්න:</span>
               <input type="date" value={quickMarkDate} onChange={e => setQuickMarkDate(e.target.value)} className={`px-3 py-2 rounded-lg border outline-none text-sm font-bold focus:ring-2 focus:ring-teal-500/50 ${inputBg}`} />
               <input type="text" value={quickMarkNote} onChange={e => setQuickMarkNote(e.target.value)} placeholder="පන්ති සටහන (Optional)" className={`px-3 py-2 rounded-lg border outline-none text-sm focus:ring-2 focus:ring-teal-500/50 flex-1 min-w-[150px] ${inputBg}`} />
-              <p className={`text-xs w-full mt-1 ${isDarkMode ? 'text-slate-400' : 'text-slate-500'}`}>දිනය සකසා පහත ඕනෑම වගුවක අලුත් තීරුවෙන් සිසුන්ගේ පැමිණීම (✔/✖) ක්ලික් කරන්න.</p>
+              <p className={`text-xs w-full mt-1 ${isDarkMode ? 'text-slate-400' : 'text-slate-500'}`}>දිනය සකසා පහත වගුවේ අලුත් තීරුවෙන් සිසුන්ගේ පැමිණීම (✔/✖) ක්ලික් කරන්න.</p>
             </div>
 
-            {/* Render Multiple Tables based on Center */}
-            {uniqueCentersInYear.length === 0 ? (
+            {/* Render Selected Table */}
+            {centerStudents.length === 0 ? (
               <div className="text-center py-20 flex flex-col items-center">
                 <span className="text-5xl mb-4 opacity-30">📭</span>
-                <p className={`font-bold ${textMuted}`}>මෙම වර්ෂයට අදාළව සිසුන් ලියාපදිංචි වී නොමැත.</p>
+                <p className={`font-bold ${textMuted}`}>මෙම වර්ෂයට සහ මධ්‍යස්ථානයට අදාළව සිසුන් ලියාපදිංචි වී නොමැත.</p>
               </div>
             ) : (
-              <div className="space-y-12">
-                {uniqueCentersInYear.map(centerName => {
-                  const centerStudents = studentsInYear.filter(s => (s.center || 'Online') === centerName);
-                  if (centerStudents.length === 0) return null;
+              <div className="flex flex-col">
+                <h3 className={`text-lg md:text-xl font-extrabold mb-4 flex items-center gap-2 ${isDarkMode ? 'text-teal-400' : 'text-teal-700'}`}>
+                  <span className="bg-teal-500 w-2 h-6 rounded-full inline-block"></span>
+                  {selectedYearView} - {activeCenter} සිසුන් 
+                  <span className={`text-xs px-2 py-0.5 rounded-md font-bold ml-2 ${isDarkMode ? 'bg-slate-800 text-slate-400' : 'bg-gray-100 text-gray-500'}`}>{centerStudents.length} Students</span>
+                </h3>
+                
+                <div className={`overflow-x-auto custom-scrollbar border rounded-xl ${isDarkMode ? 'border-slate-800' : 'border-gray-200'}`}>
+                  <table className="w-full text-left border-collapse whitespace-nowrap">
+                    <thead>
+                      <tr className={`${tableHeadBg} text-xs uppercase tracking-wider`}>
+                        <th className={`p-4 font-black border-r sticky left-0 z-20 min-w-[200px] shadow-[2px_0_5px_-2px_rgba(0,0,0,0.1)] ${tableHeadBg}`}>සිසුවාගේ නම</th>
+                        
+                        {/* Quick Mark Column */}
+                        <th className={`p-3 text-center border-r min-w-[120px] shadow-inner ${isDarkMode ? 'bg-teal-900/30 border-teal-800/50' : 'bg-teal-50 border-teal-100'}`}>
+                          <div className={`text-lg font-black ${isDarkMode ? 'text-teal-400' : 'text-teal-800'}`}>{quickMarkDate.split('-')[2]} <span className="text-xs font-normal">({quickMarkDate.split('-')[1]})</span></div>
+                          <div className={`text-[10px] font-bold mt-1 px-1 rounded truncate max-w-[100px] mx-auto border ${isDarkMode ? 'bg-slate-900 text-teal-400 border-teal-900/50' : 'bg-white text-teal-600 border-teal-100'}`} title={quickMarkNote || 'අලුත් දිනය'}>
+                            {quickMarkNote || 'New Day'}
+                          </div>
+                        </th>
 
-                  return (
-                    <div key={centerName} className="flex flex-col">
-                      <h3 className={`text-lg font-extrabold mb-4 flex items-center gap-2 ${isDarkMode ? 'text-teal-400' : 'text-teal-700'}`}>
-                        <span className="bg-teal-500 w-2 h-6 rounded-full inline-block"></span>
-                        {selectedYearView} - {centerName} මධ්‍යස්ථානය 
-                        <span className={`text-xs px-2 py-0.5 rounded-md font-bold ml-2 ${isDarkMode ? 'bg-slate-800 text-slate-400' : 'bg-gray-100 text-gray-500'}`}>{centerStudents.length} Students</span>
-                      </h3>
-                      
-                      <div className={`overflow-x-auto custom-scrollbar border rounded-xl ${isDarkMode ? 'border-slate-800' : 'border-gray-200'}`}>
-                        <table className="w-full text-left border-collapse whitespace-nowrap">
-                          <thead>
-                            <tr className={`${tableHeadBg} text-xs uppercase tracking-wider`}>
-                              {/* Name Column (Sticky) */}
-                              <th className={`p-4 font-black border-r sticky left-0 z-20 min-w-[200px] shadow-[2px_0_5px_-2px_rgba(0,0,0,0.1)] ${tableHeadBg}`}>සිසුවාගේ නම</th>
-                              
-                              {/* Quick Mark Column */}
-                              <th className={`p-3 text-center border-r min-w-[120px] shadow-inner ${isDarkMode ? 'bg-teal-900/30 border-teal-800/50' : 'bg-teal-50 border-teal-100'}`}>
-                                <div className={`text-lg font-black ${isDarkMode ? 'text-teal-400' : 'text-teal-800'}`}>{quickMarkDate.split('-')[2]} <span className="text-xs font-normal">({quickMarkDate.split('-')[1]})</span></div>
-                                <div className={`text-[10px] font-bold mt-1 px-1 rounded truncate max-w-[100px] mx-auto border ${isDarkMode ? 'bg-slate-900 text-teal-400 border-teal-900/50' : 'bg-white text-teal-600 border-teal-100'}`} title={quickMarkNote || 'අලුත් දිනය'}>
-                                  {quickMarkNote || 'New Day'}
+                        {/* Dates Columns */}
+                        {uniqueDates.map((date) => {
+                          const day = date.split('-')[2];
+                          const note = dateNotes[date]; 
+                          return (
+                            <th key={date} className={`p-3 text-center border-r min-w-[90px] ${isDarkMode ? 'border-slate-700' : 'border-slate-200'}`}>
+                              <div className="text-lg font-black">{day}</div>
+                              {note ? (
+                                <div className={`text-[10px] font-bold mt-1 px-1 rounded truncate max-w-[80px] mx-auto border ${isDarkMode ? 'bg-purple-900/30 text-purple-400 border-purple-800' : 'bg-purple-50 text-purple-600 border-purple-100'}`} title={note}>
+                                  {note}
                                 </div>
-                              </th>
+                              ) : (
+                                <div className="text-[10px] opacity-30 mt-1">-</div>
+                              )}
+                            </th>
+                          );
+                        })}
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {centerStudents.map((student) => (
+                        <tr key={student.email} className={`border-b transition-colors ${tableRowHover} ${isDarkMode ? 'border-slate-800' : 'border-gray-100'}`}>
+                          
+                          <td className={`p-4 font-bold border-r sticky left-0 z-10 shadow-[2px_0_5px_-2px_rgba(0,0,0,0.1)] ${stickyColBg}`}>
+                              <div className="flex flex-col">
+                                <span className={isDarkMode ? 'text-slate-200' : 'text-slate-800'}>{student.name}</span>
+                                <span className={`text-[10px] font-normal ${isDarkMode ? 'text-slate-500' : 'text-slate-400'}`}>{student.email.split('@')[0]}</span>
+                              </div>
+                          </td>
 
-                              {/* Dates Columns */}
-                              {uniqueDates.map((date) => {
-                                const day = date.split('-')[2];
-                                const note = dateNotes[date]; 
-                                return (
-                                  <th key={date} className={`p-3 text-center border-r min-w-[90px] ${isDarkMode ? 'border-slate-700' : 'border-slate-200'}`}>
-                                    <div className="text-lg font-black">{day}</div>
-                                    {note ? (
-                                      <div className={`text-[10px] font-bold mt-1 px-1 rounded truncate max-w-[80px] mx-auto border ${isDarkMode ? 'bg-purple-900/30 text-purple-400 border-purple-800' : 'bg-purple-50 text-purple-600 border-purple-100'}`} title={note}>
-                                        {note}
-                                      </div>
-                                    ) : (
-                                      <div className="text-[10px] opacity-30 mt-1">-</div>
-                                    )}
-                                  </th>
-                                );
-                              })}
-                            </tr>
-                          </thead>
-                          <tbody>
-                            {centerStudents.map((student) => (
-                              <tr key={student.email} className={`border-b transition-colors ${tableRowHover} ${isDarkMode ? 'border-slate-800' : 'border-gray-100'}`}>
-                                
-                                {/* Name Cell (Sticky) */}
-                                <td className={`p-4 font-bold border-r sticky left-0 z-10 shadow-[2px_0_5px_-2px_rgba(0,0,0,0.1)] ${stickyColBg}`}>
-                                   <div className="flex flex-col">
-                                     <span className={isDarkMode ? 'text-slate-200' : 'text-slate-800'}>{student.name}</span>
-                                     <span className={`text-[10px] font-normal ${isDarkMode ? 'text-slate-500' : 'text-slate-400'}`}>{student.email.split('@')[0]}</span>
-                                   </div>
-                                </td>
+                          <td className={`p-2 text-center border-r group ${isDarkMode ? 'bg-teal-900/10 border-teal-800/30' : 'bg-teal-50/30 border-teal-100'}`}>
+                              <div className="flex justify-center gap-2 opacity-30 group-hover:opacity-100 transition-opacity">
+                                <button onClick={() => handleQuickMark(student.email, 'Present')} className={`w-8 h-8 rounded-full border font-bold transition shadow-sm ${isDarkMode ? 'bg-slate-800 border-green-900/50 text-green-500 hover:bg-green-600 hover:text-white' : 'bg-white border-green-200 text-green-600 hover:bg-green-500 hover:text-white'}`} title="Present">✔</button>
+                                <button onClick={() => handleQuickMark(student.email, 'Absent')} className={`w-8 h-8 rounded-full border font-bold transition shadow-sm ${isDarkMode ? 'bg-slate-800 border-red-900/50 text-red-500 hover:bg-red-600 hover:text-white' : 'bg-white border-red-200 text-red-600 hover:bg-red-500 hover:text-white'}`} title="Absent">✖</button>
+                              </div>
+                          </td>
 
-                                {/* Quick Mark Cell */}
-                                <td className={`p-2 text-center border-r group ${isDarkMode ? 'bg-teal-900/10 border-teal-800/30' : 'bg-teal-50/30 border-teal-100'}`}>
-                                   <div className="flex justify-center gap-2 opacity-30 group-hover:opacity-100 transition-opacity">
-                                     <button onClick={() => handleQuickMark(student.email, 'Present')} className={`w-8 h-8 rounded-full border font-bold transition shadow-sm ${isDarkMode ? 'bg-slate-800 border-green-900/50 text-green-500 hover:bg-green-600 hover:text-white' : 'bg-white border-green-200 text-green-600 hover:bg-green-500 hover:text-white'}`} title="Present">✔</button>
-                                     <button onClick={() => handleQuickMark(student.email, 'Absent')} className={`w-8 h-8 rounded-full border font-bold transition shadow-sm ${isDarkMode ? 'bg-slate-800 border-red-900/50 text-red-500 hover:bg-red-600 hover:text-white' : 'bg-white border-red-200 text-red-600 hover:bg-red-500 hover:text-white'}`} title="Absent">✖</button>
-                                   </div>
-                                </td>
-
-                                {/* Existing Dates Cells */}
-                                {uniqueDates.map((date) => {
-                                  const cell = attendanceMap[student.email] && attendanceMap[student.email][date];
-                                  return (
-                                    <td key={date} className={`p-2 text-center border-r group relative ${isDarkMode ? 'border-slate-800' : 'border-slate-100'}`}>
-                                      {cell ? (
-                                        <div className="flex flex-col items-center justify-center h-full">
-                                          <span className={`w-8 h-8 flex items-center justify-center rounded-full font-bold shadow-sm ${cell.status === 'Present' ? (isDarkMode ? 'bg-green-500/20 text-green-400' : 'bg-green-100 text-green-700') : (isDarkMode ? 'bg-red-500/20 text-red-400' : 'bg-red-100 text-red-700')}`}>
-                                            {cell.status === 'Present' ? '✔' : '✖'}
-                                          </span>
-                                          <button onClick={() => handleDelete(cell.id)} className={`opacity-0 group-hover:opacity-100 absolute top-0 right-0 p-1 text-red-500 hover:text-red-400 transition rounded-full shadow-md transform translate-x-1 -translate-y-1 ${isDarkMode ? 'bg-slate-700' : 'bg-white'}`} title="මකන්න">
-                                            🗑️
-                                          </button>
-                                        </div>
-                                      ) : (
-                                        <span className={`opacity-20 ${isDarkMode ? 'text-slate-600' : 'text-gray-300'}`}>-</span>
-                                      )}
-                                    </td>
-                                  );
-                                })}
-                              </tr>
-                            ))}
-                          </tbody>
-                        </table>
-                      </div>
-                    </div>
-                  );
-                })}
+                          {uniqueDates.map((date) => {
+                            const cell = attendanceMap[student.email] && attendanceMap[student.email][date];
+                            return (
+                              <td key={date} className={`p-2 text-center border-r group relative ${isDarkMode ? 'border-slate-800' : 'border-slate-100'}`}>
+                                {cell ? (
+                                  <div className="flex flex-col items-center justify-center h-full">
+                                    <span className={`w-8 h-8 flex items-center justify-center rounded-full font-bold shadow-sm ${cell.status === 'Present' ? (isDarkMode ? 'bg-green-500/20 text-green-400' : 'bg-green-100 text-green-700') : (isDarkMode ? 'bg-red-500/20 text-red-400' : 'bg-red-100 text-red-700')}`}>
+                                      {cell.status === 'Present' ? '✔' : '✖'}
+                                    </span>
+                                    <button onClick={() => handleDelete(cell.id)} className={`opacity-0 group-hover:opacity-100 absolute top-0 right-0 p-1 text-red-500 hover:text-red-400 transition rounded-full shadow-md transform translate-x-1 -translate-y-1 ${isDarkMode ? 'bg-slate-700' : 'bg-white'}`} title="මකන්න">
+                                      🗑️
+                                    </button>
+                                  </div>
+                                ) : (
+                                  <span className={`opacity-20 ${isDarkMode ? 'text-slate-600' : 'text-gray-300'}`}>-</span>
+                                )}
+                              </td>
+                            );
+                          })}
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
               </div>
             )}
           </div>
