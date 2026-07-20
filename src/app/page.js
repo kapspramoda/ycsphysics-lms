@@ -1,14 +1,12 @@
 "use client";
 import React, { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
-import Link from "next/link";
 
 export default function HomePage() {
   const router = useRouter();
   const [isDarkMode, setIsDarkMode] = useState(false);
   const [heroView, setHeroView] = useState("carousel");
 
-  const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
@@ -27,9 +25,9 @@ export default function HomePage() {
 
   const resultsData = [1, 2, 3, 4, 5];
   const slides = [
-    { id: 1, title: "භෞතික විද්‍යාව නිවැරදිව ග්‍රහණය කරගන්න", subtitle: "2026 සහ 2027 A/L සිසුන් සඳහා Theory, Revision සහ Paper Classes.", btnText: "දැන්ම එක්වන්න", image: "https://images.unsplash.com/photo-1635070041078-e363dbe005cb?q=80&w=1920&auto=format&fit=crop" },
-    { id: 2, title: "දිවයිනේ ඉහළම ප්‍රතිඵල", subtitle: "පසුගිය වසර වලදී විශිෂ්ටතම A සාමාර්ථ ලබාගත් අපගේ දරුවන්.", btnText: "ප්‍රතිඵල බලන්න", image: "https://images.unsplash.com/photo-1523240795612-9a054b0db644?q=80&w=1920&auto=format&fit=crop" },
-    { id: 3, title: "දරුවන් වෙනුවෙන් කැපවීම", subtitle: "Digital Worksheets සමගින් පහසුවෙන් ඉගෙනගන්න.", btnText: "ලියාපදිංචි වන්න", image: "https://images.unsplash.com/photo-1516321497487-e288fb19713f?q=80&w=1920&auto=format&fit=crop" }
+    { id: 1, title: "භෞතික විද්‍යාව නිවැරදිව ග්‍රහණය කරගන්න", subtitle: "2026 සහ 2027 A/L සිසුන් සඳහා Theory, Revision සහ Paper Classes.", btnText: "වැඩි විස්තර සඳහා", action: () => window.location.href="tel:0714620408", image: "https://images.unsplash.com/photo-1635070041078-e363dbe005cb?q=80&w=1920&auto=format&fit=crop" },
+    { id: 2, title: "දිවයිනේ ඉහළම ප්‍රතිඵල", subtitle: "පසුගිය වසර වලදී විශිෂ්ටතම A සාමාර්ථ ලබාගත් අපගේ දරුවන්.", btnText: "ප්‍රතිඵල බලන්න", action: () => window.location.href="#results", image: "https://images.unsplash.com/photo-1523240795612-9a054b0db644?q=80&w=1920&auto=format&fit=crop" },
+    { id: 3, title: "දරුවන් වෙනුවෙන් කැපවීම", subtitle: "Digital Worksheets සමගින් පහසුවෙන් ඉගෙනගන්න.", btnText: "ගිණුමට පිවිසෙන්න", action: () => changeViewAndScrollTop("login"), image: "https://images.unsplash.com/photo-1516321497487-e288fb19713f?q=80&w=1920&auto=format&fit=crop" }
   ];
 
   const [currentSlide, setCurrentSlide] = useState(0);
@@ -52,12 +50,6 @@ export default function HomePage() {
     const { scrollLeft, scrollWidth } = ref.current;
     const itemWidth = scrollWidth / totalItems;
     setIndex(Math.round(scrollLeft / itemWidth));
-  };
-
-  const scrollToIndex = (ref, index, totalItems) => {
-    if (!ref.current) return;
-    const itemWidth = ref.current.scrollWidth / totalItems;
-    ref.current.scrollTo({ left: index * itemWidth, behavior: 'smooth' });
   };
 
   const changeViewAndScrollTop = (view) => {
@@ -91,28 +83,7 @@ export default function HomePage() {
       } catch (err) { setError("තාක්ෂණික දෝෂයකි. කරුණාකර නැවත උත්සාහ කරන්න."); }
       finally { setLoading(false); }
     } 
-    
-    else if (heroView === "register") {
-      if (password !== confirmPassword) {
-        setError("මුරපදයන් එකිනෙකට නොගැලපේ.");
-        setLoading(false); return;
-      }
-      try {
-        const res = await fetch("/api/register", {
-          method: "POST", headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ name, username: phone, password }), 
-        });
-        const data = await res.json();
-        if (res.ok) {
-          setPassword(""); setConfirmPassword("");
-          changeViewAndScrollTop("login");
-          alert("ලියාපදිංචි වීම සාර්ථකයි! කරුණාකර දැන් ලොග් වන්න.");
-        } else { setError(data.message || "මෙම අංකයෙන් දැනටමත් ගිණුමක් ඇත."); }
-      } catch (err) { setError("තාක්ෂණික දෝෂයකි. කරුණාකර නැවත උත්සාහ කරන්න."); }
-      finally { setLoading(false); }
-    }
 
-    // Forgot Password Submit
     else if (heroView === "forgotPassword") {
       if (password !== confirmPassword) {
         setError("මුරපදයන් එකිනෙකට නොගැලපේ.");
@@ -157,14 +128,13 @@ export default function HomePage() {
           <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-3 md:px-6 md:py-4">
             <button onClick={() => changeViewAndScrollTop("carousel")} className="flex items-center gap-2 md:gap-3 focus:outline-none">
               <div className="bg-purple-600 text-white font-bold rounded-lg p-2 text-xs md:text-sm">YS</div>
-              <span className={`logo-font text-lg md:text-2xl font-bold truncate ${logoTextColor}`}>Yashen Physics</span>
+              <span className={`logo-font text-lg md:text-2xl font-bold truncate ${logoTextColor}`}>YCS Physics</span>
             </button>
             <div className="flex items-center space-x-3 md:space-x-5 flex-shrink-0">
               <button onClick={() => setIsDarkMode(!isDarkMode)} className={`rounded-full p-2 transition-colors focus:outline-none ${isDarkMode ? 'bg-slate-800 text-yellow-400' : 'bg-purple-100 text-purple-600'}`}>
                 {isDarkMode ? "☀️" : "🌙"}
               </button>
-              <button onClick={() => changeViewAndScrollTop("login")} className={`rounded-full border-2 px-3 py-1.5 text-xs font-bold transition-all md:px-5 md:py-2 md:text-sm hidden sm:block ${btnOutline}`}>ලොග් වන්න</button>
-              <button onClick={() => changeViewAndScrollTop("register")} className="rounded-full bg-gradient-to-r from-purple-600 to-fuchsia-600 px-4 py-1.5 text-xs font-bold text-white shadow-md hover:from-purple-700 hover:to-fuchsia-700 md:px-5 md:py-2 md:text-sm">ලියාපදිංචි වන්න</button>
+              <button onClick={() => changeViewAndScrollTop("login")} className="rounded-full bg-gradient-to-r from-purple-600 to-fuchsia-600 px-5 py-2 text-xs font-bold text-white shadow-md hover:from-purple-700 hover:to-fuchsia-700 md:px-6 md:py-2.5 md:text-sm">පද්ධතියට පිවිසෙන්න</button>
             </div>
           </div>
         </header>
@@ -180,7 +150,7 @@ export default function HomePage() {
                     <div className="relative z-10 max-w-3xl">
                       <h1 className="mb-4 text-3xl font-extrabold leading-tight tracking-tight md:text-5xl lg:text-6xl drop-shadow-lg">{slide.title}</h1>
                       <p className="mb-8 text-sm text-slate-200 md:text-xl drop-shadow-md">{slide.subtitle}</p>
-                      <button onClick={() => slide.id === 2 ? window.location.href="#results" : changeViewAndScrollTop("register")} className="inline-block rounded-full bg-fuchsia-500 px-8 py-3 text-sm font-bold text-white shadow-lg transition-all hover:bg-fuchsia-600 hover:-translate-y-1 md:px-10 md:py-4 md:text-lg">{slide.btnText}</button>
+                      <button onClick={slide.action} className="inline-block rounded-full bg-fuchsia-500 px-8 py-3 text-sm font-bold text-white shadow-lg transition-all hover:bg-fuchsia-600 hover:-translate-y-1 md:px-10 md:py-4 md:text-lg">{slide.btnText}</button>
                     </div>
                   </div>
                 ))}
@@ -193,13 +163,13 @@ export default function HomePage() {
             </section>
           )}
 
-          {(heroView === "login" || heroView === "register" || heroView === "forgotPassword") && (
+          {(heroView === "login" || heroView === "forgotPassword") && (
             <section className={`flex min-h-[450px] items-center justify-center py-12 px-4 transition-colors duration-300 md:min-h-[550px] ${authBg}`}>
               <div className={`w-full max-w-md rounded-3xl border p-6 backdrop-blur-lg transition-colors duration-300 md:p-10 ${authCardBg}`}>
                 
                 <div className="mb-6 flex items-center justify-between">
                   <h2 className={`text-2xl font-extrabold ${cardTitle}`}>
-                    {heroView === "login" ? "පද්ධතියට ඇතුළු වන්න" : heroView === "register" ? "නව ගිණුමක් සාදන්න" : "මුරපදය අමතකද?"}
+                    {heroView === "login" ? "පද්ධතියට ඇතුළු වන්න" : "මුරපදය අමතකද?"}
                   </h2>
                   <button onClick={() => changeViewAndScrollTop("carousel")} className={`rounded-full p-2 transition-colors focus:outline-none ${isDarkMode ? 'bg-slate-700 text-slate-300' : 'bg-slate-100 text-slate-400 hover:text-red-500'}`}>✖</button>
                 </div>
@@ -208,12 +178,6 @@ export default function HomePage() {
                 {successMsg && <div className="mb-4 rounded-xl bg-green-50 p-4 text-sm font-medium text-green-700 border border-green-200">{successMsg}</div>}
                 
                 <form onSubmit={handleAuthSubmit} className="space-y-4">
-                  {heroView === "register" && (
-                    <div>
-                      <label className={`mb-1 block text-sm font-bold ${isDarkMode ? 'text-slate-300' : 'text-slate-600'}`}>නම</label>
-                      <input type="text" value={name} onChange={(e) => setName(e.target.value)} placeholder="උදා: Y. S. Perera" className={`w-full rounded-xl border px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500/50 transition-all ${inputBg}`} required />
-                    </div>
-                  )}
                   <div>
                     <label className={`mb-1 block text-sm font-bold ${isDarkMode ? 'text-slate-300' : 'text-slate-600'}`}>WhatsApp අංකය</label>
                     <input type="text" value={phone} onChange={(e) => setPhone(e.target.value)} placeholder="උදා: 0712345678" className={`w-full rounded-xl border px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500/50 transition-all ${inputBg}`} required />
@@ -227,7 +191,7 @@ export default function HomePage() {
                       </button>
                     </div>
                   </div>
-                  {(heroView === "register" || heroView === "forgotPassword") && (
+                  {heroView === "forgotPassword" && (
                     <div>
                       <label className={`mb-1 block text-sm font-bold ${isDarkMode ? 'text-slate-300' : 'text-slate-600'}`}>මුරපදය තහවුරු කරන්න</label>
                       <div className="relative">
@@ -246,24 +210,22 @@ export default function HomePage() {
                   )}
 
                   <button type="submit" disabled={loading} className="mt-2 w-full rounded-full bg-gradient-to-r from-purple-600 to-fuchsia-600 px-4 py-3.5 text-sm font-bold text-white shadow-md hover:from-purple-700 hover:to-fuchsia-700 transition-all disabled:opacity-70">
-                    {loading ? "රැඳී සිටින්න..." : (heroView === "login" ? "ඇතුළු වන්න" : heroView === "register" ? "ලියාපදිංචි වන්න" : "Admin වෙත යවන්න")}
+                    {loading ? "රැඳී සිටින්න..." : (heroView === "login" ? "ඇතුළු වන්න" : "Admin වෙත යවන්න")}
                   </button>
                 </form>
                 
                 <div className={`mt-6 text-center text-sm font-medium ${isDarkMode ? 'text-slate-400' : 'text-slate-500'}`}>
                   {heroView === "login" ? (
-                    <p>ගිණුමක් නැද්ද? <button onClick={() => changeViewAndScrollTop("register")} className={`font-bold ${isDarkMode ? 'text-purple-400' : 'text-purple-600'}`}>ලියාපදිංචි වන්න</button></p>
+                    <p>නව ලියාපදිංචිය සඳහා අමතන්න: <a href="tel:0714620408" className={`font-bold hover:underline ${isDarkMode ? 'text-purple-400' : 'text-purple-600'}`}>071 462 0408</a></p>
                   ) : (
-                    <p>දැනටමත් ගිණුමක් තිබේද? <button onClick={() => changeViewAndScrollTop("login")} className={`font-bold ${isDarkMode ? 'text-purple-400' : 'text-purple-600'}`}>ලොග් වන්න</button></p>
+                    <p>දැනටමත් ගිණුමක් තිබේද? <button onClick={() => changeViewAndScrollTop("login")} className={`font-bold hover:underline ${isDarkMode ? 'text-purple-400' : 'text-purple-600'}`}>ලොග් වන්න</button></p>
                   )}
                 </div>
               </div>
             </section>
           )}
 
-          {/* ... (ඔබගේ පන්ති කාලසටහන සහ ප්‍රතිඵල Section එක නොවෙනස්ව තබා ඇත) */}
           <section id="courses" className="py-16 px-4 md:py-24 md:px-6">
-            {/* අන්තර්ගතය ඉහත පරිදිම වේ... */}
             <div className="mx-auto max-w-7xl">
               <div className="mb-10 text-center md:mb-16">
                 <h2 className={`text-2xl font-extrabold md:text-4xl ${sectionTitleColor}`}>පන්ති කාලසටහන</h2>
@@ -286,8 +248,8 @@ export default function HomePage() {
                       <p className={`text-sm mb-6 ${sectionTitleColor}`}>{course.desc}</p>
                       
                       <div className="mt-auto pt-4 border-t border-purple-100/20">
-                        <button onClick={() => changeViewAndScrollTop("register")} className={`w-full text-center rounded-full px-4 py-2.5 text-xs font-bold transition-all hover:shadow-md md:text-sm ${isDarkMode ? 'bg-purple-600 text-white hover:bg-purple-500' : 'bg-purple-100 text-purple-800 hover:bg-purple-600 hover:text-white'}`}>
-                          ඇතුළත් වන්න
+                        <button onClick={() => window.location.href="tel:0714620408"} className={`w-full text-center rounded-full px-4 py-2.5 text-xs font-bold transition-all hover:shadow-md md:text-sm ${isDarkMode ? 'bg-purple-600 text-white hover:bg-purple-500' : 'bg-purple-100 text-purple-800 hover:bg-purple-600 hover:text-white'}`}>
+                          ලියාපදිංචි වීමට අමතන්න
                         </button>
                       </div>
                     </div>
@@ -329,23 +291,27 @@ export default function HomePage() {
         <footer className={`px-4 py-10 transition-colors duration-300 md:px-6 md:py-16 ${isDarkMode ? 'bg-black text-slate-400 border-t border-slate-900' : 'bg-slate-900 text-slate-300'}`}>
           <div className="mx-auto grid max-w-7xl gap-10 md:grid-cols-3 md:gap-12">
             <div>
-              <div className="flex items-center gap-3 mb-4 md:mb-6">
+              <div className="flex items-center gap-3 mb-3 md:mb-4">
                 <div className="bg-purple-600 text-white font-bold rounded-lg p-2 text-sm">YS</div>
-                <h3 className="logo-font text-xl font-extrabold text-white md:text-2xl">Yashen Physics</h3>
+                <h3 className="logo-font text-xl font-extrabold text-white md:text-2xl">YCS Physics</h3>
               </div>
-              <p className="text-sm leading-relaxed text-slate-400">
+              <div className="mb-4">
+                <p className="text-base font-bold text-purple-300">යශේන් සේනානායක</p>
+                <p className="text-[11px] md:text-xs font-medium text-slate-400">BSc (Hons) Engineering (University of Moratuwa)</p>
+              </div>
+              <p className="text-sm leading-relaxed text-slate-400 border-t border-slate-700/50 pt-4">
                 භෞතික විද්‍යාව සරලව සහ තර්කානුකූලව ඉගෙනගන්න. A/L සිසුන් සඳහාම වෙන්වූ ශ්‍රී ලංකාවේ ප්‍රමුඛතම මාර්ගගත වේදිකාව.
               </p>
             </div>
             <div>
               <h4 className="mb-4 text-base font-bold text-white md:mb-6 md:text-lg">අපව සම්බන්ධ කරගන්න</h4>
               <ul className="space-y-4 text-sm text-slate-400">
-                <li className="flex items-center"><span className="mr-3 text-lg">📞</span> <a href="tel:0714620408" className="hover:text-purple-400">071 462 0408 (Call / WhatsApp)</a></li>
+                <li className="flex items-center"><span className="mr-3 text-lg">📞</span> <a href="tel:0714620408" className="hover:text-purple-400 transition">071 462 0408 (Call / WhatsApp)</a></li>
               </ul>
             </div>
           </div>
           <div className={`mx-auto mt-10 max-w-7xl border-t pt-6 text-center text-xs md:mt-16 md:pt-8 md:text-sm ${isDarkMode ? 'border-slate-800 text-slate-600' : 'border-slate-800 text-slate-500'}`}>
-            &copy; {new Date().getFullYear()} Yashen Physics. All rights reserved.
+            &copy; {new Date().getFullYear()} YCS Physics. All rights reserved.
           </div>
         </footer>
       </div>
