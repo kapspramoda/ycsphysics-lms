@@ -14,6 +14,9 @@ export default function AdminDashboard() {
   const [notiLoading, setNotiLoading] = useState(false);
   const [notiFeedback, setNotiFeedback] = useState({ type: '', text: '' });
 
+  // Password Requests State
+  const [pwRequests, setPwRequests] = useState([]);
+
   useEffect(() => {
     const savedTheme = localStorage.getItem('theme');
     if (savedTheme === 'dark') setIsDarkMode(true);
@@ -23,6 +26,7 @@ export default function AdminDashboard() {
       router.push('/admin/login');
     } else {
       setIsAuthorized(true);
+      fetchPwRequests();
     }
   }, [router]);
 
@@ -32,6 +36,37 @@ export default function AdminDashboard() {
     localStorage.setItem('theme', newTheme ? 'dark' : 'light');
   };
 
+  // Fetch Password Requests
+  const fetchPwRequests = async () => {
+    try {
+      const res = await fetch('/api/forgot-password');
+      const data = await res.json();
+      if (data.requests) setPwRequests(data.requests);
+    } catch (e) { console.error(e); }
+  };
+
+  // Handle Password Approvals
+  const handlePwAction = async (id, action) => {
+    try {
+      const res = await fetch('/api/forgot-password', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id, action })
+      });
+      const data = await res.json();
+      if (res.ok && action === 'Approve') {
+        alert("මුරපදය යාවත්කාලීන කරන ලදී. සිසුවාට WhatsApp පණිවිඩය යැවීමට OK කරන්න.");
+        let phone = data.phone;
+        if (phone.startsWith('0')) phone = '94' + phone.substring(1);
+        
+        const text = encodeURIComponent(`ආයුබෝවන්, YCS Physics පද්ධතිය සඳහා ඔබගේ නව මුරපදය අනුමත කර ඇත. \n\nඔබගේ නව මුරපදය: ${data.password} \n\nකරුණාකර දැන් පද්ධතියට පිවිසෙන්න.`);
+        window.open(`https://wa.me/${phone}?text=${text}`, '_blank');
+      }
+      fetchPwRequests();
+    } catch (e) { console.error(e); }
+  };
+
+  // Handle Notifications
   const handleNotificationSubmit = async (e) => {
     e.preventDefault();
     if (!notiMessage.trim()) return;
@@ -63,7 +98,7 @@ export default function AdminDashboard() {
   const bgCard = isDarkMode ? "bg-slate-900 border-slate-800" : "bg-white border-transparent";
   const textMuted = isDarkMode ? "text-slate-400" : "text-gray-500";
   const headerBg = isDarkMode ? "bg-slate-900 border-slate-800" : "bg-white border-gray-200";
-  const inputBg = isDarkMode ? "bg-slate-800 border-slate-700 text-white" : "bg-gray-50 border-gray-200 text-gray-900";
+  const inputBg = isDarkMode ? "bg-slate-800 border-slate-700 text-white focus:ring-purple-500/50" : "bg-gray-50 border-gray-200 text-gray-900 focus:border-purple-500/50";
 
   if (!isAuthorized) return <div className={`min-h-screen flex items-center justify-center ${isDarkMode ? 'bg-slate-950 text-white' : 'bg-gray-100 text-gray-500'}`}><p className="font-bold">Checking Authorization...</p></div>;
 
@@ -79,6 +114,7 @@ export default function AdminDashboard() {
         </div>
         <nav className="flex-1 p-4 space-y-2 overflow-y-auto custom-scrollbar">
           <a href="#" onClick={(e) => { e.preventDefault(); router.push('/admin'); }} className="flex items-center space-x-3 bg-purple-600 px-4 py-3 rounded-xl text-white font-bold shadow-md"><span>🏠</span><span>මුල් තිරය</span></a>
+          <a href="#" onClick={(e) => { e.preventDefault(); router.push('/admin/students'); }} className="flex items-center space-x-3 hover:bg-slate-800 px-4 py-3 rounded-xl transition text-gray-300 hover:text-white"><span>👥</span><span>සිසුන් කළමනාකරණය</span></a>
           <a href="#" onClick={(e) => { e.preventDefault(); router.push('/admin/attendance'); }} className="flex items-center space-x-3 hover:bg-slate-800 px-4 py-3 rounded-xl transition text-gray-300 hover:text-white"><span>✅</span><span>පැමිණීම (Attendance)</span></a>
           <a href="#" onClick={(e) => { e.preventDefault(); router.push('/admin/videos'); }} className="flex items-center space-x-3 hover:bg-slate-800 px-4 py-3 rounded-xl transition text-gray-300 hover:text-white"><span>📺</span><span>වීඩියෝ පාඩම්</span></a>
           <a href="#" onClick={(e) => { e.preventDefault(); router.push('/admin/tutes'); }} className="flex items-center space-x-3 hover:bg-slate-800 px-4 py-3 rounded-xl transition text-gray-300 hover:text-white"><span>📚</span><span>නිබන්ධන</span></a>
@@ -90,7 +126,7 @@ export default function AdminDashboard() {
         </div>
       </aside>
 
-      <main className="flex-1 flex flex-col h-screen overflow-y-auto relative">
+      <main className="flex-1 flex flex-col h-screen overflow-y-auto relative scroll-smooth">
         <header className={`${headerBg} p-4 flex justify-between items-center sticky top-0 z-30 border-b transition-colors duration-300`}>
           <div className="flex items-center">
             <button onClick={() => setIsSidebarOpen(true)} className={`md:hidden p-2 mr-4 rounded-lg transition ${isDarkMode ? 'text-white hover:bg-slate-800' : 'text-slate-800 hover:bg-gray-100'}`}>
@@ -100,7 +136,7 @@ export default function AdminDashboard() {
           </div>
           <div className="flex items-center space-x-4">
             <button onClick={toggleTheme} className={`p-2 rounded-full transition-all focus:outline-none ${isDarkMode ? 'bg-slate-800 text-yellow-400 hover:bg-slate-700' : 'bg-purple-100 text-purple-600 hover:bg-purple-200'}`}>
-              {isDarkMode ? <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z" /></svg> : <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" /></svg>}
+              {isDarkMode ? '☀️' : '🌙'}
             </button>
             <div className={`flex items-center gap-3 px-4 py-2 rounded-full border ${isDarkMode ? 'bg-slate-800 border-slate-700' : 'bg-purple-50 border-purple-100'}`}>
               <div className="w-8 h-8 bg-purple-600 rounded-full flex items-center justify-center text-white font-bold">A</div>
@@ -111,7 +147,34 @@ export default function AdminDashboard() {
 
         <div className="p-6 md:p-10 max-w-7xl mx-auto w-full">
           
-          {/* අලුතින් එක් කළ Notification Form එක */}
+          {/* Password Requests Panel */}
+          {pwRequests.length > 0 && (
+            <div className={`${bgCard} p-6 md:p-8 rounded-3xl shadow-sm border mb-8 border-l-8 border-l-red-500 animate-pulse`}>
+              <h2 className="text-xl md:text-2xl font-bold flex items-center gap-2 mb-4 text-red-600">
+                <span>🔐</span> මුරපද වෙනස් කිරීමේ ඉල්ලීම් ({pwRequests.length})
+              </h2>
+              <div className="space-y-3">
+                {pwRequests.map(req => (
+                  <div key={req._id} className={`flex flex-col sm:flex-row justify-between items-start sm:items-center p-4 rounded-xl border ${isDarkMode ? 'bg-slate-800 border-slate-700' : 'bg-red-50 border-red-100 shadow-sm'}`}>
+                    <div>
+                      <p className="font-bold text-sm md:text-base">WhatsApp: {req.phone}</p>
+                      <p className="text-sm text-red-500 font-bold mt-1">නව මුරපදය: {req.newPassword}</p>
+                    </div>
+                    <div className="flex gap-2 mt-3 sm:mt-0 w-full sm:w-auto">
+                      <button onClick={() => handlePwAction(req._id, 'Approve')} className={`flex-1 sm:flex-none text-xs font-bold px-4 py-2 rounded-lg transition shadow-sm ${isDarkMode ? 'bg-green-900/40 text-green-400 hover:bg-green-900/60' : 'bg-green-600 text-white hover:bg-green-700'}`}>
+                        Approve & WhatsApp
+                      </button>
+                      <button onClick={() => handlePwAction(req._id, 'Reject')} className={`flex-1 sm:flex-none text-xs font-bold px-4 py-2 rounded-lg transition ${isDarkMode ? 'bg-red-900/30 text-red-500 hover:bg-red-900/50' : 'bg-red-100 text-red-600 hover:bg-red-200'}`}>
+                        Reject
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Notification Form */}
           <div className={`${bgCard} p-6 md:p-8 rounded-3xl shadow-sm border mb-8 border-l-8 border-l-amber-500`}>
             <div className="flex items-center gap-3 mb-4">
               <span className="text-3xl">📢</span>
@@ -122,10 +185,10 @@ export default function AdminDashboard() {
             <form onSubmit={handleNotificationSubmit} className="space-y-4">
               <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
                 <div className="md:col-span-3">
-                  <input type="text" placeholder="ඔබගේ පණිවිඩය මෙහි ටයිප් කරන්න..." required value={notiMessage} onChange={(e) => setNotiMessage(e.target.value)} className={`w-full px-4 py-3 rounded-xl border outline-none focus:ring-2 focus:ring-amber-500/50 ${inputBg}`} />
+                  <input type="text" placeholder="ඔබගේ පණිවිඩය මෙහි ටයිප් කරන්න..." required value={notiMessage} onChange={(e) => setNotiMessage(e.target.value)} className={`w-full px-4 py-3 rounded-xl border outline-none transition ${inputBg}`} />
                 </div>
                 <div className="md:col-span-1">
-                  <select value={notiGroup} onChange={(e) => setNotiGroup(e.target.value)} className={`w-full px-4 py-3 rounded-xl border outline-none focus:ring-2 focus:ring-amber-500/50 ${inputBg}`}>
+                  <select value={notiGroup} onChange={(e) => setNotiGroup(e.target.value)} className={`w-full px-4 py-3 rounded-xl border outline-none transition ${inputBg}`}>
                     <option value="All">සියලුම සිසුන්ට</option>
                     <option value="2026">2026 සිසුන්ට</option>
                     <option value="2027">2027 සිසුන්ට</option>
@@ -143,9 +206,18 @@ export default function AdminDashboard() {
           
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             
+            {/* අලුතින් එක් කළ සිසුන් කළමනාකරණය Card එක */}
+            <div className={`${bgCard} p-8 rounded-3xl shadow-sm border border-t-8 border-t-blue-500 hover:shadow-lg transition transform hover:-translate-y-1`}>
+              <div className="flex justify-between items-start mb-6">
+                <div><h2 className="text-2xl font-bold mb-2">සිසුන්</h2><p className={`text-sm ${textMuted}`}>සිසුන් ලියාපදිංචිය සහ පාලනය.</p></div>
+                <div className="text-5xl">👥</div>
+              </div>
+              <button onClick={() => router.push('/admin/students')} className={`w-full font-bold py-3 rounded-xl transition ${isDarkMode ? 'bg-blue-900/50 text-blue-400 hover:bg-blue-900' : 'bg-blue-50 text-blue-700 hover:bg-blue-100'}`}>කළමනාකරණය</button>
+            </div>
+
             <div className={`${bgCard} p-8 rounded-3xl shadow-sm border border-t-8 border-t-teal-500 hover:shadow-lg transition transform hover:-translate-y-1`}>
               <div className="flex justify-between items-start mb-6">
-                <div><h2 className="text-2xl font-bold mb-2">පැමිණීම</h2><p className={`text-sm ${textMuted}`}>සිසුන්ගේ දෛනික පැමිණීම සටහන් කිරීම.</p></div>
+                <div><h2 className="text-2xl font-bold mb-2">පැමිණීම</h2><p className={`text-sm ${textMuted}`}>සිසුන්ගේ දෛනික පැමිණීම.</p></div>
                 <div className="text-5xl">✅</div>
               </div>
               <button onClick={() => router.push('/admin/attendance')} className={`w-full font-bold py-3 rounded-xl transition ${isDarkMode ? 'bg-teal-900/50 text-teal-400 hover:bg-teal-900' : 'bg-teal-50 text-teal-700 hover:bg-teal-100'}`}>Attendance</button>
@@ -175,9 +247,9 @@ export default function AdminDashboard() {
               <button onClick={() => router.push('/admin/questions')} className={`w-full font-bold py-3 rounded-xl transition ${isDarkMode ? 'bg-purple-900/50 text-purple-400 hover:bg-purple-900' : 'bg-purple-50 text-purple-600 hover:bg-purple-100'}`}>කළමනාකරණය</button>
             </div>
 
-            <div className={`${bgCard} p-8 rounded-3xl shadow-sm border border-t-8 border-t-yellow-500 hover:shadow-lg transition transform hover:-translate-y-1 lg:col-span-2`}>
+            <div className={`${bgCard} p-8 rounded-3xl shadow-sm border border-t-8 border-t-yellow-500 hover:shadow-lg transition transform hover:-translate-y-1 lg:col-span-1`}>
               <div className="flex justify-between items-start mb-6">
-                <div><h2 className="text-2xl font-bold mb-2">ලකුණු ඇතුළත් කිරීම</h2><p className={`text-sm ${textMuted}`}>පන්ති කාමරයේ ප්‍රතිඵල ලේඛන යාවත්කාලීන කිරීම.</p></div>
+                <div><h2 className="text-2xl font-bold mb-2">ලකුණු</h2><p className={`text-sm ${textMuted}`}>ප්‍රතිඵල ලේඛන යාවත්කාලීන කිරීම.</p></div>
                 <div className="text-5xl">📊</div>
               </div>
               <button onClick={() => router.push('/admin/marks')} className={`w-full font-bold py-3 rounded-xl transition ${isDarkMode ? 'bg-yellow-900/50 text-yellow-400 hover:bg-yellow-900' : 'bg-yellow-50 text-yellow-700 hover:bg-yellow-100'}`}>ලකුණු සටහන් කරන්න</button>

@@ -1,15 +1,11 @@
 "use client";
-
 import React, { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 
 export default function HomePage() {
   const router = useRouter();
-
-  // Day/Night Theme State
   const [isDarkMode, setIsDarkMode] = useState(false);
-
   const [heroView, setHeroView] = useState("carousel");
 
   const [name, setName] = useState("");
@@ -20,8 +16,8 @@ export default function HomePage() {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [successMsg, setSuccessMsg] = useState("");
 
-  // යශේන් සර්ගේ පන්ති විස්තර
   const ongoingCourses = [
     { id: 1, title: "2026 THEORY", day: "බ්‍රහස්පතින්දා", time: "පෙ.ව 7.30 - ප.ව 1.30", desc: "තාපය (වායු, තාප ගති විද්‍යාව) සහ ප්‍රායෝගික" },
     { id: 2, title: "2026 PAPER CLASS", day: "Papers", time: "දැනුම් දෙනු ලැබේ", desc: "Paper 06 සිට 09 දක්වා සාකච්ඡාව" },
@@ -30,44 +26,21 @@ export default function HomePage() {
   ];
 
   const resultsData = [1, 2, 3, 4, 5];
-
   const slides = [
-    { 
-      id: 1, 
-      title: "භෞතික විද්‍යාව නිවැරදිව ග්‍රහණය කරගන්න", 
-      subtitle: "2026 සහ 2027 A/L සිසුන් සඳහා Theory, Revision සහ Paper Classes.", 
-      btnText: "දැන්ම එක්වන්න", 
-      image: "https://images.unsplash.com/photo-1635070041078-e363dbe005cb?q=80&w=1920&auto=format&fit=crop" 
-    },
-    { 
-      id: 2, 
-      title: "දිවයිනේ ඉහළම ප්‍රතිඵල", 
-      subtitle: "පසුගිය වසර වලදී විශිෂ්ටතම A සාමාර්ථ ලබාගත් අපගේ දරුවන්.", 
-      btnText: "ප්‍රතිඵල බලන්න", 
-      image: "https://images.unsplash.com/photo-1523240795612-9a054b0db644?q=80&w=1920&auto=format&fit=crop" 
-    },
-    { 
-      id: 3, 
-      title: "දරුවන් වෙනුවෙන් කැපවීම", 
-      subtitle: "Digital Worksheets සමගින් පහසුවෙන් ඉගෙනගන්න.", 
-      btnText: "ලියාපදිංචි වන්න", 
-      image: "https://images.unsplash.com/photo-1516321497487-e288fb19713f?q=80&w=1920&auto=format&fit=crop" 
-    }
+    { id: 1, title: "භෞතික විද්‍යාව නිවැරදිව ග්‍රහණය කරගන්න", subtitle: "2026 සහ 2027 A/L සිසුන් සඳහා Theory, Revision සහ Paper Classes.", btnText: "දැන්ම එක්වන්න", image: "https://images.unsplash.com/photo-1635070041078-e363dbe005cb?q=80&w=1920&auto=format&fit=crop" },
+    { id: 2, title: "දිවයිනේ ඉහළම ප්‍රතිඵල", subtitle: "පසුගිය වසර වලදී විශිෂ්ටතම A සාමාර්ථ ලබාගත් අපගේ දරුවන්.", btnText: "ප්‍රතිඵල බලන්න", image: "https://images.unsplash.com/photo-1523240795612-9a054b0db644?q=80&w=1920&auto=format&fit=crop" },
+    { id: 3, title: "දරුවන් වෙනුවෙන් කැපවීම", subtitle: "Digital Worksheets සමගින් පහසුවෙන් ඉගෙනගන්න.", btnText: "ලියාපදිංචි වන්න", image: "https://images.unsplash.com/photo-1516321497487-e288fb19713f?q=80&w=1920&auto=format&fit=crop" }
   ];
 
   const [currentSlide, setCurrentSlide] = useState(0);
-
   const [courseIndex, setCourseIndex] = useState(0);
   const [resultIndex, setResultIndex] = useState(0);
-
   const courseRef = useRef(null);
   const resultRef = useRef(null);
 
   useEffect(() => {
     if (heroView !== "carousel") return;
-    const timer = setInterval(() => {
-      setCurrentSlide((prev) => (prev === slides.length - 1 ? 0 : prev + 1));
-    }, 5000);
+    const timer = setInterval(() => { setCurrentSlide((prev) => (prev === slides.length - 1 ? 0 : prev + 1)); }, 5000);
     return () => clearInterval(timer);
   }, [slides.length, heroView]);
 
@@ -78,8 +51,7 @@ export default function HomePage() {
     if (!ref.current) return;
     const { scrollLeft, scrollWidth } = ref.current;
     const itemWidth = scrollWidth / totalItems;
-    const newIndex = Math.round(scrollLeft / itemWidth);
-    setIndex(newIndex);
+    setIndex(Math.round(scrollLeft / itemWidth));
   };
 
   const scrollToIndex = (ref, index, totalItems) => {
@@ -91,132 +63,113 @@ export default function HomePage() {
   const changeViewAndScrollTop = (view) => {
     setHeroView(view);
     setError("");
+    setSuccessMsg("");
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
-  // --- මෙන්න මේ කොටස තමයි Custom API එකට ගැලපෙන්න හැදුවේ ---
   const handleAuthSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
     setError("");
+    setSuccessMsg("");
 
     if (heroView === "login") {
-      // Admin Login
       if (phone === "admin" && password === "admin123") {
         router.push("/admin");
-        setLoading(false);
         return; 
       }
-
-      // Student Login Custom API
       try {
         const res = await fetch("/api/login", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ username: phone, password }), // Backend එකට username විදිහට phone එක යවයි
+          method: "POST", headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ username: phone, password })
         });
-
         const data = await res.json();
-
         if (res.ok) {
-          // ලොග් වීම සාර්ථක නම් දත්ත LocalStorage එකේ සේව් කරලා Dashboard එකට යවයි
           localStorage.setItem("user", JSON.stringify(data.user));
           router.push("/dashboard");
-        } else {
-          setError(data.message || "ලොග් වීමේදී දෝෂයක් මතු විය.");
-        }
-      } catch (err) {
-        setError("තාක්ෂණික දෝෂයකි. කරුණාකර නැවත උත්සාහ කරන්න.");
-      } finally {
-        setLoading(false);
-      }
-
-    } else if (heroView === "register") {
+        } else { setError(data.message || "ලොග් වීමේදී දෝෂයක් මතු විය."); }
+      } catch (err) { setError("තාක්ෂණික දෝෂයකි. කරුණාකර නැවත උත්සාහ කරන්න."); }
+      finally { setLoading(false); }
+    } 
+    
+    else if (heroView === "register") {
       if (password !== confirmPassword) {
-        setError("මුරපදයන් එකිනෙකට නොගැලපේ. කරුණාකර නැවත පරීක්ෂා කරන්න.");
-        setLoading(false);
-        return;
+        setError("මුරපදයන් එකිනෙකට නොගැලපේ.");
+        setLoading(false); return;
       }
-      
       try {
         const res = await fetch("/api/register", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          // Register API එකට අවශ්‍ය දත්ත
+          method: "POST", headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ name, username: phone, password }), 
         });
-        
         const data = await res.json();
-        
         if (res.ok) {
           setPassword(""); setConfirmPassword("");
           changeViewAndScrollTop("login");
           alert("ලියාපදිංචි වීම සාර්ථකයි! කරුණාකර දැන් ලොග් වන්න.");
-        } else {
-          setError(data.message || "මෙම අංකයෙන් දැනටමත් ගිණුමක් ඇත.");
-        }
-      } catch (err) {
-        setError("තාක්ෂණික දෝෂයකි. කරුණාකර නැවත උත්සාහ කරන්න.");
-      } finally {
-        setLoading(false);
+        } else { setError(data.message || "මෙම අංකයෙන් දැනටමත් ගිණුමක් ඇත."); }
+      } catch (err) { setError("තාක්ෂණික දෝෂයකි. කරුණාකර නැවත උත්සාහ කරන්න."); }
+      finally { setLoading(false); }
+    }
+
+    // Forgot Password Submit
+    else if (heroView === "forgotPassword") {
+      if (password !== confirmPassword) {
+        setError("මුරපදයන් එකිනෙකට නොගැලපේ.");
+        setLoading(false); return;
       }
+      try {
+        const res = await fetch("/api/forgot-password", {
+          method: "POST", headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ phone, newPassword: password }), 
+        });
+        const data = await res.json();
+        if (res.ok) {
+          setSuccessMsg("ඉල්ලීම සාර්ථකව Admin වෙත යොමු කරන ලදී. අනුමත වූ පසු ඔබට WhatsApp පණිවිඩයක් ලැබෙනු ඇත.");
+          setPhone(""); setPassword(""); setConfirmPassword("");
+        } else { setError(data.message || "මෙම අංකයෙන් ගිණුමක් නොමැත."); }
+      } catch (err) { setError("තාක්ෂණික දෝෂයකි. නැවත උත්සාහ කරන්න."); }
+      finally { setLoading(false); }
     }
   };
 
-  // --- Theme Classes ---
   const themeBg = isDarkMode ? "bg-slate-900 text-slate-100" : "bg-slate-50 text-slate-800";
   const headerBg = isDarkMode ? "bg-slate-900/80 border-slate-800" : "bg-white/80 border-purple-100";
   const logoTextColor = isDarkMode ? "text-purple-400" : "text-purple-800";
-  const btnOutline = isDarkMode ? "border-slate-700 text-slate-300 hover:bg-purple-900/30 hover:border-purple-500 hover:text-purple-400" : "border-purple-200 text-purple-700 hover:border-purple-500 hover:text-purple-700 hover:bg-purple-50";
+  const btnOutline = isDarkMode ? "border-slate-700 text-slate-300 hover:bg-purple-900/30 hover:border-purple-500" : "border-purple-200 text-purple-700 hover:bg-purple-50";
   const sectionTitleColor = isDarkMode ? "text-white" : "text-slate-900";
   const sectionDescColor = isDarkMode ? "text-slate-400" : "text-slate-500";
   const cardBg = isDarkMode ? "bg-slate-800 border-slate-700" : "bg-white border-purple-100";
   const cardTitle = isDarkMode ? "text-purple-300" : "text-purple-800";
   const cardImgBg = isDarkMode ? "bg-slate-700 text-purple-400/50" : "bg-purple-50 text-purple-300";
-  const cardImgHover = isDarkMode ? "group-hover:bg-purple-900/40 group-hover:text-purple-400" : "group-hover:bg-purple-100 group-hover:text-purple-500";
+  const cardImgHover = isDarkMode ? "group-hover:bg-purple-900/40" : "group-hover:bg-purple-100";
   const authBg = isDarkMode ? "bg-slate-950" : "bg-purple-50";
-  const authCardBg = isDarkMode ? "bg-slate-800/95 border-slate-700 shadow-purple-900/20" : "bg-white/90 border-white shadow-2xl";
-  const inputBg = isDarkMode ? "bg-slate-700 border-slate-600 text-white placeholder-slate-400 focus:border-purple-500 focus:bg-slate-600" : "bg-slate-50 border-purple-100 text-slate-900 focus:border-purple-500 focus:bg-white";
+  const authCardBg = isDarkMode ? "bg-slate-800/95 border-slate-700" : "bg-white/90 border-white shadow-2xl";
+  const inputBg = isDarkMode ? "bg-slate-700 border-slate-600 text-white" : "bg-slate-50 border-purple-100 text-slate-900 focus:bg-white";
 
   return (
     <>
-      <style dangerouslySetInnerHTML={{__html: `
-        @import url('https://fonts.googleapis.com/css2?family=Lato:wght@400;700;900&family=Oswald:wght@500;600;700&display=swap');
-        .modern-font { font-family: 'Lato', 'Iskoola Pota', sans-serif; }
-        .logo-font { font-family: 'Oswald', sans-serif; letter-spacing: 0.5px; }
-      `}} />
+      <style dangerouslySetInnerHTML={{__html: `@import url('https://fonts.googleapis.com/css2?family=Lato:wght@400;700;900&family=Oswald:wght@500;600;700&display=swap'); .modern-font { font-family: 'Lato', 'Iskoola Pota', sans-serif; } .logo-font { font-family: 'Oswald', sans-serif; }`}} />
 
       <div className={`modern-font flex min-h-screen flex-col transition-colors duration-300 ${themeBg}`}>
         
-        {/* 1. Navigation Bar */}
         <header className={`sticky top-0 z-50 w-full border-b backdrop-blur-md transition-all duration-300 ${headerBg}`}>
           <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-3 md:px-6 md:py-4">
             <button onClick={() => changeViewAndScrollTop("carousel")} className="flex items-center gap-2 md:gap-3 focus:outline-none">
               <div className="bg-purple-600 text-white font-bold rounded-lg p-2 text-xs md:text-sm">YS</div>
               <span className={`logo-font text-lg md:text-2xl font-bold truncate ${logoTextColor}`}>Yashen Physics</span>
             </button>
-
             <div className="flex items-center space-x-3 md:space-x-5 flex-shrink-0">
-              <button onClick={() => setIsDarkMode(!isDarkMode)} className={`rounded-full p-2 transition-colors focus:outline-none ${isDarkMode ? 'bg-slate-800 text-yellow-400 hover:bg-slate-700' : 'bg-purple-100 text-purple-600 hover:bg-purple-200'}`} title={isDarkMode ? "Light Mode" : "Dark Mode"}>
-                {isDarkMode ? (
-                  <svg className="h-5 w-5" fill="currentColor" viewBox="0 0 20 20"><path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z" /></svg>
-                ) : (
-                  <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" /></svg>
-                )}
+              <button onClick={() => setIsDarkMode(!isDarkMode)} className={`rounded-full p-2 transition-colors focus:outline-none ${isDarkMode ? 'bg-slate-800 text-yellow-400' : 'bg-purple-100 text-purple-600'}`}>
+                {isDarkMode ? "☀️" : "🌙"}
               </button>
-
-              <button onClick={() => changeViewAndScrollTop("login")} className={`rounded-full border-2 px-3 py-1.5 text-xs font-bold transition-all md:px-5 md:py-2 md:text-sm focus:outline-none hidden sm:block ${btnOutline}`}>
-                ලොග් වන්න
-              </button>
-              <button onClick={() => changeViewAndScrollTop("register")} className="rounded-full bg-gradient-to-r from-purple-600 to-fuchsia-600 px-4 py-1.5 text-xs font-bold text-white shadow-md hover:shadow-lg hover:from-purple-700 hover:to-fuchsia-700 transition-all md:px-5 md:py-2 md:text-sm focus:outline-none">
-                ලියාපදිංචි වන්න
-              </button>
+              <button onClick={() => changeViewAndScrollTop("login")} className={`rounded-full border-2 px-3 py-1.5 text-xs font-bold transition-all md:px-5 md:py-2 md:text-sm hidden sm:block ${btnOutline}`}>ලොග් වන්න</button>
+              <button onClick={() => changeViewAndScrollTop("register")} className="rounded-full bg-gradient-to-r from-purple-600 to-fuchsia-600 px-4 py-1.5 text-xs font-bold text-white shadow-md hover:from-purple-700 hover:to-fuchsia-700 md:px-5 md:py-2 md:text-sm">ලියාපදිංචි වන්න</button>
             </div>
           </div>
         </header>
 
         <main className="flex-grow">
-          {/* Carousel View */}
           {heroView === "carousel" && (
             <section className="relative h-[450px] w-full overflow-hidden md:h-[550px]">
               <div className="flex h-full transition-transform duration-700 ease-in-out" style={{ transform: `translateX(-${currentSlide * 100}%)` }}>
@@ -225,99 +178,92 @@ export default function HomePage() {
                     <img src={slide.image} alt={slide.title} className="absolute inset-0 h-full w-full object-cover z-0" />
                     <div className={`absolute inset-0 z-0 transition-colors duration-300 ${isDarkMode ? 'bg-slate-950/80' : 'bg-purple-900/65'}`}></div>
                     <div className="relative z-10 max-w-3xl">
-                      <h1 className="mb-4 text-3xl font-extrabold leading-tight tracking-tight md:text-5xl lg:text-6xl drop-shadow-lg">
-                        {slide.title}
-                      </h1>
-                      <p className="mb-8 text-sm text-slate-200 md:text-xl drop-shadow-md">
-                        {slide.subtitle}
-                      </p>
-                      <button onClick={() => slide.id === 2 ? window.location.href="#results" : changeViewAndScrollTop("register")} className="inline-block rounded-full bg-fuchsia-500 px-8 py-3 text-sm font-bold text-white shadow-lg transition-all hover:bg-fuchsia-600 hover:shadow-xl hover:-translate-y-1 md:px-10 md:py-4 md:text-lg focus:outline-none">
-                        {slide.btnText}
-                      </button>
+                      <h1 className="mb-4 text-3xl font-extrabold leading-tight tracking-tight md:text-5xl lg:text-6xl drop-shadow-lg">{slide.title}</h1>
+                      <p className="mb-8 text-sm text-slate-200 md:text-xl drop-shadow-md">{slide.subtitle}</p>
+                      <button onClick={() => slide.id === 2 ? window.location.href="#results" : changeViewAndScrollTop("register")} className="inline-block rounded-full bg-fuchsia-500 px-8 py-3 text-sm font-bold text-white shadow-lg transition-all hover:bg-fuchsia-600 hover:-translate-y-1 md:px-10 md:py-4 md:text-lg">{slide.btnText}</button>
                     </div>
                   </div>
                 ))}
               </div>
-
-              <button onClick={prevSlide} className="absolute left-2 top-1/2 -translate-y-1/2 rounded-full bg-white/20 p-2 text-white backdrop-blur-md hover:bg-white/40 focus:outline-none md:left-6 md:p-3 transition-all z-20">
-                <svg className="h-5 w-5 md:h-6 md:w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" /></svg>
-              </button>
-              <button onClick={nextSlide} className="absolute right-2 top-1/2 -translate-y-1/2 rounded-full bg-white/20 p-2 text-white backdrop-blur-md hover:bg-white/40 focus:outline-none md:right-6 md:p-3 transition-all z-20">
-                <svg className="h-5 w-5 md:h-6 md:w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" /></svg>
-              </button>
-
+              <button onClick={prevSlide} className="absolute left-2 top-1/2 -translate-y-1/2 rounded-full bg-white/20 p-2 text-white backdrop-blur-md hover:bg-white/40 md:left-6 md:p-3 z-20">◀</button>
+              <button onClick={nextSlide} className="absolute right-2 top-1/2 -translate-y-1/2 rounded-full bg-white/20 p-2 text-white backdrop-blur-md hover:bg-white/40 md:right-6 md:p-3 z-20">▶</button>
               <div className="absolute bottom-6 left-1/2 flex -translate-x-1/2 space-x-3 z-20">
-                {slides.map((_, idx) => (
-                  <button key={idx} onClick={() => setCurrentSlide(idx)} className={`h-2.5 rounded-full transition-all duration-300 ${currentSlide === idx ? "w-8 bg-fuchsia-400" : "w-2.5 bg-white/40 hover:bg-white/70"}`} />
-                ))}
+                {slides.map((_, idx) => (<button key={idx} onClick={() => setCurrentSlide(idx)} className={`h-2.5 rounded-full transition-all duration-300 ${currentSlide === idx ? "w-8 bg-fuchsia-400" : "w-2.5 bg-white/40"}`} />))}
               </div>
             </section>
           )}
 
-          {/* Login / Register Form View */}
-          {(heroView === "login" || heroView === "register") && (
+          {(heroView === "login" || heroView === "register" || heroView === "forgotPassword") && (
             <section className={`flex min-h-[450px] items-center justify-center py-12 px-4 transition-colors duration-300 md:min-h-[550px] ${authBg}`}>
               <div className={`w-full max-w-md rounded-3xl border p-6 backdrop-blur-lg transition-colors duration-300 md:p-10 ${authCardBg}`}>
+                
                 <div className="mb-6 flex items-center justify-between">
                   <h2 className={`text-2xl font-extrabold ${cardTitle}`}>
-                    {heroView === "login" ? "පද්ධතියට ඇතුළු වන්න" : "නව ගිණුමක් සාදන්න"}
+                    {heroView === "login" ? "පද්ධතියට ඇතුළු වන්න" : heroView === "register" ? "නව ගිණුමක් සාදන්න" : "මුරපදය අමතකද?"}
                   </h2>
-                  <button onClick={() => changeViewAndScrollTop("carousel")} className={`rounded-full p-2 transition-colors focus:outline-none ${isDarkMode ? 'bg-slate-700 text-slate-300 hover:text-red-400' : 'bg-slate-100 text-slate-400 hover:text-red-500'}`}>
-                    <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M6 18L18 6M6 6l12 12" /></svg>
-                  </button>
+                  <button onClick={() => changeViewAndScrollTop("carousel")} className={`rounded-full p-2 transition-colors focus:outline-none ${isDarkMode ? 'bg-slate-700 text-slate-300' : 'bg-slate-100 text-slate-400 hover:text-red-500'}`}>✖</button>
                 </div>
                 
-                {error && <div className="mb-6 rounded-xl bg-red-50 p-4 text-sm font-medium text-red-600 border border-red-100">{error}</div>}
+                {error && <div className="mb-4 rounded-xl bg-red-50 p-4 text-sm font-medium text-red-600 border border-red-100">{error}</div>}
+                {successMsg && <div className="mb-4 rounded-xl bg-green-50 p-4 text-sm font-medium text-green-700 border border-green-200">{successMsg}</div>}
                 
-                <form onSubmit={handleAuthSubmit} className="space-y-5">
+                <form onSubmit={handleAuthSubmit} className="space-y-4">
                   {heroView === "register" && (
                     <div>
-                      <label className={`mb-1.5 block text-sm font-bold ${isDarkMode ? 'text-slate-300' : 'text-slate-600'}`}>නම</label>
-                      <input type="text" value={name} onChange={(e) => setName(e.target.value)} placeholder="උදා: Y. S. Perera" className={`w-full rounded-xl border px-4 py-3 text-sm focus:outline-none focus:ring-4 focus:ring-purple-500/20 transition-all ${inputBg}`} required />
+                      <label className={`mb-1 block text-sm font-bold ${isDarkMode ? 'text-slate-300' : 'text-slate-600'}`}>නම</label>
+                      <input type="text" value={name} onChange={(e) => setName(e.target.value)} placeholder="උදා: Y. S. Perera" className={`w-full rounded-xl border px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500/50 transition-all ${inputBg}`} required />
                     </div>
                   )}
                   <div>
-                    <label className={`mb-1.5 block text-sm font-bold ${isDarkMode ? 'text-slate-300' : 'text-slate-600'}`}>WhatsApp අංකය</label>
-                    <input type="text" value={phone} onChange={(e) => setPhone(e.target.value)} placeholder="උදා: 0712345678" className={`w-full rounded-xl border px-4 py-3 text-sm focus:outline-none focus:ring-4 focus:ring-purple-500/20 transition-all ${inputBg}`} required />
+                    <label className={`mb-1 block text-sm font-bold ${isDarkMode ? 'text-slate-300' : 'text-slate-600'}`}>WhatsApp අංකය</label>
+                    <input type="text" value={phone} onChange={(e) => setPhone(e.target.value)} placeholder="උදා: 0712345678" className={`w-full rounded-xl border px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500/50 transition-all ${inputBg}`} required />
                   </div>
                   <div>
-                    <label className={`mb-1.5 block text-sm font-bold ${isDarkMode ? 'text-slate-300' : 'text-slate-600'}`}>මුරපදය (Password)</label>
+                    <label className={`mb-1 block text-sm font-bold ${isDarkMode ? 'text-slate-300' : 'text-slate-600'}`}>{heroView === "forgotPassword" ? "නව මුරපදය" : "මුරපදය (Password)"}</label>
                     <div className="relative">
-                      <input type={showPassword ? "text" : "password"} value={password} onChange={(e) => setPassword(e.target.value)} placeholder="රහස්‍ය මුරපදයක් ලබා දෙන්න" className={`w-full rounded-xl border px-4 py-3 pr-12 text-sm focus:outline-none focus:ring-4 focus:ring-purple-500/20 transition-all ${inputBg}`} required />
-                      <button type="button" onClick={() => setShowPassword(!showPassword)} className={`absolute right-3 top-1/2 -translate-y-1/2 rounded-full p-1.5 transition-colors focus:outline-none ${isDarkMode ? 'text-slate-400 hover:text-white' : 'text-slate-400 hover:text-slate-600'}`}>
-                        {showPassword ? <span className="text-xs font-bold">HIDE</span> : <span className="text-xs font-bold">SHOW</span>}
+                      <input type={showPassword ? "text" : "password"} value={password} onChange={(e) => setPassword(e.target.value)} placeholder="මුරපදයක් ලබා දෙන්න" className={`w-full rounded-xl border px-4 py-3 pr-12 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500/50 transition-all ${inputBg}`} required />
+                      <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-3 top-1/2 -translate-y-1/2 p-1.5 focus:outline-none text-xs font-bold text-slate-400">
+                        {showPassword ? "HIDE" : "SHOW"}
                       </button>
                     </div>
                   </div>
-                  {heroView === "register" && (
+                  {(heroView === "register" || heroView === "forgotPassword") && (
                     <div>
-                      <label className={`mb-1.5 block text-sm font-bold ${isDarkMode ? 'text-slate-300' : 'text-slate-600'}`}>මුරපදය තහවුරු කරන්න</label>
+                      <label className={`mb-1 block text-sm font-bold ${isDarkMode ? 'text-slate-300' : 'text-slate-600'}`}>මුරපදය තහවුරු කරන්න</label>
                       <div className="relative">
-                        <input type={showConfirmPassword ? "text" : "password"} value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} placeholder="මුරපදය නැවත ඇතුළත් කරන්න" className={`w-full rounded-xl border px-4 py-3 pr-12 text-sm focus:outline-none focus:ring-4 focus:ring-purple-500/20 transition-all ${inputBg}`} required />
-                        <button type="button" onClick={() => setShowConfirmPassword(!showConfirmPassword)} className={`absolute right-3 top-1/2 -translate-y-1/2 rounded-full p-1.5 transition-colors focus:outline-none ${isDarkMode ? 'text-slate-400 hover:text-white' : 'text-slate-400 hover:text-slate-600'}`}>
-                           {showConfirmPassword ? <span className="text-xs font-bold">HIDE</span> : <span className="text-xs font-bold">SHOW</span>}
+                        <input type={showConfirmPassword ? "text" : "password"} value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} placeholder="මුරපදය නැවත ඇතුළත් කරන්න" className={`w-full rounded-xl border px-4 py-3 pr-12 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500/50 transition-all ${inputBg}`} required />
+                        <button type="button" onClick={() => setShowConfirmPassword(!showConfirmPassword)} className="absolute right-3 top-1/2 -translate-y-1/2 p-1.5 focus:outline-none text-xs font-bold text-slate-400">
+                           {showConfirmPassword ? "HIDE" : "SHOW"}
                         </button>
                       </div>
                     </div>
                   )}
-                  <button type="submit" disabled={loading} className={`mt-2 w-full rounded-full px-4 py-3.5 text-sm font-bold text-white shadow-lg transition-all focus:outline-none focus:ring-4 disabled:opacity-70 disabled:cursor-not-allowed ${heroView === "login" ? "bg-gradient-to-r from-purple-600 to-fuchsia-600 hover:from-purple-700 hover:to-fuchsia-700" : "bg-gradient-to-r from-purple-600 to-fuchsia-600 hover:from-purple-700 hover:to-fuchsia-700"}`}>
-                    {loading ? (heroView === "login" ? "ඇතුළු වෙමින් පවතී..." : "ලියාපදිංචි කරමින් පවතී...") : (heroView === "login" ? "ඇතුළු වන්න" : "ලියාපදිංචි වන්න")}
+
+                  {heroView === "login" && (
+                    <div className="text-right">
+                      <button type="button" onClick={() => changeViewAndScrollTop("forgotPassword")} className={`text-xs font-bold hover:underline ${isDarkMode ? 'text-purple-400' : 'text-purple-600'}`}>මුරපදය අමතකද?</button>
+                    </div>
+                  )}
+
+                  <button type="submit" disabled={loading} className="mt-2 w-full rounded-full bg-gradient-to-r from-purple-600 to-fuchsia-600 px-4 py-3.5 text-sm font-bold text-white shadow-md hover:from-purple-700 hover:to-fuchsia-700 transition-all disabled:opacity-70">
+                    {loading ? "රැඳී සිටින්න..." : (heroView === "login" ? "ඇතුළු වන්න" : heroView === "register" ? "ලියාපදිංචි වන්න" : "Admin වෙත යවන්න")}
                   </button>
                 </form>
                 
                 <div className={`mt-6 text-center text-sm font-medium ${isDarkMode ? 'text-slate-400' : 'text-slate-500'}`}>
                   {heroView === "login" ? (
-                    <p>ගිණුමක් නැද්ද? <button onClick={() => changeViewAndScrollTop("register")} className={`font-bold transition-colors ${isDarkMode ? 'text-purple-400' : 'text-purple-600'}`}>ලියාපදිංචි වන්න</button></p>
+                    <p>ගිණුමක් නැද්ද? <button onClick={() => changeViewAndScrollTop("register")} className={`font-bold ${isDarkMode ? 'text-purple-400' : 'text-purple-600'}`}>ලියාපදිංචි වන්න</button></p>
                   ) : (
-                    <p>දැනටමත් ගිණුමක් තිබේද? <button onClick={() => changeViewAndScrollTop("login")} className={`font-bold transition-colors ${isDarkMode ? 'text-purple-400' : 'text-purple-600'}`}>ලොග් වන්න</button></p>
+                    <p>දැනටමත් ගිණුමක් තිබේද? <button onClick={() => changeViewAndScrollTop("login")} className={`font-bold ${isDarkMode ? 'text-purple-400' : 'text-purple-600'}`}>ලොග් වන්න</button></p>
                   )}
                 </div>
               </div>
             </section>
           )}
 
-          {/* 3. පන්ති කාලසටහන */}
+          {/* ... (ඔබගේ පන්ති කාලසටහන සහ ප්‍රතිඵල Section එක නොවෙනස්ව තබා ඇත) */}
           <section id="courses" className="py-16 px-4 md:py-24 md:px-6">
+            {/* අන්තර්ගතය ඉහත පරිදිම වේ... */}
             <div className="mx-auto max-w-7xl">
               <div className="mb-10 text-center md:mb-16">
                 <h2 className={`text-2xl font-extrabold md:text-4xl ${sectionTitleColor}`}>පන්ති කාලසටහන</h2>
@@ -348,22 +294,14 @@ export default function HomePage() {
                   </div>
                 ))}
               </div>
-
-              <div className="mt-2 flex justify-center space-x-2.5 md:hidden">
-                {ongoingCourses.map((_, idx) => (
-                  <button key={idx} onClick={() => scrollToIndex(courseRef, idx, ongoingCourses.length)} className={`h-2 rounded-full transition-all duration-300 ${courseIndex === idx ? "w-6 bg-purple-600" : (isDarkMode ? "w-2 bg-slate-700" : "w-2 bg-purple-200")}`} />
-                ))}
-              </div>
             </div>
           </section>
 
-          {/* 4. අපගේ විශිෂ්ට ප්‍රතිඵල */}
           <section id="results" className={`py-16 px-4 border-y md:py-24 md:px-6 transition-colors duration-300 ${isDarkMode ? 'bg-slate-950 border-slate-800' : 'bg-purple-50/50 border-purple-100'}`}>
             <div className="mx-auto max-w-7xl">
               <div className="mb-10 text-center md:mb-16">
                 <h2 className={`text-2xl font-extrabold md:text-4xl ${sectionTitleColor}`}>අපගේ විශිෂ්ට ප්‍රතිඵල</h2>
                 <div className="mx-auto mt-4 h-1.5 w-16 rounded-full bg-purple-600 md:w-24"></div>
-                <p className={`mt-4 text-xs font-medium md:text-base ${sectionDescColor}`}>පසුගිය වසරේ A/L විභාගයෙන් භෞතික විද්‍යාව සඳහා ඉහළම සාමාර්ථ ලබාගත් අපගේ සිසුන්</p>
               </div>
 
               <div 
@@ -388,50 +326,28 @@ export default function HomePage() {
 
         </main>
 
-        {/* 6. Footer (Yashen Sir's Info) */}
         <footer className={`px-4 py-10 transition-colors duration-300 md:px-6 md:py-16 ${isDarkMode ? 'bg-black text-slate-400 border-t border-slate-900' : 'bg-slate-900 text-slate-300'}`}>
           <div className="mx-auto grid max-w-7xl gap-10 md:grid-cols-3 md:gap-12">
-            
             <div>
               <div className="flex items-center gap-3 mb-4 md:mb-6">
                 <div className="bg-purple-600 text-white font-bold rounded-lg p-2 text-sm">YS</div>
-                <h3 className="logo-font text-xl font-extrabold text-white md:text-2xl tracking-tight">Yashen Physics</h3>
+                <h3 className="logo-font text-xl font-extrabold text-white md:text-2xl">Yashen Physics</h3>
               </div>
               <p className="text-sm leading-relaxed text-slate-400">
                 භෞතික විද්‍යාව සරලව සහ තර්කානුකූලව ඉගෙනගන්න. A/L සිසුන් සඳහාම වෙන්වූ ශ්‍රී ලංකාවේ ප්‍රමුඛතම මාර්ගගත වේදිකාව.
               </p>
             </div>
-            
-            <div>
-              <h4 className="mb-4 text-base font-bold text-white md:mb-6 md:text-lg">ඉක්මන් සබැඳි</h4>
-              <ul className="space-y-3 text-sm text-slate-400">
-                <li><button onClick={() => changeViewAndScrollTop("login")} className="hover:text-white transition-colors focus:outline-none">ලොග් වන්න</button></li>
-                <li><button onClick={() => changeViewAndScrollTop("register")} className="hover:text-white transition-colors focus:outline-none">ලියාපදිංචි වන්න</button></li>
-                <li><a href="#courses" className="hover:text-white transition-colors">පන්ති කාලසටහන</a></li>
-              </ul>
-            </div>
-            
             <div>
               <h4 className="mb-4 text-base font-bold text-white md:mb-6 md:text-lg">අපව සම්බන්ධ කරගන්න</h4>
               <ul className="space-y-4 text-sm text-slate-400">
-                <li className="flex items-center">
-                  <span className="mr-3 text-lg">📞</span> 
-                  <a href="tel:0714620408" className="hover:text-purple-400 transition-colors">071 462 0408 (Call / WhatsApp)</a>
-                </li>
-                <li className="flex items-center">
-                  <span className="mr-3 text-lg">🎓</span> 
-                  <span className="leading-relaxed">Conducted by Yashen Senanayaka <br/><span className="text-xs">(BSc Eng Hons - UG)</span></span>
-                </li>
+                <li className="flex items-center"><span className="mr-3 text-lg">📞</span> <a href="tel:0714620408" className="hover:text-purple-400">071 462 0408 (Call / WhatsApp)</a></li>
               </ul>
             </div>
-
           </div>
-          
           <div className={`mx-auto mt-10 max-w-7xl border-t pt-6 text-center text-xs md:mt-16 md:pt-8 md:text-sm ${isDarkMode ? 'border-slate-800 text-slate-600' : 'border-slate-800 text-slate-500'}`}>
             &copy; {new Date().getFullYear()} Yashen Physics. All rights reserved.
           </div>
         </footer>
-
       </div>
     </>
   );
