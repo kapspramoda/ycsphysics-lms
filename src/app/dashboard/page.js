@@ -154,9 +154,9 @@ export default function DashboardPage() {
           <a href="#" onClick={(e) => { e.preventDefault(); router.push('/videos'); }} className="flex items-center space-x-3 hover:bg-purple-800/80 text-purple-200 hover:text-white px-4 py-3 rounded-xl transition">
             <span className="text-xl">📺</span><span className="font-medium">වීඩියෝ පාඩම්</span>
           </a>
-          <a href="#" onClick={(e) => { e.preventDefault(); router.push('/simulation'); }} className="flex items-center space-x-3 hover:bg-purple-800/80 text-purple-200 hover:text-white px-4 py-3 rounded-xl transition">
+          {/* <a href="#" onClick={(e) => { e.preventDefault(); router.push('/simulation'); }} className="flex items-center space-x-3 hover:bg-purple-800/80 text-purple-200 hover:text-white px-4 py-3 rounded-xl transition">
             <span className="text-xl">🧪</span><span className="font-medium">Simulations</span>
-          </a>
+          </a> */}
           <a href="#" onClick={(e) => { e.preventDefault(); router.push('/exam'); }} className="flex items-center space-x-3 hover:bg-purple-800/80 text-purple-200 hover:text-white px-4 py-3 rounded-xl transition">
             <span className="text-xl">💻</span><span className="font-medium">Online විභාග</span>
           </a>
