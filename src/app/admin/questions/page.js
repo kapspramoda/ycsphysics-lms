@@ -6,17 +6,19 @@ export default function AdminQuestionsPage() {
   const router = useRouter();
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [isAuthorized, setIsAuthorized] = useState(false);
+  const [isDarkMode, setIsDarkMode] = useState(false);
 
   const [formData, setFormData] = useState({ paperName: '', alYear: '2026', text: '', option1: '', option2: '', option3: '', option4: '', option5: '', correctAnswer: '0' });
   const [questions, setQuestions] = useState([]);
   const [msg, setMsg] = useState('');
   
   const [editingId, setEditingId] = useState(null);
-
-  // --- අලුත්: දිගහැරෙන පේපර් එක මතක තබාගන්නා State එක ---
   const [expandedPaperKey, setExpandedPaperKey] = useState(null);
 
   useEffect(() => {
+    const savedTheme = localStorage.getItem('theme');
+    if (savedTheme === 'dark') setIsDarkMode(true);
+
     const adminToken = localStorage.getItem('isAdminLoggedIn');
     if (!adminToken) {
       router.push('/admin/login');
@@ -24,6 +26,12 @@ export default function AdminQuestionsPage() {
       setIsAuthorized(true);
     }
   }, [router]);
+
+  const toggleTheme = () => {
+    const newTheme = !isDarkMode;
+    setIsDarkMode(newTheme);
+    localStorage.setItem('theme', newTheme ? 'dark' : 'light');
+  };
 
   const fetchQuestions = async () => {
     try {
@@ -54,8 +62,6 @@ export default function AdminQuestionsPage() {
 
       if (res.ok) {
         setMsg(editingId ? 'ප්‍රශ්නය යාවත්කාලීන කළා! ✅' : 'ප්‍රශ්නය එක් කළා! ✅');
-        
-        // අලුතින් දාපු පේපර් එක ඔටෝ දිගහැරෙන්න (Maximize වෙන්න) සකසනවා
         const targetKey = `${formData.alYear} - ${formData.paperName}`;
         setExpandedPaperKey(targetKey);
 
@@ -63,7 +69,6 @@ export default function AdminQuestionsPage() {
             setFormData({ paperName: '', alYear: '2026', text: '', option1: '', option2: '', option3: '', option4: '', option5: '', correctAnswer: '0' });
             setEditingId(null);
         } else {
-            // එකම පේපර් එකට දිගටම ප්‍රශ්න දාන්න ලේසි වෙන්න paperName එකයි alYear එකයි මකන්නේ නෑ!
             setFormData({ ...formData, text: '', option1: '', option2: '', option3: '', option4: '', option5: '', correctAnswer: '0' });
         }
         
@@ -78,15 +83,11 @@ export default function AdminQuestionsPage() {
       paperName: q.paperName,
       alYear: q.alYear,
       text: q.text,
-      option1: q.options[0],
-      option2: q.options[1],
-      option3: q.options[2],
-      option4: q.options[3],
-      option5: q.options[4],
+      option1: q.options[0], option2: q.options[1], option3: q.options[2], option4: q.options[3], option5: q.options[4],
       correctAnswer: q.correctAnswer.toString()
     });
     setEditingId(q._id);
-    window.scrollTo(0, 0); 
+    window.scrollTo({ top: 0, behavior: 'smooth' }); 
   };
 
   const toggleVisibility = async (id, status) => {
@@ -127,12 +128,10 @@ export default function AdminQuestionsPage() {
     } catch (error) { console.error(error); }
   };
 
-  // --- අලුත්: පේපර් Group කිරීම සහ අලුත්ම එක උඩට එන විදිහට Sort කිරීම ---
   const groupedPapers = {};
   questions.forEach(q => {
     const key = `${q.alYear} - ${q.paperName}`; 
     if (!groupedPapers[key]) {
-      // latestId එක පාවිච්චි කරන්නේ අලුත්ම ප්‍රශ්නය තියෙන පේපර් එක හොයාගන්නයි
       groupedPapers[key] = { key, paperName: q.paperName, alYear: q.alYear, questions: [], latestId: q._id.toString() };
     }
     groupedPapers[key].questions.push(q);
@@ -141,59 +140,68 @@ export default function AdminQuestionsPage() {
     }
   });
 
-  // Array එකක් බවට පත් කරලා අලුත්ම එක (latestId) අනුව පිළිවෙළට (Descending) සකසනවා
   const sortedPapers = Object.values(groupedPapers).sort((a, b) => b.latestId.localeCompare(a.latestId));
 
-  // මුලින්ම ලෝඩ් වෙද්දී පළවෙනි (අලුත්ම) පේපර් එක ඔටෝ දිගහැරෙනවා
   useEffect(() => {
     if (sortedPapers.length > 0 && !expandedPaperKey) {
       setExpandedPaperKey(sortedPapers[0].key);
     }
   }, [sortedPapers, expandedPaperKey]);
 
-  if (!isAuthorized) return <div className="min-h-screen bg-slate-900 flex items-center justify-center"><p className="font-bold text-slate-400">පද්ධතියට ඇතුළු වෙමින් පවතී...</p></div>;
+  const bgMain = isDarkMode ? "bg-slate-950 text-slate-100" : "bg-gray-100 text-gray-800";
+  const bgCard = isDarkMode ? "bg-slate-900 border border-slate-800 shadow-none" : "bg-white border-transparent shadow-lg";
+  const textMuted = isDarkMode ? "text-slate-400" : "text-gray-500";
+  const headerBg = isDarkMode ? "bg-slate-900 border-b border-slate-800" : "bg-white shadow-sm border-b border-gray-200";
+  const inputBg = isDarkMode ? "bg-slate-800 border-slate-700 text-white focus:ring-purple-500/50" : "bg-gray-50 border-gray-200 text-gray-900 focus:border-purple-500";
+
+  if (!isAuthorized) return <div className={`min-h-screen flex items-center justify-center ${isDarkMode ? 'bg-slate-950 text-slate-400' : 'bg-slate-900 text-slate-400'}`}><p className="font-bold">පද්ධතියට ඇතුළු වෙමින් පවතී...</p></div>;
 
   return (
-    <div className="bg-gray-100 font-sans flex h-screen overflow-hidden">
+    <div className={`font-sans flex h-screen overflow-hidden transition-colors duration-300 ${bgMain}`}>
       
-      <div className={`fixed inset-0 bg-black/50 z-40 md:hidden ${isSidebarOpen ? 'block' : 'hidden'}`} onClick={() => setIsSidebarOpen(false)}></div>
+      <div className={`fixed inset-0 bg-black/60 z-40 md:hidden transition-opacity ${isSidebarOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'}`} onClick={() => setIsSidebarOpen(false)}></div>
 
-      <aside className={`w-64 bg-slate-900 text-white flex flex-col fixed inset-y-0 left-0 z-50 transform ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'} md:translate-x-0 md:static transition-transform duration-300 shadow-xl`}>
+      <aside className={`w-64 bg-slate-950 text-white flex flex-col fixed inset-y-0 left-0 z-50 transform ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'} md:translate-x-0 md:static transition-transform duration-300 shadow-xl border-r border-slate-800`}>
         <div className="p-6 border-b border-slate-800 font-bold text-xl flex items-center justify-between">
           <span>⚙️ Admin Panel</span>
           <button onClick={() => setIsSidebarOpen(false)} className="md:hidden text-gray-400 hover:text-white">✖</button>
         </div>
         <nav className="flex-1 p-4 space-y-2 overflow-y-auto custom-scrollbar">
-          <a href="#" onClick={(e) => { e.preventDefault(); router.push('/admin'); }} className="flex items-center space-x-3 hover:bg-slate-800 px-4 py-3 rounded-lg transition text-gray-300 hover:text-white"><span>🏠</span><span>මුල් තිරය</span></a>
-          <a href="#" onClick={(e) => { e.preventDefault(); router.push('/admin/attendance'); }} className="flex items-center space-x-3 hover:bg-slate-800 px-4 py-3 rounded-lg transition text-gray-300 hover:text-white"><span>✅</span><span>පැමිණීම (Attendance)</span></a>
-          <a href="#" onClick={(e) => { e.preventDefault(); router.push('/admin/videos'); }} className="flex items-center space-x-3 hover:bg-slate-800 px-4 py-3 rounded-lg transition text-gray-300 hover:text-white"><span>📺</span><span>වීඩියෝ පාඩම්</span></a>
-          <a href="#" onClick={(e) => { e.preventDefault(); router.push('/admin/tutes'); }} className="flex items-center space-x-3 hover:bg-slate-800 px-4 py-3 rounded-lg transition text-gray-300 hover:text-white"><span>📚</span><span>නිබන්ධන</span></a>
-          <a href="#" onClick={(e) => { e.preventDefault(); router.push('/admin/questions'); }} className="flex items-center space-x-3 bg-purple-600 px-4 py-3 rounded-lg text-white font-bold shadow-md"><span>📝</span><span>MCQ ප්‍රශ්න පත්‍ර</span></a>
-          <a href="#" onClick={(e) => { e.preventDefault(); router.push('/admin/marks'); }} className="flex items-center space-x-3 hover:bg-slate-800 px-4 py-3 rounded-lg transition text-gray-300 hover:text-white"><span>📊</span><span>ලකුණු ඇතුළත් කිරීම</span></a>
+          <a href="#" onClick={(e) => { e.preventDefault(); router.push('/admin'); }} className="flex items-center space-x-3 hover:bg-slate-800 px-4 py-3 rounded-xl transition text-gray-300 hover:text-white"><span>🏠</span><span>මුල් තිරය</span></a>
+          <a href="#" onClick={(e) => { e.preventDefault(); router.push('/admin/attendance'); }} className="flex items-center space-x-3 hover:bg-slate-800 px-4 py-3 rounded-xl transition text-gray-300 hover:text-white"><span>✅</span><span>පැමිණීම (Attendance)</span></a>
+          <a href="#" onClick={(e) => { e.preventDefault(); router.push('/admin/videos'); }} className="flex items-center space-x-3 hover:bg-slate-800 px-4 py-3 rounded-xl transition text-gray-300 hover:text-white"><span>📺</span><span>වීඩියෝ පාඩම්</span></a>
+          <a href="#" onClick={(e) => { e.preventDefault(); router.push('/admin/tutes'); }} className="flex items-center space-x-3 hover:bg-slate-800 px-4 py-3 rounded-xl transition text-gray-300 hover:text-white"><span>📚</span><span>නිබන්ධන</span></a>
+          <a href="#" onClick={(e) => { e.preventDefault(); router.push('/admin/questions'); }} className="flex items-center space-x-3 bg-purple-600 px-4 py-3 rounded-xl text-white font-bold shadow-md"><span>📝</span><span>MCQ ප්‍රශ්න පත්‍ර</span></a>
+          <a href="#" onClick={(e) => { e.preventDefault(); router.push('/admin/marks'); }} className="flex items-center space-x-3 hover:bg-slate-800 px-4 py-3 rounded-xl transition text-gray-300 hover:text-white"><span>📊</span><span>ලකුණු ඇතුළත් කිරීම</span></a>
         </nav>
       </aside>
 
-      <main className="flex-1 flex flex-col h-screen overflow-y-auto">
-        <header className="bg-white shadow-sm p-4 flex items-center sticky top-0 z-30 border-b border-gray-200">
-          <button onClick={() => setIsSidebarOpen(true)} className="md:hidden p-2 mr-4 text-slate-800 hover:bg-gray-100 rounded-lg transition"><span className="text-2xl font-bold">☰</span></button>
-          <h1 className="text-xl font-bold text-slate-800">📝 MCQ ප්‍රශ්න පත්‍ර කළමනාකරණය</h1>
+      <main className="flex-1 flex flex-col h-screen overflow-y-auto relative scroll-smooth">
+        <header className={`${headerBg} p-4 flex justify-between items-center sticky top-0 z-30 transition-colors duration-300`}>
+          <div className="flex items-center">
+            <button onClick={() => setIsSidebarOpen(true)} className={`md:hidden p-2 mr-4 rounded-lg transition ${isDarkMode ? 'text-white hover:bg-slate-800' : 'text-slate-800 hover:bg-gray-100'}`}><span className="text-2xl font-bold">☰</span></button>
+            <h1 className="text-xl font-bold">📝 MCQ ප්‍රශ්න පත්‍ර කළමනාකරණය</h1>
+          </div>
+          <button onClick={toggleTheme} className={`p-2 rounded-full transition-all focus:outline-none ${isDarkMode ? 'bg-slate-800 text-yellow-400 hover:bg-slate-700' : 'bg-purple-100 text-purple-600 hover:bg-purple-200'}`}>
+            {isDarkMode ? <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z" /></svg> : <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" /></svg>}
+          </button>
         </header>
 
         <div className="p-6 md:p-10 max-w-7xl mx-auto w-full grid grid-cols-1 lg:grid-cols-3 gap-10">
           
-          <div className="bg-white p-8 rounded-3xl shadow-lg h-fit border-t-8 border-purple-600 sticky top-24 lg:col-span-1">
-            <h2 className="text-2xl font-bold mb-6 text-center">{editingId ? '✏️ ප්‍රශ්නය සංස්කරණය' : '➕ ප්‍රශ්න පත්‍ර සෑදීම'}</h2>
-            {msg && <p className={`p-3 rounded mb-4 font-bold text-center ${msg.includes('✅') ? 'bg-green-100 text-green-700' : 'bg-purple-100 text-purple-700'}`}>{msg}</p>}
+          <div className={`${bgCard} p-8 rounded-3xl h-fit border-t-8 border-t-purple-600 sticky top-24 lg:col-span-1`}>
+            <h2 className="text-xl font-bold mb-6 text-center">{editingId ? '✏️ ප්‍රශ්නය සංස්කරණය' : '➕ ප්‍රශ්න පත්‍ර සෑදීම'}</h2>
+            {msg && <p className={`p-3 rounded-lg mb-4 text-sm font-bold text-center ${msg.includes('✅') ? 'bg-green-100 text-green-700' : 'bg-purple-100 text-purple-700'}`}>{msg}</p>}
             
             <form onSubmit={handleSubmit} className="space-y-4">
               <div>
-                <label className="block text-gray-700 text-xs font-bold mb-1">ප්‍රශ්න පත්‍රයේ නම</label>
-                <input type="text" placeholder="උදා: 2026 Model Paper 01" className="w-full p-3 border rounded-xl bg-gray-50 outline-none focus:border-purple-500" required value={formData.paperName} onChange={(e) => setFormData({...formData, paperName: e.target.value})} />
+                <label className={`block text-xs font-bold mb-1 ${isDarkMode ? 'text-slate-300' : 'text-gray-700'}`}>ප්‍රශ්න පත්‍රයේ නම</label>
+                <input type="text" placeholder="උදා: 2026 Model Paper 01" className={`w-full p-3 rounded-xl border outline-none transition ${inputBg}`} required value={formData.paperName} onChange={(e) => setFormData({...formData, paperName: e.target.value})} />
               </div>
               
               <div>
-                <label className="block text-gray-700 text-xs font-bold mb-1">A/L වර්ෂය</label>
-                <select className="w-full p-3 border rounded-xl bg-gray-50 outline-none focus:border-purple-500" value={formData.alYear} onChange={(e) => setFormData({...formData, alYear: e.target.value})}>
+                <label className={`block text-xs font-bold mb-1 ${isDarkMode ? 'text-slate-300' : 'text-gray-700'}`}>A/L වර්ෂය</label>
+                <select className={`w-full p-3 rounded-xl border outline-none transition ${inputBg}`} value={formData.alYear} onChange={(e) => setFormData({...formData, alYear: e.target.value})}>
                   <option value="All">All Years</option>
                   <option value="2026">2026</option>
                   <option value="2027">2027</option>
@@ -202,20 +210,20 @@ export default function AdminQuestionsPage() {
               </div>
 
               <div>
-                <label className="block text-gray-700 text-xs font-bold mb-1">ප්‍රශ්නය</label>
-                <textarea placeholder="ප්‍රශ්නය..." className="w-full p-3 border rounded-xl bg-gray-50 outline-none focus:border-purple-500 min-h-[100px]" required value={formData.text} onChange={(e) => setFormData({...formData, text: e.target.value})} />
+                <label className={`block text-xs font-bold mb-1 ${isDarkMode ? 'text-slate-300' : 'text-gray-700'}`}>ප්‍රශ්නය</label>
+                <textarea placeholder="ප්‍රශ්නය..." className={`w-full p-3 rounded-xl border outline-none transition min-h-[100px] ${inputBg}`} required value={formData.text} onChange={(e) => setFormData({...formData, text: e.target.value})} />
               </div>
 
-              <div className="grid grid-cols-1 gap-2 p-3 bg-purple-50/50 rounded-xl border border-purple-100">
-                <label className="block text-purple-800 text-xs font-bold mb-1">පිළිතුරු 5 ඇතුළත් කරන්න</label>
+              <div className={`grid grid-cols-1 gap-2 p-3 rounded-xl border ${isDarkMode ? 'bg-slate-800/50 border-slate-700' : 'bg-purple-50/50 border-purple-100'}`}>
+                <label className={`block text-xs font-bold mb-1 ${isDarkMode ? 'text-purple-400' : 'text-purple-800'}`}>පිළිතුරු 5 ඇතුළත් කරන්න</label>
                 {[1, 2, 3, 4, 5].map(i => (
-                  <input key={i} type="text" placeholder={`පිළිතුර ${i}`} className="w-full p-2 border rounded-lg text-sm bg-white outline-none focus:border-purple-500 shadow-sm" required value={formData[`option${i}`]} onChange={(e) => setFormData({...formData, [`option${i}`]: e.target.value})} />
+                  <input key={i} type="text" placeholder={`පිළිතුර ${i}`} className={`w-full p-2 border rounded-lg text-sm outline-none transition shadow-sm ${isDarkMode ? 'bg-slate-700 border-slate-600 text-white focus:border-purple-500' : 'bg-white border-gray-200 text-gray-800 focus:border-purple-500'}`} required value={formData[`option${i}`]} onChange={(e) => setFormData({...formData, [`option${i}`]: e.target.value})} />
                 ))}
               </div>
 
               <div>
-                <label className="block text-gray-700 text-xs font-bold mb-1">නිවැරදි පිළිතුර</label>
-                <select className="w-full p-3 border rounded-xl font-bold bg-green-50 outline-none focus:border-green-500 text-green-800" value={formData.correctAnswer} onChange={(e) => setFormData({...formData, correctAnswer: e.target.value})}>
+                <label className={`block text-xs font-bold mb-1 ${isDarkMode ? 'text-slate-300' : 'text-gray-700'}`}>නිවැරදි පිළිතුර</label>
+                <select className={`w-full p-3 rounded-xl font-bold border outline-none transition ${isDarkMode ? 'bg-green-900/30 border-green-700 text-green-400 focus:ring-green-500' : 'bg-green-50 border-green-200 text-green-800 focus:border-green-500'}`} value={formData.correctAnswer} onChange={(e) => setFormData({...formData, correctAnswer: e.target.value})}>
                   {[1, 2, 3, 4, 5].map((n, i) => <option key={i} value={i}>{n} වන පිළිතුර නිවැරදිය</option>)}
                 </select>
               </div>
@@ -228,7 +236,7 @@ export default function AdminQuestionsPage() {
                 <button type="button" onClick={() => {
                   setEditingId(null);
                   setFormData({ paperName: '', alYear: '2026', text: '', option1: '', option2: '', option3: '', option4: '', option5: '', correctAnswer: '0' });
-                }} className="w-full mt-2 text-gray-500 font-bold hover:text-gray-700 text-sm">
+                }} className={`w-full mt-2 font-bold text-sm transition ${isDarkMode ? 'text-slate-400 hover:text-slate-300' : 'text-gray-500 hover:text-gray-700'}`}>
                   සංස්කරණය අවලංගු කරන්න
                 </button>
               )}
@@ -237,83 +245,75 @@ export default function AdminQuestionsPage() {
 
           <div className="lg:col-span-2 space-y-6">
             {sortedPapers.length === 0 ? (
-               <div className="bg-white p-10 rounded-3xl shadow-lg text-center text-gray-500"><span className="text-5xl block mb-4">📭</span>ප්‍රශ්න කිසිවක් නැත.</div>
+               <div className={`${bgCard} p-10 rounded-3xl text-center ${textMuted}`}><span className="text-5xl block mb-4 opacity-50">📭</span>ප්‍රශ්න කිසිවක් නැත.</div>
             ) : (
               sortedPapers.map(paper => {
                 const isAllHidden = paper.questions.every(q => !q.isVisible);
-                const isExpanded = expandedPaperKey === paper.key; // මේ පේපර් එක දිගහැරලාද බලනවා
+                const isExpanded = expandedPaperKey === paper.key; 
 
                 return (
-                  <div key={paper.key} className={`bg-white rounded-3xl shadow-md overflow-hidden border transition-all duration-300 ${isAllHidden ? 'border-gray-300 opacity-80' : 'border-purple-100'}`}>
+                  <div key={paper.key} className={`${bgCard} rounded-3xl overflow-hidden transition-all duration-300 ${isAllHidden ? 'border-gray-500/30 opacity-80' : (isDarkMode ? 'border-slate-700' : 'border-purple-100')}`}>
                     
-                    {/* Paper Header (ක්ලික් කළාම Minimize/Maximize වෙනවා) */}
                     <div 
-                      className={`p-5 flex flex-wrap justify-between items-center border-b cursor-pointer transition-colors ${isExpanded ? (isAllHidden ? 'bg-gray-100' : 'bg-purple-50') : 'bg-white hover:bg-gray-50'}`}
+                      className={`p-5 flex flex-wrap justify-between items-center border-b cursor-pointer transition-colors ${isExpanded ? (isAllHidden ? (isDarkMode ? 'bg-slate-800' : 'bg-gray-100') : (isDarkMode ? 'bg-slate-800/80' : 'bg-purple-50')) : (isDarkMode ? 'bg-slate-900 hover:bg-slate-800' : 'bg-white hover:bg-gray-50')} ${isDarkMode ? 'border-slate-700' : 'border-gray-200'}`}
                       onClick={() => setExpandedPaperKey(isExpanded ? null : paper.key)}
                     >
                       <div className="flex items-center gap-3">
-                        {/* ඊතලය (Arrow Icon) */}
                         <span className={`text-slate-400 transform transition-transform duration-300 ${isExpanded ? 'rotate-180' : 'rotate-0'}`}>▼</span>
                         <div>
-                          <h3 className={`text-xl font-bold flex items-center gap-2 ${isAllHidden ? 'text-gray-600' : 'text-purple-900'}`}>
+                          <h3 className={`text-lg md:text-xl font-bold flex items-center gap-2 ${isAllHidden ? (isDarkMode ? 'text-slate-500' : 'text-gray-600') : (isDarkMode ? 'text-purple-400' : 'text-purple-900')}`}>
                             <span className="text-2xl">📝</span> {paper.paperName}
                           </h3>
                           <div className="flex items-center gap-2 mt-1">
-                            <span className="bg-white text-purple-800 text-xs font-bold px-3 py-1 rounded-full shadow-sm border border-purple-100">
+                            <span className={`text-[10px] font-bold px-3 py-0.5 rounded-full shadow-sm border ${isDarkMode ? 'bg-slate-900 text-purple-400 border-slate-700' : 'bg-white text-purple-800 border-purple-100'}`}>
                               {paper.alYear}
                             </span>
-                            <span className="text-sm font-medium text-gray-500">
+                            <span className={`text-xs font-medium ${isDarkMode ? 'text-slate-400' : 'text-gray-500'}`}>
                               ප්‍රශ්න {paper.questions.length} ක්
                             </span>
                           </div>
                         </div>
                       </div>
 
-                      {/* Header බොත්තම් (දිගහැරලා තියෙනකොට විතරක් පෙන්වන්නත් පුළුවන්, නැත්නම් හැමවෙලේම පෙන්වන්නත් පුළුවන්. මෙහි හැමවෙලේම පෙන්වයි) */}
                       <div className="flex gap-2 mt-4 sm:mt-0" onClick={(e) => e.stopPropagation()}>
                         {isAllHidden ? (
-                          <button onClick={() => toggleEntirePaper(paper.paperName, paper.alYear, true)} className="bg-green-100 text-green-700 text-xs sm:text-sm font-bold px-3 py-2 rounded-lg hover:bg-green-200 transition shadow-sm border border-green-200 flex items-center gap-1">
-                            👁️ සියල්ල පෙන්වන්න
+                          <button onClick={() => toggleEntirePaper(paper.paperName, paper.alYear, true)} className={`text-xs sm:text-sm font-bold px-3 py-2 rounded-lg transition shadow-sm border flex items-center gap-1 ${isDarkMode ? 'bg-green-900/30 text-green-400 border-green-800 hover:bg-green-900/50' : 'bg-green-100 text-green-700 hover:bg-green-200 border-green-200'}`}>
+                            👁️ Show All
                           </button>
                         ) : (
-                          <button onClick={() => toggleEntirePaper(paper.paperName, paper.alYear, false)} className="bg-yellow-100 text-yellow-700 text-xs sm:text-sm font-bold px-3 py-2 rounded-lg hover:bg-yellow-200 transition shadow-sm border border-yellow-200 flex items-center gap-1">
-                            🚫 සියල්ල සඟවන්න
+                          <button onClick={() => toggleEntirePaper(paper.paperName, paper.alYear, false)} className={`text-xs sm:text-sm font-bold px-3 py-2 rounded-lg transition shadow-sm border flex items-center gap-1 ${isDarkMode ? 'bg-yellow-900/30 text-yellow-500 border-yellow-800 hover:bg-yellow-900/50' : 'bg-yellow-100 text-yellow-700 hover:bg-yellow-200 border-yellow-200'}`}>
+                            🚫 Hide All
                           </button>
                         )}
-                        <button onClick={() => deleteEntirePaper(paper.paperName, paper.alYear)} className="bg-red-100 text-red-600 text-xs sm:text-sm font-bold px-3 py-2 rounded-lg hover:bg-red-200 transition shadow-sm border border-red-200 flex items-center gap-1">
-                          🗑️ මකන්න
+                        <button onClick={() => deleteEntirePaper(paper.paperName, paper.alYear)} className={`text-xs sm:text-sm font-bold px-3 py-2 rounded-lg transition shadow-sm border flex items-center gap-1 ${isDarkMode ? 'bg-red-900/30 text-red-500 border-red-800 hover:bg-red-900/50' : 'bg-red-100 text-red-600 hover:bg-red-200 border-red-200'}`}>
+                          🗑️ Erase
                         </button>
                       </div>
                     </div>
 
-                    {/* ප්‍රශ්න ලැයිස්තුව (Maximize වෙලා තියෙනවා නම් විතරක් පෙන්වයි) */}
                     {isExpanded && (
-                      <div className="p-6 space-y-4 bg-slate-50/50 animate-fade-in">
+                      <div className={`p-6 space-y-4 animate-fade-in ${isDarkMode ? 'bg-slate-900' : 'bg-slate-50/50'}`}>
                         {paper.questions.map((q, idx) => (
-                          <div key={q._id} className={`p-5 rounded-2xl border transition-all ${!q.isVisible ? 'bg-gray-100 opacity-60 grayscale border-gray-200' : 'bg-white shadow-sm hover:shadow-md border-purple-100'}`}>
-                            <div className="flex justify-between items-start mb-3">
-                              <span className="font-bold text-gray-400 bg-gray-100 px-2 py-0.5 rounded text-sm">Q{idx + 1}</span>
+                          <div key={q._id} className={`p-5 rounded-2xl border transition-all ${!q.isVisible ? (isDarkMode ? 'bg-slate-800/50 opacity-60 border-slate-700' : 'bg-gray-100 opacity-60 grayscale border-gray-200') : (isDarkMode ? 'bg-slate-800 border-slate-700 shadow-sm hover:border-slate-600' : 'bg-white shadow-sm hover:shadow-md border-purple-100')}`}>
+                            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 gap-3">
+                              <span className={`font-bold px-2 py-0.5 rounded text-xs ${isDarkMode ? 'bg-slate-700 text-slate-300' : 'text-gray-500 bg-gray-100'}`}>Q{idx + 1}</span>
                               
-                              <div className="flex gap-2">
-                                <button onClick={() => handleEdit(q)} className="text-xs font-bold px-3 py-1 rounded bg-purple-100 text-purple-700 hover:bg-purple-200 transition-all transform hover:scale-105 shadow-sm border border-purple-200">
-                                  ✏️ Edit
-                                </button>
-                                <button onClick={() => toggleVisibility(q._id, q.isVisible)} className={`text-xs font-bold px-3 py-1 rounded transition-all transform hover:scale-105 shadow-sm border ${!q.isVisible ? 'bg-gray-200 text-gray-700 hover:bg-gray-300 border-gray-300' : 'bg-yellow-100 text-yellow-700 hover:bg-yellow-200 border-yellow-200'}`}>
+                              <div className="flex gap-2 w-full sm:w-auto">
+                                <button onClick={() => handleEdit(q)} className={`flex-1 sm:flex-none text-xs font-bold px-3 py-1.5 rounded transition-all transform hover:scale-105 shadow-sm border ${isDarkMode ? 'bg-purple-900/40 text-purple-400 border-purple-800' : 'bg-purple-100 text-purple-700 hover:bg-purple-200 border-purple-200'}`}>✏️ Edit</button>
+                                <button onClick={() => toggleVisibility(q._id, q.isVisible)} className={`flex-1 sm:flex-none text-xs font-bold px-3 py-1.5 rounded transition-all transform hover:scale-105 shadow-sm border ${!q.isVisible ? (isDarkMode ? 'bg-slate-700 text-slate-300 border-slate-600' : 'bg-gray-200 text-gray-700 hover:bg-gray-300 border-gray-300') : (isDarkMode ? 'bg-yellow-900/40 text-yellow-500 border-yellow-800' : 'bg-yellow-100 text-yellow-700 hover:bg-yellow-200 border-yellow-200')}`}>
                                   {q.isVisible ? '🚫 Hide' : '👁️ Show'}
                                 </button>
-                                <button onClick={() => deleteQuestion(q._id)} className="text-xs font-bold px-3 py-1 rounded bg-red-50 text-red-500 hover:bg-red-100 hover:text-red-700 transition-all transform hover:scale-105 shadow-sm border border-red-100">
-                                  🗑️ Erase
-                                </button>
+                                <button onClick={() => deleteQuestion(q._id)} className={`flex-1 sm:flex-none text-xs font-bold px-3 py-1.5 rounded transition-all transform hover:scale-105 shadow-sm border ${isDarkMode ? 'bg-red-900/30 text-red-500 border-red-800' : 'bg-red-50 text-red-500 hover:bg-red-100 hover:text-red-700 border-red-100'}`}>🗑️ Erase</button>
                               </div>
                             </div>
                             
-                            <p className={`font-semibold text-base mb-4 leading-relaxed ${!q.isVisible ? 'text-gray-500 line-through' : 'text-gray-800'}`}>{q.text}</p>
+                            <p className={`font-semibold text-sm md:text-base mb-4 leading-relaxed whitespace-pre-wrap ${!q.isVisible ? (isDarkMode ? 'text-slate-500 line-through' : 'text-gray-500 line-through') : (isDarkMode ? 'text-slate-200' : 'text-gray-800')}`}>{q.text}</p>
                             
                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 mt-3">
                               {q.options.map((opt, optIdx) => (
-                                <div key={optIdx} className={`text-sm px-3 py-2 rounded-lg border flex items-center gap-2 ${q.correctAnswer === optIdx ? 'bg-green-50 border-green-200 text-green-800 font-bold' : 'bg-gray-50 border-gray-200 text-gray-600'}`}>
-                                  <span className={`w-5 h-5 flex items-center justify-center rounded-full text-xs ${q.correctAnswer === optIdx ? 'bg-green-500 text-white' : 'bg-gray-200 text-gray-500'}`}>{optIdx + 1}</span>
-                                  {opt}
+                                <div key={optIdx} className={`text-xs md:text-sm px-3 py-2.5 rounded-lg border flex items-center gap-2 ${q.correctAnswer === optIdx ? (isDarkMode ? 'bg-green-900/30 border-green-700 text-green-400 font-bold' : 'bg-green-50 border-green-200 text-green-800 font-bold') : (isDarkMode ? 'bg-slate-700/50 border-slate-600 text-slate-300' : 'bg-gray-50 border-gray-200 text-gray-600')}`}>
+                                  <span className={`w-5 h-5 flex items-center justify-center rounded-full text-[10px] md:text-xs flex-shrink-0 ${q.correctAnswer === optIdx ? 'bg-green-500 text-white' : (isDarkMode ? 'bg-slate-600 text-slate-400' : 'bg-gray-200 text-gray-500')}`}>{optIdx + 1}</span>
+                                  <span className="truncate">{opt}</span>
                                 </div>
                               ))}
                             </div>
