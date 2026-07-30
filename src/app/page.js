@@ -16,17 +16,37 @@ export default function HomePage() {
   const [loading, setLoading] = useState(false);
   const [successMsg, setSuccessMsg] = useState("");
 
+  // 🔴 අලුත් පන්ති කාලසටහන (2026 පන්ති ඉවත් කර ඇත)
   const ongoingCourses = [
-    { id: 1, title: "2026 THEORY", day: "බ්‍රහස්පතින්දා", time: "පෙ.ව 7.30 - ප.ව 1.30", desc: "තාපය (වායු, තාප ගති විද්‍යාව) සහ ප්‍රායෝගික" },
-    { id: 2, title: "2026 PAPER CLASS", day: "Papers", time: "දැනුම් දෙනු ලැබේ", desc: "Paper 06 සිට 09 දක්වා සාකච්ඡාව" },
-    { id: 3, title: "2026 REVISION", day: "සිකුරාදා", time: "පෙ.ව 7.30 - ප.ව 2.00", desc: "පදාර්ථ හා විකිරණය, ඉලෙක්ට්‍රොනික විද්‍යාව" },
-    { id: 4, title: "2027 THEORY", day: "සෙනසුරාදා", time: "ප.ව 1.00 - ප.ව 4.00", desc: "කාර්යය, ශක්තිය හා ක්ෂමතාව, භ්‍රමණ චලිතය" },
+    { 
+      id: 1, 
+      title: "2027 THEORY", 
+      day: "සෙනසුරාදා", 
+      time: "ප.ව 1:00 - ප.ව 5:00", 
+      desc: "සියෝන් වන් - මතුගම" 
+    },
+    { 
+      id: 2, 
+      title: "2027 PAPER CLASS", 
+      day: "බදාදා / බ්‍රහස්. / සිකුරාදා", 
+      time: "ප.ව 2:00 - ප.ව 5:00", 
+      desc: "සියෝන් වන් - මතුගම" 
+    },
+    { 
+      id: 3, 
+      title: "2028 THEORY", 
+      day: "සෙනසුරාදා", 
+      time: "පෙ.ව 8:00 - පෙ.ව 11:00", 
+      desc: "සියෝන් වන් - මතුගම" 
+    }
   ];
 
+  // ප්‍රතිඵල දත්ත (දැනට භාවිතා නොවේ, නමුත් පසුවට තබා ඇත)
   const resultsData = [1, 2, 3, 4, 5];
+  
   const slides = [
-    { id: 1, title: "භෞතික විද්‍යාව නිවැරදිව ග්‍රහණය කරගන්න", subtitle: "2026 සහ 2027 A/L සිසුන් සඳහා Theory, Revision සහ Paper Classes.", btnText: "වැඩි විස්තර සඳහා", action: () => window.location.href="tel:0714620408", image: "https://images.unsplash.com/photo-1635070041078-e363dbe005cb?q=80&w=1920&auto=format&fit=crop" },
-    { id: 2, title: "දිවයිනේ ඉහළම ප්‍රතිඵල", subtitle: "පසුගිය වසර වලදී විශිෂ්ටතම A සාමාර්ථ ලබාගත් අපගේ දරුවන්.", btnText: "ප්‍රතිඵල බලන්න", action: () => window.location.href="#results", image: "https://images.unsplash.com/photo-1523240795612-9a054b0db644?q=80&w=1920&auto=format&fit=crop" },
+    { id: 1, title: "භෞතික විද්‍යාව නිවැරදිව ග්‍රහණය කරගන්න", subtitle: "2027 සහ 2028 A/L සිසුන් සඳහා Theory සහ Paper Classes.", btnText: "වැඩි විස්තර සඳහා", action: () => window.location.href="tel:0714620408", image: "https://images.unsplash.com/photo-1635070041078-e363dbe005cb?q=80&w=1920&auto=format&fit=crop" },
+    { id: 2, title: "දිවයිනේ ඉහළම ප්‍රතිඵල", subtitle: "පසුගිය වසර වලදී විශිෂ්ටතම A සාමාර්ථ ලබාගත් අපගේ දරුවන්.", btnText: "ලියාපදිංචියට", action: () => window.location.href="tel:0714620408", image: "https://images.unsplash.com/photo-1523240795612-9a054b0db644?q=80&w=1920&auto=format&fit=crop" },
     { id: 3, title: "දරුවන් වෙනුවෙන් කැපවීම", subtitle: "Digital Worksheets සමගින් පහසුවෙන් ඉගෙනගන්න.", btnText: "ගිණුමට පිවිසෙන්න", action: () => changeViewAndScrollTop("login"), image: "https://images.unsplash.com/photo-1516321497487-e288fb19713f?q=80&w=1920&auto=format&fit=crop" }
   ];
 
@@ -67,9 +87,18 @@ export default function HomePage() {
 
     if (heroView === "login") {
       if (phone === "admin" && password === "admin123") {
+        localStorage.setItem("isAdminLoggedIn", "true");
+        localStorage.setItem("adminRole", "Admin");
         router.push("/admin");
         return; 
       }
+      if (phone === "editor" && password === "editor123") {
+        localStorage.setItem("isAdminLoggedIn", "true");
+        localStorage.setItem("adminRole", "Editor");
+        router.push("/admin");
+        return; 
+      }
+      
       try {
         const res = await fetch("/api/login", {
           method: "POST", headers: { "Content-Type": "application/json" },
@@ -124,6 +153,22 @@ export default function HomePage() {
 
       <div className={`modern-font flex min-h-screen flex-col transition-colors duration-300 ${themeBg}`}>
         
+        {/* 🔴 Floating WhatsApp Button */}
+        <a 
+          href="https://wa.me/94714620408" 
+          target="_blank" 
+          rel="noopener noreferrer" 
+          className="fixed bottom-6 right-6 z-[9999] bg-[#25D366] text-white p-3.5 md:p-4 rounded-full shadow-2xl hover:scale-110 transition-transform duration-300 flex items-center justify-center group"
+          title="WhatsApp ඔස්සේ සම්බන්ධ වන්න"
+        >
+          <svg className="w-8 h-8 md:w-10 md:h-10" fill="currentColor" viewBox="0 0 24 24">
+            <path d="M12.031 0C5.385 0 0 5.383 0 12.032c0 2.128.552 4.195 1.6 6.012L.15 24l6.105-1.597A11.964 11.964 0 0012.031 24c6.643 0 12.032-5.385 12.032-12.032C24.063 5.383 18.674 0 12.031 0zm7.143 17.15c-.302.854-1.745 1.622-2.42 1.706-.527.067-1.196.126-3.414-.795-2.65-1.1-4.329-3.82-4.46-3.993-.134-.176-1.066-1.423-1.066-2.715 0-1.291.674-1.93 9.17-2.18.232-.174.526-.298.777-.074.251.222.79 1.107.962 1.328.172.222.155.397-.094.646-.248.248-.567.58-.826.855-.276.294-.567.616-.251 1.157.316.541 1.405 2.321 3.003 3.766 2.062 1.865 3.864 2.457 4.417 2.712.553.254.877.206 1.206-.178.328-.383 1.41-1.642 1.79-2.204.381-.564.76-.469 1.258-.293.498.177 3.153 1.488 3.693 1.754.541.266.903.398 1.036.621.132.222.132 1.288-.17 2.143z" />
+          </svg>
+          <span className="absolute right-full mr-4 bg-white text-slate-800 text-sm font-bold py-1.5 px-3 rounded-xl shadow-lg opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity duration-300 whitespace-nowrap">
+            අපව සම්බන්ධ කරගන්න!
+          </span>
+        </a>
+
         <header className={`sticky top-0 z-50 w-full border-b backdrop-blur-md transition-all duration-300 ${headerBg}`}>
           <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-3 md:px-6 md:py-4">
             <button onClick={() => changeViewAndScrollTop("carousel")} className="flex items-center gap-2 md:gap-3 focus:outline-none">
@@ -234,8 +279,7 @@ export default function HomePage() {
 
               <div 
                 ref={courseRef}
-                onScroll={() => handleScroll(courseRef, setCourseIndex, ongoingCourses.length)}
-                className="flex overflow-x-auto snap-x snap-mandatory gap-5 pb-6 md:grid md:grid-cols-4 md:gap-8 md:overflow-visible [&::-webkit-scrollbar]:hidden [-ms-overflow-style:'none'] [scrollbar-width:'none']"
+                className="flex overflow-x-auto snap-x snap-mandatory gap-5 pb-6 md:grid md:grid-cols-3 md:gap-8 md:overflow-visible [&::-webkit-scrollbar]:hidden [-ms-overflow-style:'none'] [scrollbar-width:'none']"
               >
                 {ongoingCourses.map((course) => (
                   <div key={course.id} className={`group flex-none w-[85%] sm:w-[45%] snap-center flex flex-col overflow-hidden rounded-2xl shadow-sm transition-all duration-300 hover:-translate-y-1.5 hover:shadow-xl md:w-auto border ${cardBg}`}>
@@ -259,6 +303,8 @@ export default function HomePage() {
             </div>
           </section>
 
+          {/* 🔴 ප්‍රතිඵල කොටස දැනට සඟවා (Comment කර) ඇත */}
+          {/*
           <section id="results" className={`py-16 px-4 border-y md:py-24 md:px-6 transition-colors duration-300 ${isDarkMode ? 'bg-slate-950 border-slate-800' : 'bg-purple-50/50 border-purple-100'}`}>
             <div className="mx-auto max-w-7xl">
               <div className="mb-10 text-center md:mb-16">
@@ -285,6 +331,7 @@ export default function HomePage() {
               </div>
             </div>
           </section>
+          */}
 
         </main>
 
@@ -303,15 +350,37 @@ export default function HomePage() {
                 භෞතික විද්‍යාව සරලව සහ තර්කානුකූලව ඉගෙනගන්න. A/L සිසුන් සඳහාම වෙන්වූ ශ්‍රී ලංකාවේ ප්‍රමුඛතම මාර්ගගත වේදිකාව.
               </p>
             </div>
+            
             <div>
               <h4 className="mb-4 text-base font-bold text-white md:mb-6 md:text-lg">අපව සම්බන්ධ කරගන්න</h4>
               <ul className="space-y-4 text-sm text-slate-400">
-                <li className="flex items-center"><span className="mr-3 text-lg">📞</span> <a href="tel:0714620408" className="hover:text-purple-400 transition">071 462 0408 (Call / WhatsApp)</a></li>
+                <li className="flex items-center">
+                  <span className="mr-3 text-lg">📞</span> 
+                  <a href="tel:0714620408" className="hover:text-purple-400 transition">071 462 0408 (Call / WhatsApp)</a>
+                </li>
+                
+                {/* 🔴 Social Media Icons */}
+                <li className="flex items-center gap-4 mt-6">
+                  {/* Facebook */}
+                  <a href="#" target="_blank" rel="noopener noreferrer" className={`p-2 rounded-full transition-colors ${isDarkMode ? 'bg-slate-800 hover:bg-blue-600/20 text-slate-300 hover:text-blue-500' : 'bg-slate-800 hover:bg-blue-600 text-slate-300 hover:text-white'}`}>
+                    <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M22 12c0-5.523-4.477-10-10-10S2 6.477 2 12c0 4.991 3.657 9.128 8.438 9.878v-6.987h-2.54V12h2.54V9.797c0-2.506 1.492-3.89 3.777-3.89 1.094 0 2.238.195 2.238.195v2.46h-1.26c-1.243 0-1.63.771-1.63 1.562V12h2.773l-.443 2.89h-2.33v6.988C18.343 21.128 22 16.991 22 12z"/></svg>
+                  </a>
+                  {/* YouTube */}
+                  <a href="#" target="_blank" rel="noopener noreferrer" className={`p-2 rounded-full transition-colors ${isDarkMode ? 'bg-slate-800 hover:bg-red-600/20 text-slate-300 hover:text-red-500' : 'bg-slate-800 hover:bg-red-600 text-slate-300 hover:text-white'}`}>
+                    <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg>
+                  </a>
+                  {/* TikTok */}
+                  <a href="#" target="_blank" rel="noopener noreferrer" className={`p-2 rounded-full transition-colors ${isDarkMode ? 'bg-slate-800 hover:bg-pink-600/20 text-slate-300 hover:text-pink-500' : 'bg-slate-800 hover:bg-black text-slate-300 hover:text-white'}`}>
+                    <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-5.2 1.74 2.89 2.89 0 0 1 2.31-4.64 2.93 2.93 0 0 1 .88.13V9.4a6.84 6.84 0 0 0-1-.05A6.33 6.33 0 0 0 5 20.1a6.34 6.34 0 0 0 10.86-4.43v-7a8.16 8.16 0 0 0 4.77 1.52v-3.4a4.85 4.85 0 0 1-1-.1z"/></svg>
+                  </a>
+                </li>
               </ul>
             </div>
           </div>
+          
           <div className={`mx-auto mt-10 max-w-7xl border-t pt-6 text-center text-xs md:mt-16 md:pt-8 md:text-sm ${isDarkMode ? 'border-slate-800 text-slate-600' : 'border-slate-800 text-slate-500'}`}>
-            &copy; {new Date().getFullYear()} YCS Physics. All rights reserved.
+            &copy; {new Date().getFullYear()} YCS Physics. All rights reserved. <br/>
+            <span className="mt-2 inline-block">Designed and developed by <a href="https://esip.lk" target="_blank" rel="noopener noreferrer" className="font-bold hover:text-purple-400">esip.lk</a></span>
           </div>
         </footer>
       </div>
