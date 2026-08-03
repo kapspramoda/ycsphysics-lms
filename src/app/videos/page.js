@@ -10,6 +10,7 @@ export default function VideoLessonsPage() {
   const [isDarkMode, setIsDarkMode] = useState(false);
   const [userName, setUserName] = useState('');
   const [avatar, setAvatar] = useState(null);
+  const [userClasses, setUserClasses] = useState([]); // 🔴 අලුත්: ළමයාගේ පන්ති වර්ග
 
   const [videos, setVideos] = useState([]);
   const [currentVideo, setCurrentVideo] = useState(null);
@@ -50,12 +51,31 @@ export default function VideoLessonsPage() {
         const year = userObj.alYear || 'All'; 
         setUserYear(year);
 
+        // 🔴 ළමයාගේ පන්ති වර්ග ලබාගැනීම
+        const classes = userObj.classTypes || ['Theory'];
+        setUserClasses(classes);
+
         const response = await fetch(`/api/videos?year=${year}`, { cache: 'no-store' });
         const data = await response.json();
         
         if (data.videos && data.videos.length > 0) {
-          setVideos(data.videos);
-          setCurrentVideo(data.videos[0]);
+          
+          // 🔴 ළමයාට අදාළ වීඩියෝ පමණක් Filter කිරීම
+          const allowedVideos = data.videos.filter(video => {
+            if (video.category === 'Paper') return classes.includes('Paper');
+            if (video.category === 'Revision') return classes.includes('Revision');
+            if (video.category === 'Theory') return classes.includes('Theory');
+            return true; 
+          });
+
+          if (allowedVideos.length > 0) {
+            setVideos(allowedVideos);
+            setCurrentVideo(allowedVideos[0]);
+          } else {
+            setVideos([]);
+            setCurrentVideo(null);
+          }
+
         } else {
           setVideos([]);
           setCurrentVideo(null);
@@ -70,7 +90,6 @@ export default function VideoLessonsPage() {
     fetchVideos();
   }, [router]);
 
-  // YouTube IFrame වෙතින් දත්ත (Time, Duration) ලබාගැනීමේ පද්ධතිය
   useEffect(() => {
     const handleMessage = (event) => {
       try {
@@ -191,10 +210,8 @@ export default function VideoLessonsPage() {
   return (
     <div className={`font-sans flex h-screen overflow-hidden transition-colors duration-300 ${bgMain}`}>
       
-      {/* 🔴 Mobile Overlay: z-index එක z-[9998] බවට වෙනස් කර ඇත */}
       <div className={`fixed inset-0 bg-black/60 z-[9998] md:hidden transition-opacity ${isSidebarOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'}`} onClick={() => setIsSidebarOpen(false)}></div>
 
-      {/* 🔴 Sidebar Navigation: z-index එක z-[9999] බවට වෙනස් කර ඇත */}
       <aside className={`w-64 bg-purple-900 text-white flex flex-col fixed inset-y-0 left-0 z-[9999] transform ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'} md:translate-x-0 md:static transition-transform duration-300 shadow-2xl`}>
         <div onClick={() => router.push('/')} className="p-6 border-b border-purple-800 font-bold text-xl tracking-wider cursor-pointer hover:opacity-80 transition flex items-center gap-2">
           <div className="bg-white text-purple-700 font-bold rounded-lg p-1.5 text-xs">YS</div>
@@ -204,25 +221,35 @@ export default function VideoLessonsPage() {
           <a href="#" onClick={(e) => { e.preventDefault(); router.push('/dashboard'); }} className="flex items-center space-x-3 hover:bg-purple-800 px-4 py-3 rounded-lg transition">
             <span className="text-xl">🏠</span><span className="font-medium">මුල් තිරය</span>
           </a>
-          <a href="#" onClick={(e) => { e.preventDefault(); router.push('/videos'); }} className="flex items-center space-x-3 bg-purple-800 px-4 py-3 rounded-lg transition shadow-inner border border-purple-800/30">
-            <span className="text-xl">📺</span><span className="font-bold text-white">වීඩියෝ පාඩම්</span>
-          </a>
+          
+          {/* 🔴 Sidebar Links: ළමයාගේ Class Type එකට අනුව පෙන්වීම */}
+          {(userClasses.includes('Theory') || userClasses.includes('Revision')) && (
+            <a href="#" onClick={(e) => { e.preventDefault(); router.push('/videos'); }} className="flex items-center space-x-3 bg-purple-800 px-4 py-3 rounded-lg transition shadow-inner border border-purple-800/30">
+              <span className="text-xl">📺</span><span className="font-bold text-white">වීඩියෝ පාඩම්</span>
+            </a>
+          )}
+          
           <a href="#" onClick={(e) => { e.preventDefault(); router.push('/exam'); }} className="flex items-center space-x-3 hover:bg-purple-800 px-4 py-3 rounded-lg transition">
             <span className="text-xl">💻</span><span className="font-medium">Online විභාග</span>
           </a>
-          <a href="#" onClick={(e) => { e.preventDefault(); router.push('/tutes'); }} className="flex items-center space-x-3 hover:bg-purple-800 px-4 py-3 rounded-lg transition">
-            <span className="text-xl">📚</span><span className="font-medium">නිබන්ධන</span>
-          </a>
-          <a href="#" onClick={(e) => { e.preventDefault(); router.push('/marking'); }} className="flex items-center space-x-3 hover:bg-purple-800 px-4 py-3 rounded-lg transition">
-            <span className="text-xl">✅</span><span className="font-medium">Marking Schemes</span>
-          </a>
+
+          {(userClasses.includes('Theory') || userClasses.includes('Revision')) && (
+            <a href="#" onClick={(e) => { e.preventDefault(); router.push('/tutes'); }} className="flex items-center space-x-3 hover:bg-purple-800 px-4 py-3 rounded-lg transition">
+              <span className="text-xl">📚</span><span className="font-medium">නිබන්ධන</span>
+            </a>
+          )}
+
+          {userClasses.includes('Paper') && (
+            <a href="#" onClick={(e) => { e.preventDefault(); router.push('/marking'); }} className="flex items-center space-x-3 hover:bg-purple-800 px-4 py-3 rounded-lg transition">
+              <span className="text-xl">✅</span><span className="font-medium">Marking Schemes</span>
+            </a>
+          )}
+
           <a href="#" onClick={(e) => { e.preventDefault(); router.push('/dashboard/marks'); }} className="flex items-center space-x-3 hover:bg-purple-800 px-4 py-3 rounded-lg transition">
             <span className="text-xl">📊</span><span className="font-medium">ප්‍රගති වාර්තාව</span>
           </a>
+          
           <div className="pt-4 border-t border-purple-800/50 mt-4 mb-2"></div>
-          {/* <a href="#" onClick={(e) => { e.preventDefault(); router.push('/notifications'); }} className="flex items-center space-x-3 hover:bg-purple-800 px-4 py-3 rounded-lg transition">
-            <span className="text-xl">🔔</span><span className="font-medium">දැනුම්දීම්</span>
-          </a> */}
           <a href="#" onClick={(e) => { e.preventDefault(); router.push('/settings'); }} className="flex items-center space-x-3 hover:bg-purple-800 px-4 py-3 rounded-lg transition">
             <span className="text-xl">⚙️</span><span className="font-medium">සැකසුම්</span>
           </a>
@@ -249,11 +276,7 @@ export default function VideoLessonsPage() {
           </div>
           <div className="flex items-center space-x-4 md:space-x-6">
             <button onClick={toggleTheme} className={`p-2 rounded-full transition-all focus:outline-none ${isDarkMode ? 'bg-slate-800 text-yellow-400 hover:bg-slate-700' : 'bg-purple-100 text-purple-600 hover:bg-purple-200'}`}>
-              {isDarkMode ? (
-                <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z" /></svg>
-              ) : (
-                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" /></svg>
-              )}
+              {isDarkMode ? "☀️" : "🌙"}
             </button>
             <div className={`flex items-center gap-3 px-4 py-2 rounded-full border ${isDarkMode ? 'bg-slate-800 border-slate-700' : 'bg-purple-50 border-purple-100'}`}>
               <div className="text-right hidden sm:block">
@@ -277,7 +300,6 @@ export default function VideoLessonsPage() {
             ) : currentVideo ? (
               <div className="animate-fade-in space-y-4">
                 
-                {/* --- ආරක්ෂිත Video Player කොටස --- */}
                 <div 
                   className={isFullscreen ? "fixed inset-0 z-[99999] bg-black w-screen h-[100dvh] flex flex-col justify-center select-none" : "aspect-video w-full bg-black relative rounded-2xl overflow-hidden shadow-lg select-none"}
                   onContextMenu={(e) => e.preventDefault()}
@@ -289,13 +311,10 @@ export default function VideoLessonsPage() {
                   )}
 
                   <div className="relative w-full h-full flex-grow">
-                    
-                    {/* උඩ කළු තීරුව (Top Shield) */}
                     <div className="absolute top-0 left-0 w-full h-[65px] md:h-[75px] z-[99] bg-black pointer-events-auto flex items-center px-4 md:px-5">
                       <span className="text-white/60 text-xs font-bold truncate max-w-xs md:max-w-md">{currentVideo.title}</span>
                     </div>
 
-                    {/* පහළ කළු තීරුව (Bottom Shield) */}
                     <div className="absolute bottom-0 left-0 w-full h-[60px] md:h-[65px] z-[99] bg-black pointer-events-auto flex items-center justify-end px-4 md:px-5">
                       <span className="text-[10px] md:text-xs font-bold text-slate-500/80 mt-2 mr-1">YCS Physics</span>
                     </div>
@@ -312,7 +331,6 @@ export default function VideoLessonsPage() {
                   </div>
                 </div>
 
-                {/* --- Custom Controls Panel --- */}
                 <div className={`p-4 md:p-5 rounded-2xl border shadow-sm flex flex-col gap-4 transition-all ${isDarkMode ? 'bg-slate-800/50 border-purple-900/30' : 'bg-purple-50/40 border-purple-100/50'}`}>
                   
                   <div className="flex items-center gap-3 w-full">

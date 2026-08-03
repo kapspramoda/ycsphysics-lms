@@ -9,6 +9,7 @@ export default function StudentTutes() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [userName, setUserName] = useState('');
   const [avatar, setAvatar] = useState(null);
+  const [userClasses, setUserClasses] = useState([]); // 🔴 අලුත්: ළමයාගේ පන්ති වර්ග
 
   const [tutes, setTutes] = useState([]);
   const [userYear, setUserYear] = useState('');
@@ -28,10 +29,28 @@ export default function StudentTutes() {
       const year = user.alYear || 'All';
       setUserYear(year);
 
+      // 🔴 ළමයාගේ පන්ති වර්ග ලබාගැනීම
+      const classes = user.classTypes || ['Theory'];
+      setUserClasses(classes);
+
       try {
         const res = await fetch(`/api/tutes?year=${year}`);
         const data = await res.json();
-        setTutes(data.tutes || []);
+        
+        if (data.tutes && data.tutes.length > 0) {
+          
+          // 🔴 ළමයාට අදාළ නිබන්ධන පමණක් Filter කිරීම
+          const allowedTutes = data.tutes.filter(tute => {
+            if (tute.category === 'Marking') return classes.includes('Paper');
+            if (tute.category === 'Revision') return classes.includes('Revision');
+            if (tute.category === 'Theory') return classes.includes('Theory');
+            return true; 
+          });
+
+          setTutes(allowedTutes);
+        } else {
+          setTutes([]);
+        }
       } catch (error) {
         console.error(error);
       } finally {
@@ -50,47 +69,51 @@ export default function StudentTutes() {
   return (
     <div className="bg-gray-50 font-sans text-gray-800 flex h-screen overflow-hidden">
       
-      {/* Mobile Overlay */}
       <div className={`fixed inset-0 bg-black/50 z-40 md:hidden ${isSidebarOpen ? 'block' : 'hidden'}`} onClick={() => setIsSidebarOpen(false)}></div>
 
-      {/* Sidebar Navigation */}
       <aside className={`w-64 bg-purple-900 text-white flex flex-col fixed inset-y-0 left-0 z-50 transform ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'} md:translate-x-0 md:static transition-transform duration-300 shadow-2xl`}>
-        <div 
-          onClick={() => router.push('/')} 
-           className="p-6 border-b border-purple-800 font-bold text-xl tracking-wider cursor-pointer hover:opacity-80 transition"
-            >
-             YCS<span className="text-purple-300">Physics</span>
-          </div>
+        <div onClick={() => router.push('/')} className="p-6 border-b border-purple-800 font-bold text-xl tracking-wider cursor-pointer hover:opacity-80 transition flex items-center gap-2">
+          <div className="bg-white text-purple-700 font-bold rounded-lg p-1.5 text-xs">YS</div>
+          YCS<span className="text-purple-300">Physics</span>
+        </div>
         <nav className="flex-1 p-4 space-y-2 overflow-y-auto custom-scrollbar">
-  <a href="#" onClick={(e) => { e.preventDefault(); router.push('/dashboard'); }} className="flex items-center space-x-3 hover:bg-purple-800 px-4 py-3 rounded-lg transition">
-    <span className="text-xl">🏠</span><span className="font-medium">මුල් තිරය</span>
-  </a>
-  <a href="#" onClick={(e) => { e.preventDefault(); router.push('/videos'); }} className="flex items-center space-x-3 hover:bg-purple-800 px-4 py-3 rounded-lg transition">
-    <span className="text-xl">📺</span><span className="font-medium">වීඩියෝ පාඩම්</span>
-  </a>
-  <a href="#" onClick={(e) => { e.preventDefault(); router.push('/exam'); }} className="flex items-center space-x-3 hover:bg-purple-800 px-4 py-3 rounded-lg transition">
-    <span className="text-xl">💻</span><span className="font-medium">Online විභාග</span>
-  </a>
-  <a href="#" onClick={(e) => { e.preventDefault(); router.push('/tutes'); }} className="flex items-center space-x-3 hover:bg-purple-800 px-4 py-3 rounded-lg transition">
-    <span className="text-xl">📚</span><span className="font-medium">නිබන්ධන</span>
-  </a>
-  <a href="#" onClick={(e) => { e.preventDefault(); router.push('/marking'); }} className="flex items-center space-x-3 hover:bg-purple-800 px-4 py-3 rounded-lg transition">
-    <span className="text-xl">✅</span><span className="font-medium">Marking Schemes</span>
-  </a>
-  <a href="#" onClick={(e) => { e.preventDefault(); router.push('/dashboard/marks'); }} className="flex items-center space-x-3 hover:bg-purple-800 px-4 py-3 rounded-lg transition">
-    <span className="text-xl">📊</span><span className="font-medium">ප්‍රගති වාර්තාව</span>
-  </a>
-  
-  {/* අලුතින් එකතු කළ දැනුම්දීම් සහ සැකසුම් */}
-  <div className="pt-4 border-t border-purple-800/50 mt-4 mb-2"></div>
+          <a href="#" onClick={(e) => { e.preventDefault(); router.push('/dashboard'); }} className="flex items-center space-x-3 hover:bg-purple-800 px-4 py-3 rounded-lg transition">
+            <span className="text-xl">🏠</span><span className="font-medium">මුල් තිරය</span>
+          </a>
+          
+          {/* 🔴 Sidebar Links: ළමයාගේ Class Type එකට අනුව පෙන්වීම */}
+          {(userClasses.includes('Theory') || userClasses.includes('Revision')) && (
+            <a href="#" onClick={(e) => { e.preventDefault(); router.push('/videos'); }} className="flex items-center space-x-3 hover:bg-purple-800 px-4 py-3 rounded-lg transition">
+              <span className="text-xl">📺</span><span className="font-medium">වීඩියෝ පාඩම්</span>
+            </a>
+          )}
+          
+          <a href="#" onClick={(e) => { e.preventDefault(); router.push('/exam'); }} className="flex items-center space-x-3 hover:bg-purple-800 px-4 py-3 rounded-lg transition">
+            <span className="text-xl">💻</span><span className="font-medium">Online විභාග</span>
+          </a>
 
-  {/* <a href="#" onClick={(e) => { e.preventDefault(); router.push('/notifications'); }} className="flex items-center space-x-3 hover:bg-purple-800 px-4 py-3 rounded-lg transition">
-    <span className="text-xl">🔔</span><span className="font-medium">දැනුම්දීම්</span>
-  </a> */}
-  <a href="#" onClick={(e) => { e.preventDefault(); router.push('/settings'); }} className="flex items-center space-x-3 hover:bg-purple-800 px-4 py-3 rounded-lg transition">
-    <span className="text-xl">⚙️</span><span className="font-medium">සැකසුම්</span>
-  </a>
-</nav>
+          {(userClasses.includes('Theory') || userClasses.includes('Revision')) && (
+            <a href="#" onClick={(e) => { e.preventDefault(); router.push('/tutes'); }} className="flex items-center space-x-3 bg-purple-800 px-4 py-3 rounded-lg transition shadow-inner border border-purple-800/30">
+              <span className="text-xl">📚</span><span className="font-bold text-white">නිබන්ධන</span>
+            </a>
+          )}
+
+          {userClasses.includes('Paper') && (
+            <a href="#" onClick={(e) => { e.preventDefault(); router.push('/marking'); }} className="flex items-center space-x-3 hover:bg-purple-800 px-4 py-3 rounded-lg transition">
+              <span className="text-xl">✅</span><span className="font-medium">Marking Schemes</span>
+            </a>
+          )}
+
+          <a href="#" onClick={(e) => { e.preventDefault(); router.push('/dashboard/marks'); }} className="flex items-center space-x-3 hover:bg-purple-800 px-4 py-3 rounded-lg transition">
+            <span className="text-xl">📊</span><span className="font-medium">ප්‍රගති වාර්තාව</span>
+          </a>
+          
+          <div className="pt-4 border-t border-purple-800/50 mt-4 mb-2"></div>
+
+          <a href="#" onClick={(e) => { e.preventDefault(); router.push('/settings'); }} className="flex items-center space-x-3 hover:bg-purple-800 px-4 py-3 rounded-lg transition">
+            <span className="text-xl">⚙️</span><span className="font-medium">සැකසුම්</span>
+          </a>
+        </nav>
         <div className="p-4 border-t border-purple-800">
           <button onClick={handleLogout} className="w-full flex items-center space-x-3 hover:bg-red-500/20 p-3 rounded-lg transition text-purple-200 hover:text-red-400">
             <div className="w-8 h-8 rounded-full bg-purple-800 flex items-center justify-center text-white font-bold text-sm">
@@ -101,10 +124,8 @@ export default function StudentTutes() {
         </div>
       </aside>
 
-      {/* Main Content Area */}
       <main className="flex-1 flex flex-col h-screen overflow-y-auto">
         
-        {/* Header */}
         <header className="bg-white shadow-sm p-4 flex justify-between items-center sticky top-0 z-30 border-b border-gray-200">
           <div className="flex items-center gap-4">
             <button onClick={() => setIsSidebarOpen(true)} className="md:hidden p-2 text-slate-600 hover:bg-slate-100 rounded-lg transition">
@@ -125,7 +146,6 @@ export default function StudentTutes() {
           </div>
         </header>
 
-        {/* Content */}
         <div className="p-4 md:p-8 pb-20 max-w-6xl mx-auto w-full">
           {loading ? (
              <div className="text-center mt-20 text-slate-500 font-bold text-lg animate-pulse">පූරණය වෙමින් පවතී... ⏳</div>
