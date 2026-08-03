@@ -27,6 +27,7 @@ export default function AdminStudentsPage() {
   const [msg, setMsg] = useState({ type: '', text: '' });
   const [loading, setLoading] = useState(false);
   const [students, setStudents] = useState([]);
+  const [isFetchingStudents, setIsFetchingStudents] = useState(true); // Loading state for students list
 
   // Student Profile Modal States
   const [selectedStudent, setSelectedStudent] = useState(null);
@@ -53,11 +54,24 @@ export default function AdminStudentsPage() {
   };
 
   const fetchStudents = async () => {
+    setIsFetchingStudents(true);
     try {
+      // API එකට කතා කරලා දත්ත ගන්නවා
       const res = await fetch('/api/users?year=All', { cache: 'no-store' });
       const data = await res.json();
-      if (data.users) setStudents(data.users);
-    } catch (error) { console.error(error); }
+      
+      // දත්ත ආවොත් ඒක State එකට දානවා
+      if (data && data.users) {
+        setStudents(data.users);
+      } else {
+        setStudents([]);
+      }
+    } catch (error) { 
+      console.error("Error fetching students:", error); 
+      setStudents([]);
+    } finally {
+      setIsFetchingStudents(false);
+    }
   };
 
   // --- Single Student Submit ---
@@ -91,7 +105,7 @@ export default function AdminStudentsPage() {
       if (res.ok) {
         setMsg({ type: 'success', text: 'සිසුවා සාර්ථකව පද්ධතියට එක් කළා! ✅' });
         setFormData({ name: '', email: '', password: '', alYear: '2026', center: '', isTheory: true, isRevision: false, isPaper: false });
-        fetchStudents();
+        fetchStudents(); // Submit කරාට පස්සේ අනිවාර්යයෙන්ම List එක Update කරනවා
       } else { throw new Error(data.message || 'දෝෂයක් මතු විය.'); }
     } catch (error) {
       setMsg({ type: 'error', text: error.message });
@@ -141,7 +155,7 @@ export default function AdminStudentsPage() {
 
     setMsg({ type: 'success', text: `සාර්ථකයි: ${successCount} | අසාර්ථකයි (දැනටමත් ඇත): ${errorCount}` });
     setBulkText('');
-    fetchStudents();
+    fetchStudents(); // Bulk Submit කරාට පස්සේ අනිවාර්යයෙන්ම List එක Update කරනවා
     setLoading(false);
     setTimeout(() => setMsg({ type: '', text: '' }), 5000);
   };
@@ -229,7 +243,7 @@ export default function AdminStudentsPage() {
 
         <div className="p-6 md:p-10 max-w-7xl mx-auto w-full">
 
-          {/* --- අලුත්: Quick Links / Dashboard Top Row --- */}
+          {/* --- Quick Links / Dashboard Top Row --- */}
           <div className="mb-10">
             <h2 className="text-xl md:text-2xl font-bold mb-6">මොකක්ද අද කරන්න තියෙන්නේ? 🚀</h2>
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
@@ -367,7 +381,9 @@ export default function AdminStudentsPage() {
                 </h2>
                 
                 <div className="flex-1 overflow-y-auto pr-2 space-y-3 custom-scrollbar">
-                  {students.length === 0 ? (
+                  {isFetchingStudents ? (
+                    <div className={`text-center py-20 ${textMuted}`}>සිසුන්ගේ දත්ත ලබාගනිමින් පවතී...</div>
+                  ) : students.length === 0 ? (
                     <div className={`text-center py-20 ${textMuted}`}><span className="text-5xl block mb-4 opacity-50">📭</span>දැනට සිසුන් ලියාපදිංචි වී නොමැත.</div>
                   ) : (
                     students.map((student) => (
