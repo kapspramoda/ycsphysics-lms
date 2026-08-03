@@ -2,21 +2,22 @@ import { NextResponse } from 'next/server';
 import connectToDatabase from '@/lib/mongodb';
 import mongoose from 'mongoose';
 
-// User Schema යාවත්කාලීන කිරීම (පරණ සහ අලුත් දත්ත දෙකටම ගැලපෙන්න)
+// 🔴 අලුත් දත්ත වහාම පෙන්වීමට Cache වීම සම්පූර්ණයෙන්ම නවතාලීම
+export const dynamic = 'force-dynamic';
+
 const UserSchema = new mongoose.Schema({
   name: { type: String, required: true },
-  username: { type: String }, // Login වීමට අවශ්‍ය නිසා මෙය එක් කර ඇත
-  email: { type: String }, // WhatsApp Number එක
+  username: { type: String }, 
+  email: { type: String }, 
   password: { type: String, required: true },
-  alYear: { type: String, default: '2026' }, // required අයින් කර default අගයක් ලබා දී ඇත
-  center: { type: String, default: 'Online' }, // required අයින් කර default අගයක් ලබා දී ඇත
+  alYear: { type: String, default: '2026' },
+  center: { type: String, default: 'Online' },
   classTypes: { type: [String], default: ['Theory'] }, 
   status: { type: String, default: 'Active' }, 
   role: { type: String, default: 'Student' },
   createdAt: { type: Date, default: Date.now }
-});
+}, { strict: false }); // 🔴 පරණ දත්ත සමග ගැටීම වැළැක්වීමට
 
-// Cache වීම වැළැක්වීමට
 const User = mongoose.models.User || mongoose.model('User', UserSchema);
 
 // අලුත් සිසුවෙක් ඇතුළත් කිරීම (POST)
@@ -25,7 +26,6 @@ export async function POST(req) {
     const { name, email, password, alYear, center, classTypes } = await req.json();
     await connectToDatabase();
 
-    // මේ අංකයෙන් ළමයෙක් දැනටමත් ඉන්නවාද බලනවා (email හෝ username හරහා)
     const existingUser = await User.findOne({
       $or: [{ email: email }, { username: email }]
     });
@@ -34,11 +34,10 @@ export async function POST(req) {
       return NextResponse.json({ message: 'මෙම අංකයෙන් ගිණුමක් දැනටමත් පවතී!' }, { status: 400 });
     }
 
-    // 🔴 WhatsApp අංකය username සහ email දෙකටම Save කරනවා (Login ගැටලු මඟහැරීමට)
     const newUser = new User({
       name, 
       email: email, 
-      username: email, // අනිවාර්යයෙන්ම username එකටත් අංකය යවන්න ඕනේ
+      username: email, 
       password, 
       alYear: alYear || '2026', 
       center: center || 'Online', 
@@ -62,19 +61,23 @@ export async function GET(req) {
     const year = searchParams.get('year') || 'All';
     await connectToDatabase();
     
-    let query = { role: 'Student' };
+    // 🔴 'role: Student' ෆිල්ටර් එක ඉවත් කළා. පරණ ළමයින්වත් දැන් පෙනේවි.
+    let query = {}; 
+    
+    // Admin සහ Editor ගිණුම් ළමයි ලැයිස්තුවෙන් ඉවත් කිරීම
+    query.username = { $nin: ['admin', 'editor'] };
+    
     if (year !== 'All') query.alYear = year;
 
     const users = await User.find(query).sort({ createdAt: -1 });
 
-    // Frontend එකට යවද්දී හිස් දත්ත (null/undefined) Error නොදෙන විදිහට සකස් කර යැවීම
     const formattedUsers = users.map(u => ({
       _id: u._id,
-      name: u.name,
-      email: u.email || u.username, 
-      alYear: u.alYear || 'N/A',
+      name: u.name || 'Unknown',
+      email: u.email || u.username || 'No Number', 
+      alYear: u.alYear || '2026',
       center: u.center || 'Online',
-      classTypes: u.classTypes || [],
+      classTypes: u.classTypes || ['Theory'],
       status: u.status || 'Active'
     }));
 
