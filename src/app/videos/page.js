@@ -10,7 +10,7 @@ export default function VideoLessonsPage() {
   const [isDarkMode, setIsDarkMode] = useState(false);
   const [userName, setUserName] = useState('');
   const [avatar, setAvatar] = useState(null);
-  const [userClasses, setUserClasses] = useState([]); // 🔴 අලුත්: ළමයාගේ පන්ති වර්ග
+  const [userClasses, setUserClasses] = useState([]);
 
   const [videos, setVideos] = useState([]);
   const [currentVideo, setCurrentVideo] = useState(null);
@@ -51,7 +51,6 @@ export default function VideoLessonsPage() {
         const year = userObj.alYear || 'All'; 
         setUserYear(year);
 
-        // 🔴 ළමයාගේ පන්ති වර්ග ලබාගැනීම
         const classes = userObj.classTypes || ['Theory'];
         setUserClasses(classes);
 
@@ -60,7 +59,7 @@ export default function VideoLessonsPage() {
         
         if (data.videos && data.videos.length > 0) {
           
-          // 🔴 ළමයාට අදාළ වීඩියෝ පමණක් Filter කිරීම
+          // 🔴 ළමයාගේ පන්තියට අදාළ වීඩියෝ පමණක් පෙරීම (Filter)
           const allowedVideos = data.videos.filter(video => {
             if (video.category === 'Paper') return classes.includes('Paper');
             if (video.category === 'Revision') return classes.includes('Revision');
@@ -127,7 +126,6 @@ export default function VideoLessonsPage() {
     return url;
   };
 
-  // --- Custom Video Player Functions ---
   const getSecuredVideoUrl = (ytId) => {
     if(!ytId) return "";
     return `https://www.youtube.com/embed/${ytId}?autoplay=1&rel=0&modestbranding=1&showinfo=0&controls=0&disablekb=1&iv_load_policy=3&fs=0&enablejsapi=1`;
@@ -217,34 +215,21 @@ export default function VideoLessonsPage() {
           <div className="bg-white text-purple-700 font-bold rounded-lg p-1.5 text-xs">YS</div>
           YCS<span className="text-purple-300">Physics</span>
         </div>      
+        
+        {/* 🔴 Sidebar එක සරල කර ඇත */}
         <nav className="flex-1 p-4 space-y-2 overflow-y-auto custom-scrollbar">
           <a href="#" onClick={(e) => { e.preventDefault(); router.push('/dashboard'); }} className="flex items-center space-x-3 hover:bg-purple-800 px-4 py-3 rounded-lg transition">
             <span className="text-xl">🏠</span><span className="font-medium">මුල් තිරය</span>
           </a>
-          
-          {/* 🔴 Sidebar Links: ළමයාගේ Class Type එකට අනුව පෙන්වීම */}
-          {(userClasses.includes('Theory') || userClasses.includes('Revision')) && (
-            <a href="#" onClick={(e) => { e.preventDefault(); router.push('/videos'); }} className="flex items-center space-x-3 bg-purple-800 px-4 py-3 rounded-lg transition shadow-inner border border-purple-800/30">
-              <span className="text-xl">📺</span><span className="font-bold text-white">වීඩියෝ පාඩම්</span>
-            </a>
-          )}
-          
+          <a href="#" onClick={(e) => { e.preventDefault(); router.push('/videos'); }} className="flex items-center space-x-3 bg-purple-800 px-4 py-3 rounded-lg transition shadow-inner border border-purple-800/30">
+            <span className="text-xl">📺</span><span className="font-bold text-white">වීඩියෝ පාඩම්</span>
+          </a>
           <a href="#" onClick={(e) => { e.preventDefault(); router.push('/exam'); }} className="flex items-center space-x-3 hover:bg-purple-800 px-4 py-3 rounded-lg transition">
             <span className="text-xl">💻</span><span className="font-medium">Online විභාග</span>
           </a>
-
-          {(userClasses.includes('Theory') || userClasses.includes('Revision')) && (
-            <a href="#" onClick={(e) => { e.preventDefault(); router.push('/tutes'); }} className="flex items-center space-x-3 hover:bg-purple-800 px-4 py-3 rounded-lg transition">
-              <span className="text-xl">📚</span><span className="font-medium">නිබන්ධන</span>
-            </a>
-          )}
-
-          {userClasses.includes('Paper') && (
-            <a href="#" onClick={(e) => { e.preventDefault(); router.push('/marking'); }} className="flex items-center space-x-3 hover:bg-purple-800 px-4 py-3 rounded-lg transition">
-              <span className="text-xl">✅</span><span className="font-medium">Marking Schemes</span>
-            </a>
-          )}
-
+          <a href="#" onClick={(e) => { e.preventDefault(); router.push('/tutes'); }} className="flex items-center space-x-3 hover:bg-purple-800 px-4 py-3 rounded-lg transition">
+            <span className="text-xl">📚</span><span className="font-medium">නිබන්ධන</span>
+          </a>
           <a href="#" onClick={(e) => { e.preventDefault(); router.push('/dashboard/marks'); }} className="flex items-center space-x-3 hover:bg-purple-800 px-4 py-3 rounded-lg transition">
             <span className="text-xl">📊</span><span className="font-medium">ප්‍රගති වාර්තාව</span>
           </a>
@@ -254,6 +239,7 @@ export default function VideoLessonsPage() {
             <span className="text-xl">⚙️</span><span className="font-medium">සැකසුම්</span>
           </a>
         </nav>
+
         <div className="p-4 border-t border-purple-800">
           <button onClick={handleLogout} className="w-full flex items-center space-x-3 hover:bg-red-500 text-purple-200 hover:text-white p-3 rounded-xl transition">
             <div className="w-8 h-8 rounded-full bg-purple-950 flex items-center justify-center text-white font-bold text-sm">
@@ -395,11 +381,11 @@ export default function VideoLessonsPage() {
                       {currentVideo.tuteUrl ? (
                         <a href={getDownloadUrl(currentVideo.tuteUrl)} target="_blank" rel="noopener noreferrer" className="flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-purple-600 to-fuchsia-600 hover:from-purple-700 hover:to-fuchsia-700 text-white px-4 py-2.5 md:px-5 md:py-3 text-xs md:text-sm font-bold transition-all shadow-sm flex-shrink-0">
                           <svg className="w-4 h-4 md:w-5 md:h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M12 16l-5-5h3V4h4v7h3l-5 5zm9-2v6H3v-6H1v8h22v-8h-2z"/></svg>
-                          Tute (PDF)
+                          {currentVideo.category === 'Paper' ? 'Marking (PDF)' : 'Tute (PDF)'}
                         </a>
                       ) : (
                         <button disabled className={`flex items-center justify-center gap-2 rounded-xl border border-dashed px-4 py-2.5 md:px-5 md:py-3 text-xs md:text-sm font-bold cursor-not-allowed flex-shrink-0 ${isDarkMode ? 'border-slate-700 text-slate-500' : 'border-gray-300 text-gray-400'}`}>
-                          ⏳ Tute පසුවට
+                          ⏳ පසුවට
                         </button>
                       )}
                     </div>
