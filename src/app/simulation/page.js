@@ -98,7 +98,7 @@ export default function SimulationPage() {
   useEffect(() => {
     const storedUser = localStorage.getItem('user');
     if (!storedUser) {
-      router.push('/auth');
+      router.push('/');
       return;
     }
     const userObj = JSON.parse(storedUser);
@@ -108,7 +108,7 @@ export default function SimulationPage() {
   const handleLogout = (e) => {
     e.preventDefault();
     localStorage.removeItem('user');
-    router.push('/auth');
+    router.push('/');
   };
 
   return (

@@ -24,7 +24,7 @@ export default function ExamPage() {
   useEffect(() => {
     const storedUser = localStorage.getItem('user');
     if (!storedUser) {
-      router.push('/auth');
+      router.push('/');
       return;
     }
 
@@ -80,7 +80,7 @@ export default function ExamPage() {
   const handleLogout = (e) => {
     e.preventDefault();
     localStorage.removeItem('user');
-    router.push('/auth');
+    router.push('/');
   };
 
   const handleSubmit = async () => {

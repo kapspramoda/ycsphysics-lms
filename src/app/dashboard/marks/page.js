@@ -19,7 +19,7 @@ export default function StudentMarksPage() {
     const storedUser = localStorage.getItem('user'); 
     
     if (!storedUser) {
-      router.push('/auth');
+      router.push('/');
     } else {
       setIsAuthorized(true);
       const userObj = JSON.parse(storedUser);
@@ -53,7 +53,7 @@ export default function StudentMarksPage() {
   const handleLogout = (e) => {
     e.preventDefault();
     localStorage.removeItem('user');
-    router.push('/auth');
+    router.push('/');
   };
 
   if (!isAuthorized) {

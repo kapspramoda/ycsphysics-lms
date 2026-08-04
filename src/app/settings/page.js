@@ -20,7 +20,7 @@ export default function SettingsPage() {
   useEffect(() => {
     const storedUser = localStorage.getItem('user');
     if (!storedUser) {
-      router.push('/auth');
+      router.push('/');
     } else {
       const userObj = JSON.parse(storedUser);
       setUser(userObj);
@@ -34,7 +34,7 @@ export default function SettingsPage() {
   const handleLogout = (e) => {
     e.preventDefault();
     localStorage.removeItem('user');
-    router.push('/auth');
+    router.push('/');
   };
 
   const handleImageUpload = (e) => {

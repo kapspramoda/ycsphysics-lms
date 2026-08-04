@@ -38,7 +38,7 @@ export default function VideoLessonsPage() {
       try {
         const storedUser = localStorage.getItem('user');
         if (!storedUser) {
-          router.push('/auth');
+          router.push('/');
           return;
         }
 
@@ -114,7 +114,7 @@ export default function VideoLessonsPage() {
   const handleLogout = (e) => {
     e.preventDefault();
     localStorage.removeItem('user');
-    router.push('/auth');
+    router.push('/');
   };
 
   const getDownloadUrl = (url) => {

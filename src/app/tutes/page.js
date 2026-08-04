@@ -18,7 +18,7 @@ export default function StudentTutes() {
   useEffect(() => {
     const fetchTutes = async () => {
       const userStr = localStorage.getItem('user');
-      if (!userStr) { router.push('/auth'); return; }
+      if (!userStr) { router.push('/'); return; }
       
       const user = JSON.parse(userStr);
       setUserName(user.name);
@@ -62,7 +62,7 @@ export default function StudentTutes() {
   const handleLogout = (e) => {
     e.preventDefault();
     localStorage.removeItem('user');
-    router.push('/auth');
+    router.push('/');
   };
 
   return (

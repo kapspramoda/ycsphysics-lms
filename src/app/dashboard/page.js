@@ -37,7 +37,7 @@ export default function PhysicsoardPage() {
 
     const storedUser = localStorage.getItem('user');
     if (!storedUser) {
-      // 🔴 පරණ /auth වෙනුවට අලුත් මුල් පිටුවට (/) යවයි
+      // 🔴 පරණ / වෙනුවට අලුත් මුල් පිටුවට (/) යවයි
       router.push('/');
     } else {
       const userObj = JSON.parse(storedUser);
@@ -101,7 +101,7 @@ export default function PhysicsoardPage() {
   const handleLogout = (e) => {
     e.preventDefault();
     localStorage.removeItem('user');
-    // 🔴 පරණ /auth වෙනුවට අලුත් මුල් පිටුවට (/) යවයි
+    // 🔴 පරණ / වෙනුවට අලුත් මුල් පිටුවට (/) යවයි
     router.push('/');
   };
 
