@@ -6,9 +6,8 @@ export default function AdminAttendancePage() {
   const router = useRouter();
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [isAuthorized, setIsAuthorized] = useState(false);
-  
-  // --- Dark Mode State ---
   const [isDarkMode, setIsDarkMode] = useState(false);
+  const [adminRole, setAdminRole] = useState('Admin'); // 🔴 අලුත්: Role State
 
   const today = new Date().toISOString().split('T')[0]; 
   const currentMonth = today.substring(0, 7); 
@@ -20,24 +19,24 @@ export default function AdminAttendancePage() {
   const [allStudents, setAllStudents] = useState([]); 
   const [attendanceRecords, setAttendanceRecords] = useState([]);
   
-  // Table View States
   const [viewMonth, setViewMonth] = useState(currentMonth); 
   const [selectedYearView, setSelectedYearView] = useState('2026'); 
-  const [selectedCenterView, setSelectedCenterView] = useState(''); // මධ්‍යස්ථානය තේරීමට
+  const [selectedCenterView, setSelectedCenterView] = useState('');
 
-  // Quick Mark States
   const [quickMarkDate, setQuickMarkDate] = useState(today);
   const [quickMarkNote, setQuickMarkNote] = useState('');
 
-  // 1. Load Data
   useEffect(() => {
     const savedTheme = localStorage.getItem('theme');
     if (savedTheme === 'dark') setIsDarkMode(true);
 
     const adminToken = localStorage.getItem('isAdminLoggedIn');
+    const role = localStorage.getItem('adminRole') || 'Admin'; // 🔴
+
     if (!adminToken) {
       router.push('/admin/login');
     } else {
+      setAdminRole(role); // 🔴
       setIsAuthorized(true);
       const fetchAllStudents = async () => {
         try {
@@ -56,6 +55,12 @@ export default function AdminAttendancePage() {
     localStorage.setItem('theme', newTheme ? 'dark' : 'light');
   };
 
+  const handleLogout = () => {
+    localStorage.removeItem('isAdminLoggedIn');
+    localStorage.removeItem('adminRole');
+    router.push('/');
+  };
+
   const fetchAttendance = async () => {
     try {
       const res = await fetch(`/api/attendance?month=${viewMonth}&year=${selectedYearView}`, { cache: 'no-store' });
@@ -68,28 +73,18 @@ export default function AdminAttendancePage() {
     if (isAuthorized) fetchAttendance(); 
   }, [viewMonth, selectedYearView, isAuthorized]);
 
-  // --- Data Calculations ---
-  // පද්ධතියේ ඇති සියලුම මධ්‍යස්ථාන ලැයිස්තුව (Form එකේ Datalist එකට)
   const allUniqueCenters = [...new Set(allStudents.map(s => s.center || 'Online'))];
-  
-  // තෝරාගත් වර්ෂයේ ඉන්න සිසුන් සහ මධ්‍යස්ථාන
   const studentsInYear = allStudents.filter(s => s.alYear === selectedYearView);
   const uniqueCentersInYear = [...new Set(studentsInYear.map(s => s.center || 'Online'))];
-
-  // අදාළ වර්ෂයේ දැනට තෝරාගෙන ඇති මධ්‍යස්ථානය නිවැරදි කිරීම
   const activeCenter = uniqueCentersInYear.includes(selectedCenterView) ? selectedCenterView : (uniqueCentersInYear[0] || '');
 
-  // වර්ෂය හෝ මධ්‍යස්ථානය වෙනස් වූ විට Quick Mark Note එක Auto වෙනස් වීම
   useEffect(() => {
     setQuickMarkNote(activeCenter);
   }, [activeCenter]);
 
-  // Table එක සඳහා තෝරාගත් වර්ෂයේ සහ මධ්‍යස්ථානයේ සිසුන් පමණක් පෙරීම
   const centerStudents = studentsInYear.filter(s => (s.center || 'Online') === activeCenter);
-  
   const currentYearStudents = allStudents.filter(s => s.alYear === formData.alYear);
 
-  // --- Actions ---
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!formData.email) {
@@ -132,7 +127,7 @@ export default function AdminAttendancePage() {
           alYear: selectedYearView, 
           email: email, 
           status: status, 
-          note: quickMarkNote // Auto-filled center name
+          note: quickMarkNote 
         }),
       });
       fetchAttendance(); 
@@ -156,7 +151,6 @@ export default function AdminAttendancePage() {
     if (record.note) dateNotes[record.date] = record.note;
   });
 
-  // --- Theme Classes ---
   const bgMain = isDarkMode ? "bg-slate-950 text-slate-100" : "bg-gray-100 text-gray-800";
   const bgCard = isDarkMode ? "bg-slate-900 border border-slate-800 shadow-none" : "bg-white border-transparent shadow-lg";
   const textMuted = isDarkMode ? "text-slate-400" : "text-gray-500";
@@ -180,15 +174,31 @@ export default function AdminAttendancePage() {
           <span>⚙️ Admin Panel</span>
           <button onClick={() => setIsSidebarOpen(false)} className="md:hidden text-gray-400 hover:text-white">✖</button>
         </div>
+        
+        {/* 🔴 Sidebar Navigation with Roles */}
         <nav className="flex-1 p-4 space-y-2 overflow-y-auto custom-scrollbar">
           <a href="#" onClick={(e) => { e.preventDefault(); router.push('/admin'); }} className="flex items-center space-x-3 hover:bg-slate-800 px-4 py-3 rounded-xl transition text-gray-300 hover:text-white"><span>🏠</span><span>මුල් තිරය</span></a>
-          <a href="#" onClick={(e) => { e.preventDefault(); router.push('/admin/students'); }} className="flex items-center space-x-3 hover:bg-slate-800 px-4 py-3 rounded-xl transition text-gray-300 hover:text-white"><span>👥</span><span>සිසුන් කළමනාකරණය</span></a>
+          
+          {adminRole === 'Admin' && (
+            <a href="#" onClick={(e) => { e.preventDefault(); router.push('/admin/students'); }} className="flex items-center space-x-3 hover:bg-slate-800 px-4 py-3 rounded-xl transition text-gray-300 hover:text-white"><span>👥</span><span>සිසුන් කළමනාකරණය</span></a>
+          )}
+          
           <a href="#" onClick={(e) => { e.preventDefault(); router.push('/admin/attendance'); }} className="flex items-center space-x-3 bg-teal-600 px-4 py-3 rounded-xl text-white font-bold shadow-md"><span>✅</span><span>පැමිණීම (Attendance)</span></a>
-          <a href="#" onClick={(e) => { e.preventDefault(); router.push('/admin/videos'); }} className="flex items-center space-x-3 hover:bg-slate-800 px-4 py-3 rounded-xl transition text-gray-300 hover:text-white"><span>📺</span><span>වීඩියෝ පාඩම්</span></a>
-          <a href="#" onClick={(e) => { e.preventDefault(); router.push('/admin/tutes'); }} className="flex items-center space-x-3 hover:bg-slate-800 px-4 py-3 rounded-xl transition text-gray-300 hover:text-white"><span>📚</span><span>නිබන්ධන</span></a>
-          <a href="#" onClick={(e) => { e.preventDefault(); router.push('/admin/questions'); }} className="flex items-center space-x-3 hover:bg-slate-800 px-4 py-3 rounded-xl transition text-gray-300 hover:text-white"><span>📝</span><span>MCQ ප්‍රශ්න පත්‍ර</span></a>
+          
+          {adminRole === 'Admin' && (
+            <>
+              <a href="#" onClick={(e) => { e.preventDefault(); router.push('/admin/videos'); }} className="flex items-center space-x-3 hover:bg-slate-800 px-4 py-3 rounded-xl transition text-gray-300 hover:text-white"><span>📺</span><span>වීඩියෝ පාඩම්</span></a>
+              <a href="#" onClick={(e) => { e.preventDefault(); router.push('/admin/tutes'); }} className="flex items-center space-x-3 hover:bg-slate-800 px-4 py-3 rounded-xl transition text-gray-300 hover:text-white"><span>📚</span><span>නිබන්ධන</span></a>
+              <a href="#" onClick={(e) => { e.preventDefault(); router.push('/admin/questions'); }} className="flex items-center space-x-3 hover:bg-slate-800 px-4 py-3 rounded-xl transition text-gray-300 hover:text-white"><span>📝</span><span>MCQ ප්‍රශ්න පත්‍ර</span></a>
+            </>
+          )}
+
           <a href="#" onClick={(e) => { e.preventDefault(); router.push('/admin/marks'); }} className="flex items-center space-x-3 hover:bg-slate-800 px-4 py-3 rounded-xl transition text-gray-300 hover:text-white"><span>📊</span><span>ලකුණු ඇතුළත් කිරීම</span></a>
         </nav>
+
+        <div className="p-4 border-t border-slate-800">
+          <button onClick={handleLogout} className="w-full bg-slate-800 hover:bg-red-900/50 text-white hover:text-red-400 font-bold py-3 rounded-xl transition">⬅ Logout</button>
+        </div>
       </aside>
 
       <main className="flex-1 flex flex-col h-screen overflow-y-auto relative">
@@ -203,14 +213,17 @@ export default function AdminAttendancePage() {
           
           <div className="flex items-center space-x-4">
             <button onClick={toggleTheme} className={`p-2 rounded-full transition-all focus:outline-none ${isDarkMode ? 'bg-slate-800 text-yellow-400 hover:bg-slate-700' : 'bg-teal-100 text-teal-600 hover:bg-teal-200'}`}>
-              {isDarkMode ? <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z" /></svg> : <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" /></svg>}
+              {isDarkMode ? '☀️' : '🌙'}
             </button>
+            <div className={`flex items-center gap-3 px-4 py-2 rounded-full border ${isDarkMode ? 'bg-slate-800 border-slate-700' : 'bg-purple-50 border-purple-100'}`}>
+              <div className="w-8 h-8 bg-teal-600 rounded-full flex items-center justify-center text-white font-bold">{adminRole.charAt(0)}</div>
+              <span className={`font-bold text-sm hidden sm:block ${isDarkMode ? 'text-purple-400' : 'text-purple-900'}`}>{adminRole} Mode</span>
+            </div>
           </div>
         </header>
 
         <div className="p-6 md:p-10 max-w-[1600px] mx-auto w-full grid grid-cols-1 lg:grid-cols-4 gap-8">
           
-          {/* වම් පැත්ත: Single Form */}
           <div className={`${bgCard} p-8 rounded-3xl border-t-8 border-t-teal-500 lg:col-span-1 h-fit sticky top-24`}>
             <h2 className="text-xl font-bold mb-6 text-center">✅ තනි සිසුවෙකු සටහන් කිරීම</h2>
 
@@ -224,7 +237,6 @@ export default function AdminAttendancePage() {
               
               <div>
                 <label className={`block text-sm font-bold mb-1 ${isDarkMode ? 'text-slate-300' : 'text-gray-700'}`}>ස්ථානය / පන්ති සටහන</label>
-                {/* 🔴 අලුත්: මධ්‍යස්ථානය තෝරන්න Datalist එක */}
                 <input type="text" list="centers" value={formData.note} onChange={(e) => setFormData({...formData, note: e.target.value})} className={`w-full px-4 py-3 rounded-xl border outline-none focus:ring-2 focus:ring-teal-500/50 text-sm ${inputBg}`} placeholder="මධ්‍යස්ථානය තෝරන්න හෝ ටයිප් කරන්න"/>
                 <datalist id="centers">
                   {allUniqueCenters.map(center => <option key={center} value={center} />)}
@@ -268,10 +280,8 @@ export default function AdminAttendancePage() {
             </form>
           </div>
 
-          {/* දකුණු පැත්ත: Attendance Table */}
           <div className={`${bgCard} p-6 md:p-8 rounded-3xl lg:col-span-3 min-h-[500px]`}>
             
-            {/* Top Filters (අවුරුද්ද සහ මධ්‍යස්ථානය තේරීම) */}
             <div className={`flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8 border-b pb-6 ${isDarkMode ? 'border-slate-800' : 'border-gray-200'}`}>
               <h2 className="text-xl md:text-2xl font-bold flex items-center">
                 <span className="mr-2">📅</span> මාසික පැමිණීමේ වාර්තා
@@ -285,7 +295,6 @@ export default function AdminAttendancePage() {
                   <option value="2028">2028</option>
                 </select>
 
-                {/* 🔴 අලුත්: මධ්‍යස්ථානය අනුව Table එක තේරීමේ Dropdown එක */}
                 <select value={activeCenter} onChange={(e) => setSelectedCenterView(e.target.value)} className={`px-4 py-2 border rounded-xl text-sm font-bold outline-none focus:ring-2 focus:ring-teal-500/50 min-w-[150px] ${inputBg}`}>
                   {uniqueCentersInYear.length === 0 ? (
                     <option value="" disabled>මධ්‍යස්ථාන නැත</option>
@@ -296,7 +305,6 @@ export default function AdminAttendancePage() {
               </div>
             </div>
 
-            {/* Quick Mark Global Panel */}
             <div className={`flex items-center flex-wrap gap-3 p-4 rounded-2xl border mb-8 shadow-sm ${isDarkMode ? 'bg-teal-900/10 border-teal-800/40' : 'bg-teal-50/50 border-teal-100'}`}>
               <span className={`font-bold text-sm ${isDarkMode ? 'text-teal-400' : 'text-teal-800'}`}>⚡ අලුත් දිනයක් සකසන්න:</span>
               <input type="date" value={quickMarkDate} onChange={e => setQuickMarkDate(e.target.value)} className={`px-3 py-2 rounded-lg border outline-none text-sm font-bold focus:ring-2 focus:ring-teal-500/50 ${inputBg}`} />
@@ -304,7 +312,6 @@ export default function AdminAttendancePage() {
               <p className={`text-xs w-full mt-1 ${isDarkMode ? 'text-slate-400' : 'text-slate-500'}`}>දිනය සකසා පහත වගුවේ අලුත් තීරුවෙන් සිසුන්ගේ පැමිණීම (✔/✖) ක්ලික් කරන්න.</p>
             </div>
 
-            {/* Render Selected Table */}
             {centerStudents.length === 0 ? (
               <div className="text-center py-20 flex flex-col items-center">
                 <span className="text-5xl mb-4 opacity-30">📭</span>
@@ -324,7 +331,6 @@ export default function AdminAttendancePage() {
                       <tr className={`${tableHeadBg} text-xs uppercase tracking-wider`}>
                         <th className={`p-4 font-black border-r sticky left-0 z-20 min-w-[200px] shadow-[2px_0_5px_-2px_rgba(0,0,0,0.1)] ${tableHeadBg}`}>සිසුවාගේ නම</th>
                         
-                        {/* Quick Mark Column */}
                         <th className={`p-3 text-center border-r min-w-[120px] shadow-inner ${isDarkMode ? 'bg-teal-900/30 border-teal-800/50' : 'bg-teal-50 border-teal-100'}`}>
                           <div className={`text-lg font-black ${isDarkMode ? 'text-teal-400' : 'text-teal-800'}`}>{quickMarkDate.split('-')[2]} <span className="text-xs font-normal">({quickMarkDate.split('-')[1]})</span></div>
                           <div className={`text-[10px] font-bold mt-1 px-1 rounded truncate max-w-[100px] mx-auto border ${isDarkMode ? 'bg-slate-900 text-teal-400 border-teal-900/50' : 'bg-white text-teal-600 border-teal-100'}`} title={quickMarkNote || 'අලුත් දිනය'}>
@@ -332,7 +338,6 @@ export default function AdminAttendancePage() {
                           </div>
                         </th>
 
-                        {/* Dates Columns */}
                         {uniqueDates.map((date) => {
                           const day = date.split('-')[2];
                           const note = dateNotes[date]; 

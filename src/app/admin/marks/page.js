@@ -7,6 +7,7 @@ export default function AdminMarksPage() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [isAuthorized, setIsAuthorized] = useState(false); 
   const [isDarkMode, setIsDarkMode] = useState(false);
+  const [adminRole, setAdminRole] = useState('Admin'); // 🔴 අලුත්: Role State
 
   const [formData, setFormData] = useState({ email: '', paperName: '', score: '', alYear: '2026' });
   const [message, setMessage] = useState({ type: '', text: '' });
@@ -23,9 +24,12 @@ export default function AdminMarksPage() {
     if (savedTheme === 'dark') setIsDarkMode(true);
 
     const adminToken = localStorage.getItem('isAdminLoggedIn');
+    const role = localStorage.getItem('adminRole') || 'Admin'; // 🔴
+
     if (!adminToken) {
       router.push('/admin/login');
     } else {
+      setAdminRole(role); // 🔴
       setIsAuthorized(true);
     }
   }, [router]);
@@ -104,6 +108,12 @@ export default function AdminMarksPage() {
     }
   };
 
+  const handleLogout = () => {
+    localStorage.removeItem('isAdminLoggedIn');
+    localStorage.removeItem('adminRole');
+    router.push('/');
+  };
+
   let groupedMarks = {};
   if (selectedYearView) {
     const filteredMarks = allMarks.filter(m => m.alYear === selectedYearView);
@@ -143,15 +153,31 @@ export default function AdminMarksPage() {
           <span>⚙️ Admin Panel</span>
           <button onClick={() => setIsSidebarOpen(false)} className="md:hidden text-gray-400 hover:text-white">✖</button>
         </div>
+        
+        {/* 🔴 Sidebar Navigation with Roles */}
         <nav className="flex-1 p-4 space-y-2 overflow-y-auto custom-scrollbar">
           <a href="#" onClick={(e) => { e.preventDefault(); router.push('/admin'); }} className="flex items-center space-x-3 hover:bg-slate-800 px-4 py-3 rounded-xl transition text-gray-300 hover:text-white"><span>🏠</span><span>මුල් තිරය</span></a>
-          <a href="#" onClick={(e) => { e.preventDefault(); router.push('/admin/students'); }} className="flex items-center space-x-3 hover:bg-slate-800 px-4 py-3 rounded-xl transition text-gray-300 hover:text-white"><span>👥</span><span>සිසුන් කළමනාකරණය</span></a>
+          
+          {adminRole === 'Admin' && (
+            <a href="#" onClick={(e) => { e.preventDefault(); router.push('/admin/students'); }} className="flex items-center space-x-3 hover:bg-slate-800 px-4 py-3 rounded-xl transition text-gray-300 hover:text-white"><span>👥</span><span>සිසුන් කළමනාකරණය</span></a>
+          )}
+          
           <a href="#" onClick={(e) => { e.preventDefault(); router.push('/admin/attendance'); }} className="flex items-center space-x-3 hover:bg-slate-800 px-4 py-3 rounded-xl transition text-gray-300 hover:text-white"><span>✅</span><span>පැමිණීම (Attendance)</span></a>
-          <a href="#" onClick={(e) => { e.preventDefault(); router.push('/admin/videos'); }} className="flex items-center space-x-3 hover:bg-slate-800 px-4 py-3 rounded-xl transition text-gray-300 hover:text-white"><span>📺</span><span>වීඩියෝ පාඩම්</span></a>
-          <a href="#" onClick={(e) => { e.preventDefault(); router.push('/admin/tutes'); }} className="flex items-center space-x-3 hover:bg-slate-800 px-4 py-3 rounded-xl transition text-gray-300 hover:text-white"><span>📚</span><span>නිබන්ධන</span></a>
-          <a href="#" onClick={(e) => { e.preventDefault(); router.push('/admin/questions'); }} className="flex items-center space-x-3 hover:bg-slate-800 px-4 py-3 rounded-xl transition text-gray-300 hover:text-white"><span>📝</span><span>MCQ ප්‍රශ්න පත්‍ර</span></a>
+          
+          {adminRole === 'Admin' && (
+            <>
+              <a href="#" onClick={(e) => { e.preventDefault(); router.push('/admin/videos'); }} className="flex items-center space-x-3 hover:bg-slate-800 px-4 py-3 rounded-xl transition text-gray-300 hover:text-white"><span>📺</span><span>වීඩියෝ පාඩම්</span></a>
+              <a href="#" onClick={(e) => { e.preventDefault(); router.push('/admin/tutes'); }} className="flex items-center space-x-3 hover:bg-slate-800 px-4 py-3 rounded-xl transition text-gray-300 hover:text-white"><span>📚</span><span>නිබන්ධන</span></a>
+              <a href="#" onClick={(e) => { e.preventDefault(); router.push('/admin/questions'); }} className="flex items-center space-x-3 hover:bg-slate-800 px-4 py-3 rounded-xl transition text-gray-300 hover:text-white"><span>📝</span><span>MCQ ප්‍රශ්න පත්‍ර</span></a>
+            </>
+          )}
+
           <a href="#" onClick={(e) => { e.preventDefault(); router.push('/admin/marks'); }} className="flex items-center space-x-3 bg-amber-500 px-4 py-3 rounded-xl text-white font-bold shadow-md"><span>📊</span><span>ලකුණු ඇතුළත් කිරීම</span></a>
         </nav>
+
+        <div className="p-4 border-t border-slate-800">
+          <button onClick={handleLogout} className="w-full bg-slate-800 hover:bg-red-900/50 text-white hover:text-red-400 font-bold py-3 rounded-xl transition">⬅ Logout</button>
+        </div>
       </aside>
 
       <main className="flex-1 flex flex-col h-screen overflow-y-auto relative scroll-smooth">
@@ -160,9 +186,15 @@ export default function AdminMarksPage() {
             <button onClick={() => setIsSidebarOpen(true)} className={`md:hidden p-2 mr-4 rounded-lg transition ${isDarkMode ? 'text-white hover:bg-slate-800' : 'text-slate-800 hover:bg-gray-100'}`}><span className="text-2xl font-bold">☰</span></button>
             <h1 className="text-xl font-bold">📊 ලකුණු ඇතුළත් කිරීම</h1>
           </div>
-          <button onClick={toggleTheme} className={`p-2 rounded-full transition-all focus:outline-none ${isDarkMode ? 'bg-slate-800 text-yellow-400 hover:bg-slate-700' : 'bg-amber-100 text-amber-600 hover:bg-amber-200'}`}>
-            {isDarkMode ? <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z" /></svg> : <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" /></svg>}
-          </button>
+          <div className="flex items-center space-x-4">
+            <button onClick={toggleTheme} className={`p-2 rounded-full transition-all focus:outline-none ${isDarkMode ? 'bg-slate-800 text-yellow-400 hover:bg-slate-700' : 'bg-amber-100 text-amber-600 hover:bg-amber-200'}`}>
+              {isDarkMode ? '☀️' : '🌙'}
+            </button>
+            <div className={`flex items-center gap-3 px-4 py-2 rounded-full border ${isDarkMode ? 'bg-slate-800 border-slate-700' : 'bg-purple-50 border-purple-100'}`}>
+              <div className="w-8 h-8 bg-amber-500 rounded-full flex items-center justify-center text-white font-bold">{adminRole.charAt(0)}</div>
+              <span className={`font-bold text-sm hidden sm:block ${isDarkMode ? 'text-purple-400' : 'text-purple-900'}`}>{adminRole} Mode</span>
+            </div>
+          </div>
         </header>
 
         <div className="p-6 md:p-10 max-w-7xl mx-auto w-full">
@@ -275,7 +307,6 @@ export default function AdminMarksPage() {
                             <tr className={`${tableHeadBg} text-xs uppercase tracking-wider`}>
                               <th className="p-4 rounded-tl-xl w-16 text-center">ස්ථානය</th>
                               <th className="p-4">සිසුවාගේ නම</th>
-                              <th className="p-4">වර්ගය</th>
                               <th className="p-4 text-center">ලකුණු</th>
                               <th className="p-4 rounded-tr-xl text-center">වෙනස්කම්</th>
                             </tr>
@@ -287,7 +318,6 @@ export default function AdminMarksPage() {
                                   {rankIndex === 0 ? <span className="text-2xl" title="පළමු ස්ථානය">🥇</span> : rankIndex === 1 ? <span className="text-2xl" title="දෙවන ස්ථානය">🥈</span> : rankIndex === 2 ? <span className="text-2xl" title="තෙවන ස්ථානය">🥉</span> : <span className={`font-bold ${isDarkMode ? 'text-slate-500' : 'text-gray-500'}`}>{rankIndex + 1}</span>}
                                 </td>
                                 <td className={`p-4 font-bold text-sm ${isDarkMode ? 'text-slate-200' : 'text-gray-800'}`}>{getStudentName(mark.email)}</td>
-                                <td className="p-4"><span className={`px-2.5 py-1 rounded-full text-[10px] font-bold ${mark.examType === 'Online' ? (isDarkMode ? 'bg-green-900/40 text-green-400' : 'bg-green-100 text-green-700') : (isDarkMode ? 'bg-yellow-900/40 text-yellow-400' : 'bg-yellow-100 text-yellow-700')}`}>{mark.examType}</span></td>
                                 <td className={`p-4 text-center font-black text-lg ${isDarkMode ? 'text-purple-400' : 'text-purple-600'}`}>{mark.score}%</td>
                                 <td className="p-4 text-center">
                                   <button onClick={() => handleDelete(mark._id)} className={`font-bold text-xs px-3 py-1.5 rounded-lg transition ${isDarkMode ? 'bg-red-900/30 text-red-500 hover:bg-red-900/50 border border-red-900/50' : 'bg-red-50 text-red-500 hover:text-red-700 hover:bg-red-100'}`}>🗑️ මකන්න</button>
