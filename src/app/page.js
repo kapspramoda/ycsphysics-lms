@@ -123,6 +123,7 @@ export default function HomePage() {
   const headerBg = isDarkMode ? "bg-slate-900/90 border-slate-800 shadow-md" : "bg-white/90 border-purple-100 shadow-sm";
   const logoTextColor = isDarkMode ? "text-purple-400" : "text-purple-800";
   const sectionTitleColor = isDarkMode ? "text-white" : "text-slate-900";
+  const sectionDescColor = isDarkMode ? "text-slate-400" : "text-slate-500";
   const cardBg = isDarkMode ? "bg-slate-900 border-slate-800 hover:border-purple-500/50" : "bg-white border-purple-100 hover:border-purple-300";
   const cardTitle = isDarkMode ? "text-purple-300" : "text-purple-800";
   const cardImgBg = isDarkMode ? "bg-slate-800 text-purple-400/50" : "bg-purple-50 text-purple-300";
