@@ -6,7 +6,7 @@ import { Line } from 'react-chartjs-2';
 
 ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend, Filler);
 
-export default function DashboardPage() {
+export default function PhysicsoardPage() {
   const router = useRouter();
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   
@@ -16,10 +16,11 @@ export default function DashboardPage() {
   const [center, setCenter] = useState('');
   const [isAuthorized, setIsAuthorized] = useState(false);
   const [avatar, setAvatar] = useState(null); 
+  const [userClasses, setUserClasses] = useState([]); // 🔴 පන්ති වර්ගය ලබා ගැනීමට
+
   const [todos, setTodos] = useState([]);
   const [newTodo, setNewTodo] = useState('');
 
-  // අලුත් Notification State
   const [systemNotification, setSystemNotification] = useState(null);
 
   const [chartLabels, setChartLabels] = useState(['දත්ත නැත']);
@@ -36,12 +37,14 @@ export default function DashboardPage() {
 
     const storedUser = localStorage.getItem('user');
     if (!storedUser) {
-      router.push('/auth');
+      // 🔴 පරණ /auth වෙනුවට අලුත් මුල් පිටුවට (/) යවයි
+      router.push('/');
     } else {
       const userObj = JSON.parse(storedUser);
       setUserName(userObj.name);
       setAlYear(userObj.alYear || '');
       setCenter(userObj.center || '');
+      setUserClasses(userObj.classTypes || ['Theory']); // පන්ති වර්ගය සේව් කරගැනීම
       setIsAuthorized(true);
 
       const storedAvatar = localStorage.getItem('userAvatar');
@@ -50,7 +53,6 @@ export default function DashboardPage() {
       const storedTodos = localStorage.getItem('userTodos');
       if (storedTodos) setTodos(JSON.parse(storedTodos));
 
-      // Fetch Notification
       const fetchNotification = async () => {
         try {
           const res = await fetch(`/api/notifications?year=${userObj.alYear || 'All'}`);
@@ -99,7 +101,8 @@ export default function DashboardPage() {
   const handleLogout = (e) => {
     e.preventDefault();
     localStorage.removeItem('user');
-    router.push('/auth');
+    // 🔴 පරණ /auth වෙනුවට අලුත් මුල් පිටුවට (/) යවයි
+    router.push('/');
   };
 
   const handleAddTodo = (e) => {
@@ -148,33 +151,30 @@ export default function DashboardPage() {
           YCS<span className="text-purple-300">Physics</span>
         </div>
         <nav className="flex-1 p-4 space-y-2 overflow-y-auto custom-scrollbar">
-          <a href="#" onClick={(e) => { e.preventDefault(); router.push('/dashboard'); }} className="flex items-center space-x-3 bg-purple-800 text-white px-4 py-3 rounded-xl transition shadow-inner">
+          <a href="#" onClick={(e) => { e.preventDefault(); router.push('/Physicsoard'); }} className="flex items-center space-x-3 bg-purple-800 text-white px-4 py-3 rounded-xl transition shadow-inner">
             <span className="text-xl">🏠</span><span className="font-bold">මුල් තිරය</span>
           </a>
+          
           <a href="#" onClick={(e) => { e.preventDefault(); router.push('/videos'); }} className="flex items-center space-x-3 hover:bg-purple-800/80 text-purple-200 hover:text-white px-4 py-3 rounded-xl transition">
             <span className="text-xl">📺</span><span className="font-medium">වීඩියෝ පාඩම්</span>
           </a>
-          {/* <a href="#" onClick={(e) => { e.preventDefault(); router.push('/simulation'); }} className="flex items-center space-x-3 hover:bg-purple-800/80 text-purple-200 hover:text-white px-4 py-3 rounded-xl transition">
-            <span className="text-xl">🧪</span><span className="font-medium">Simulations</span>
-          </a> */}
+          
           <a href="#" onClick={(e) => { e.preventDefault(); router.push('/exam'); }} className="flex items-center space-x-3 hover:bg-purple-800/80 text-purple-200 hover:text-white px-4 py-3 rounded-xl transition">
             <span className="text-xl">💻</span><span className="font-medium">Online විභාග</span>
           </a>
+          
           <a href="#" onClick={(e) => { e.preventDefault(); router.push('/tutes'); }} className="flex items-center space-x-3 hover:bg-purple-800/80 text-purple-200 hover:text-white px-4 py-3 rounded-xl transition">
             <span className="text-xl">📚</span><span className="font-medium">නිබන්ධන</span>
           </a>
-          {/* <a href="#" onClick={(e) => { e.preventDefault(); router.push('/marking'); }} className="flex items-center space-x-3 hover:bg-purple-800/80 text-purple-200 hover:text-white px-4 py-3 rounded-xl transition">
-            <span className="text-xl">✅</span><span className="font-medium">Marking Schemes</span>
-          </a> */}
-          <a href="#" onClick={(e) => { e.preventDefault(); router.push('/dashboard/marks'); }} className="flex items-center space-x-3 hover:bg-purple-800/80 text-purple-200 hover:text-white px-4 py-3 rounded-xl transition">
+          
+          {/* 🔴 Marking Schemes ලින්ක් එක අයින් කර ඇත (දැන් එය Tutes/Videos යටතටම එන බැවින්) */}
+
+          <a href="#" onClick={(e) => { e.preventDefault(); router.push('/Physicsoard/marks'); }} className="flex items-center space-x-3 hover:bg-purple-800/80 text-purple-200 hover:text-white px-4 py-3 rounded-xl transition">
             <span className="text-xl">📊</span><span className="font-medium">ප්‍රගති වාර්තාව</span>
           </a>
           
           <div className="pt-4 border-t border-purple-800 mt-4 mb-2"></div>
 
-          {/* <a href="#" onClick={(e) => { e.preventDefault(); router.push('/notifications'); }} className="flex items-center space-x-3 hover:bg-purple-800/80 text-purple-200 hover:text-white px-4 py-3 rounded-xl transition">
-            <span className="text-xl">🔔</span><span className="font-medium">දැනුම්දීම්</span>
-          </a> */}
           <a href="#" onClick={(e) => { e.preventDefault(); router.push('/settings'); }} className="flex items-center space-x-3 hover:bg-purple-800/80 text-purple-200 hover:text-white px-4 py-3 rounded-xl transition">
             <span className="text-xl">⚙️</span><span className="font-medium">සැකසුම්</span>
           </a>
@@ -191,7 +191,7 @@ export default function DashboardPage() {
           
           <div className="flex items-center space-x-4 md:space-x-6">
             <button onClick={toggleTheme} className={`p-2 rounded-full transition-all focus:outline-none ${isDarkMode ? 'bg-slate-800 text-yellow-400 hover:bg-slate-700' : 'bg-purple-100 text-purple-600 hover:bg-purple-200'}`}>
-              {isDarkMode ? <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z" /></svg> : <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" /></svg>}
+              {isDarkMode ? "☀️" : "🌙"}
             </button>
 
             <div className="flex items-center space-x-3 cursor-pointer">
@@ -208,7 +208,6 @@ export default function DashboardPage() {
 
         <div className="p-6 md:p-10 space-y-8 max-w-7xl mx-auto w-full">
           
-          {/* අලුතින් එක් කළ System Notification Banner එක */}
           {systemNotification && (
             <div className="bg-amber-100 dark:bg-amber-900/40 border-l-8 border-amber-500 p-4 md:p-5 rounded-r-2xl shadow-sm flex items-start gap-4 animate-fade-in">
               <span className="text-3xl mt-1">📢</span>
@@ -235,12 +234,13 @@ export default function DashboardPage() {
             <div className="absolute top-0 right-0 w-64 h-64 bg-white opacity-10 rounded-full blur-3xl transform translate-x-1/2 -translate-y-1/2"></div>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-6">
+          {/* 🔴 Marking Card එක ඉවත් කර Grid එක සමානුපාතික කර ඇත */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
             
             <div onClick={() => router.push('/videos')} className={`${bgCard} p-6 rounded-2xl shadow-sm border border-t-4 border-t-red-500 hover:shadow-lg transition duration-300 transform hover:-translate-y-1 cursor-pointer group flex flex-col items-center text-center`}>
               <div className="w-14 h-14 bg-red-50 text-red-600 rounded-2xl flex items-center justify-center text-3xl mb-4 group-hover:scale-110 transition duration-300">📺</div>
               <h3 className="text-lg font-bold mb-1 group-hover:text-red-500 transition">වීඩියෝ පාඩම්</h3>
-              <p className={`text-xs ${textMuted}`}>සිද්ධාන්ත සහ පුනරීක්ෂණ</p>
+              <p className={`text-xs ${textMuted}`}>සිද්ධාන්ත / Papers</p>
             </div>
 
             <div onClick={() => router.push('/exam')} className={`${bgCard} p-6 rounded-2xl shadow-sm border border-t-4 border-t-purple-500 hover:shadow-lg transition duration-300 transform hover:-translate-y-1 cursor-pointer group flex flex-col items-center text-center`}>
@@ -252,16 +252,10 @@ export default function DashboardPage() {
             <div onClick={() => router.push('/tutes')} className={`${bgCard} p-6 rounded-2xl shadow-sm border border-t-4 border-t-green-500 hover:shadow-lg transition duration-300 transform hover:-translate-y-1 cursor-pointer group flex flex-col items-center text-center`}>
               <div className="w-14 h-14 bg-green-50 text-green-600 rounded-2xl flex items-center justify-center text-3xl mb-4 group-hover:scale-110 transition duration-300">📚</div>
               <h3 className="text-lg font-bold mb-1 group-hover:text-green-500 transition">නිබන්ධන</h3>
-              <p className={`text-xs ${textMuted}`}>PDF බාගත කරගන්න</p>
-            </div>
-
-            <div onClick={() => router.push('/marking')} className={`${bgCard} p-6 rounded-2xl shadow-sm border border-t-4 border-t-fuchsia-500 hover:shadow-lg transition duration-300 transform hover:-translate-y-1 cursor-pointer group flex flex-col items-center text-center`}>
-              <div className="w-14 h-14 bg-fuchsia-50 text-fuchsia-600 rounded-2xl flex items-center justify-center text-3xl mb-4 group-hover:scale-110 transition duration-300">✅</div>
-              <h3 className="text-lg font-bold mb-1 group-hover:text-fuchsia-500 transition">Marking</h3>
-              <p className={`text-xs ${textMuted}`}>ලකුණු දීමේ පටිපාටිය</p>
+              <p className={`text-xs ${textMuted}`}>PDF / Marking</p>
             </div>
             
-            <div onClick={() => router.push('/dashboard/marks')} className={`${bgCard} p-6 rounded-2xl shadow-sm border border-t-4 border-t-amber-500 hover:shadow-lg transition duration-300 transform hover:-translate-y-1 cursor-pointer group flex flex-col items-center text-center lg:col-span-1 sm:col-span-2`}>
+            <div onClick={() => router.push('/Physicsoard/marks')} className={`${bgCard} p-6 rounded-2xl shadow-sm border border-t-4 border-t-amber-500 hover:shadow-lg transition duration-300 transform hover:-translate-y-1 cursor-pointer group flex flex-col items-center text-center`}>
               <div className="w-14 h-14 bg-amber-50 text-amber-600 rounded-2xl flex items-center justify-center text-3xl mb-4 group-hover:scale-110 transition duration-300 relative">
                  📊<span className="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full animate-pulse border-2 border-white"></span>
               </div>
