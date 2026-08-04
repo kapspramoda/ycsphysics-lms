@@ -86,13 +86,13 @@ export default function HomePage() {
     setSuccessMsg("");
 
     if (heroView === "login") {
-      if (phone === "admin" && password === "admin123") {
+      if (phone === "ycsadmin" && password === "YCSad@224488") {
         localStorage.setItem("isAdminLoggedIn", "true");
         localStorage.setItem("adminRole", "Admin");
         router.push("/admin");
         return; 
       }
-      if (phone === "editor" && password === "editor123") {
+      if (phone === "ycseditor" && password === "YCS@998844") {
         localStorage.setItem("isAdminLoggedIn", "true");
         localStorage.setItem("adminRole", "Editor");
         router.push("/admin");
