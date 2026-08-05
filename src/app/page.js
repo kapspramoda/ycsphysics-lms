@@ -72,7 +72,7 @@ export default function HomePage() {
     setSuccessMsg("");
 
     if (heroView === "login") {
-      if (phone === "ycsadmin" && password === "YCSad@224488") {
+      if (phone === "admin" && password === "admin$2244") {
         localStorage.setItem("isAdminLoggedIn", "true");
         localStorage.setItem("adminRole", "Admin");
         router.push("/admin");
