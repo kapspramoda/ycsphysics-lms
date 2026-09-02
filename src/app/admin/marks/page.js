@@ -7,12 +7,15 @@ export default function AdminMarksPage() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [isAuthorized, setIsAuthorized] = useState(false); 
   const [isDarkMode, setIsDarkMode] = useState(false);
-  const [adminRole, setAdminRole] = useState('Admin'); // 🔴 අලුත්: Role State
+  const [adminRole, setAdminRole] = useState('Admin'); 
 
   const [formData, setFormData] = useState({ email: '', paperName: '', score: '', alYear: '2026' });
   const [message, setMessage] = useState({ type: '', text: '' });
   const [loading, setLoading] = useState(false);
   
+  // 🔴 අලුත්: සිසුන් සෙවීම සඳහා State එක
+  const [studentSearchTerm, setStudentSearchTerm] = useState('');
+
   const [existingPapers, setExistingPapers] = useState(['2026 Model Paper 01', 'Term Test 01']);
   const [allMarks, setAllMarks] = useState([]);
   const [editingId, setEditingId] = useState(null); 
@@ -24,12 +27,12 @@ export default function AdminMarksPage() {
     if (savedTheme === 'dark') setIsDarkMode(true);
 
     const adminToken = localStorage.getItem('isAdminLoggedIn');
-    const role = localStorage.getItem('adminRole') || 'Admin'; // 🔴
+    const role = localStorage.getItem('adminRole') || 'Admin';
 
     if (!adminToken) {
       router.push('/admin/login');
     } else {
-      setAdminRole(role); // 🔴
+      setAdminRole(role); 
       setIsAuthorized(true);
     }
   }, [router]);
@@ -79,6 +82,7 @@ export default function AdminMarksPage() {
         if (!existingPapers.includes(formData.paperName)) setExistingPapers([...existingPapers, formData.paperName]);
         
         setFormData({ ...formData, email: '', score: '' }); 
+        setStudentSearchTerm(''); // ලකුණු දැම්මට පස්සේ Search එක හිස් කිරීම
         setEditingId(null);
         
         const res = await fetch('/api/marks', { cache: 'no-store' });
@@ -96,6 +100,7 @@ export default function AdminMarksPage() {
   const handleEdit = (mark) => {
     setFormData({ email: mark.email, paperName: mark.paperName, score: mark.score, alYear: mark.alYear || '2026' });
     setEditingId(mark._id);
+    setStudentSearchTerm(''); // Edit කරනකොට Search එක හිස් කිරීම
     window.scrollTo({ top: 0, behavior: 'smooth' }); 
   };
 
@@ -131,7 +136,12 @@ export default function AdminMarksPage() {
     return student ? student.name : email; 
   };
 
+  // 🔴 වර්ෂය අනුව සහ Search Term එක අනුව සිසුන් ෆිල්ටර් කිරීම
   const currentYearStudents = allStudents.filter(s => s.alYear === formData.alYear);
+  const filteredCurrentYearStudents = currentYearStudents.filter(s => 
+    s.name.toLowerCase().includes(studentSearchTerm.toLowerCase()) || 
+    s.email.toLowerCase().includes(studentSearchTerm.toLowerCase())
+  );
 
   const bgMain = isDarkMode ? "bg-slate-950 text-slate-100" : "bg-gray-100 text-gray-800";
   const bgCard = isDarkMode ? "bg-slate-900 border border-slate-800 shadow-none" : "bg-white border-transparent shadow-lg";
@@ -154,7 +164,6 @@ export default function AdminMarksPage() {
           <button onClick={() => setIsSidebarOpen(false)} className="md:hidden text-gray-400 hover:text-white">✖</button>
         </div>
         
-        {/* 🔴 Sidebar Navigation with Roles */}
         <nav className="flex-1 p-4 space-y-2 overflow-y-auto custom-scrollbar">
           <a href="#" onClick={(e) => { e.preventDefault(); router.push('/admin'); }} className="flex items-center space-x-3 hover:bg-slate-800 px-4 py-3 rounded-xl transition text-gray-300 hover:text-white"><span>🏠</span><span>මුල් තිරය</span></a>
           
@@ -211,6 +220,7 @@ export default function AdminMarksPage() {
                   <label className={`block text-xs font-bold mb-1 ${isDarkMode ? 'text-slate-300' : 'text-gray-700'}`}>A/L වර්ෂය</label>
                   <select value={formData.alYear} onChange={(e) => {
                       setFormData({...formData, alYear: e.target.value, email: ''}); 
+                      setStudentSearchTerm(''); // වර්ෂය වෙනස් කළ විට Search එක හිස් කිරීම
                     }} className={`w-full p-3 rounded-xl border outline-none transition ${inputBg}`}>
                     <option value="2026">2026 A/L</option>
                     <option value="2027">2027 A/L</option>
@@ -218,15 +228,33 @@ export default function AdminMarksPage() {
                   </select>
                 </div>
                 
+                {/* 🔴 අලුත්: සිසුවා සෙවීමේ තීරුව සහ Dropdown එක */}
                 <div>
-                  <label className={`block text-xs font-bold mb-1 ${isDarkMode ? 'text-slate-300' : 'text-gray-700'}`}>සිසුවාගේ නම</label>
-                  <select required value={formData.email} onChange={(e) => setFormData({...formData, email: e.target.value})} className={`w-full p-3 rounded-xl border outline-none transition font-medium ${inputBg}`}>
-                    <option value="" disabled hidden>සිසුවෙකු තෝරන්න...</option>
-                    {currentYearStudents.length === 0 ? (
-                      <option value="" disabled>මෙම වර්ෂයට සිසුන් නොමැත</option>
+                  <label className={`block text-xs font-bold mb-2 flex justify-between ${isDarkMode ? 'text-slate-300' : 'text-gray-700'}`}>
+                    <span>සිසුවාගේ නම</span>
+                    <span className="text-amber-500">{filteredCurrentYearStudents.length} Students</span>
+                  </label>
+                  
+                  <div className="relative mb-2">
+                    <span className="absolute left-3 top-2.5 opacity-50 text-sm">🔍</span>
+                    <input 
+                      type="text" 
+                      placeholder="නම හෝ අංකය ටයිප් කරන්න..." 
+                      value={studentSearchTerm}
+                      onChange={(e) => setStudentSearchTerm(e.target.value)}
+                      className={`w-full pl-9 pr-3 py-2 rounded-xl border outline-none text-sm transition ${inputBg}`}
+                    />
+                  </div>
+
+                  <select required size={studentSearchTerm ? 4 : 1} value={formData.email} onChange={(e) => setFormData({...formData, email: e.target.value})} className={`w-full p-3 rounded-xl border outline-none transition font-medium custom-scrollbar ${inputBg}`}>
+                    <option value="" disabled hidden>පහතින් සිසුවෙකු තෝරන්න...</option>
+                    {filteredCurrentYearStudents.length === 0 ? (
+                      <option value="" disabled>සිසුන් හමු නොවිණි</option>
                     ) : (
-                      currentYearStudents.map(student => (
-                        <option key={student.email} value={student.email}>{student.name}</option>
+                      filteredCurrentYearStudents.map(student => (
+                        <option key={student.email} value={student.email}>
+                          {student.name} ({student.email})
+                        </option>
                       ))
                     )}
                   </select>
@@ -239,12 +267,12 @@ export default function AdminMarksPage() {
                 </div>
                 <div>
                   <label className={`block text-xs font-bold mb-1 ${isDarkMode ? 'text-slate-300' : 'text-gray-700'}`}>ලබාගත් ලකුණු (%)</label>
-                  <input type="number" required min="0" max="100" value={formData.score} onChange={(e) => setFormData({...formData, score: e.target.value})} className={`w-full p-3 rounded-xl border outline-none transition ${inputBg}`} placeholder="උදා: 75"/>
+                  <input type="number" required min="0" max="100" value={formData.score} onChange={(e) => setFormData({...formData, score: e.target.value})} className={`w-full p-3 rounded-xl border outline-none transition text-lg font-bold ${inputBg}`} placeholder="උදා: 75"/>
                 </div>
                 <button type="submit" disabled={loading} className={`w-full text-white font-bold rounded-xl p-4 shadow-md mt-4 transition ${editingId ? 'bg-green-600 hover:bg-green-700' : 'bg-amber-500 hover:bg-amber-600'}`}>
                   {loading ? 'රැඳී සිටින්න...' : editingId ? 'ලකුණු යාවත්කාලීන කරන්න' : 'Database එකට යවන්න'}
                 </button>
-                {editingId && <button type="button" onClick={() => { setEditingId(null); setFormData({ email: '', paperName: '', score: '', alYear: '2026' }); }} className={`w-full mt-2 font-bold text-sm transition ${isDarkMode ? 'text-slate-400 hover:text-slate-300' : 'text-gray-500 hover:text-gray-700'}`}>අවලංගු කරන්න</button>}
+                {editingId && <button type="button" onClick={() => { setEditingId(null); setFormData({ email: '', paperName: '', score: '', alYear: '2026' }); setStudentSearchTerm(''); }} className={`w-full mt-2 font-bold text-sm transition ${isDarkMode ? 'text-slate-400 hover:text-slate-300' : 'text-gray-500 hover:text-gray-700'}`}>අවලංගු කරන්න</button>}
               </form>
             </div>
 
