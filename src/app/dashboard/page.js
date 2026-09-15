@@ -151,7 +151,7 @@ export default function PhysicsoardPage() {
           YCS<span className="text-purple-300">Physics</span>
         </div>
         <nav className="flex-1 p-4 space-y-2 overflow-y-auto custom-scrollbar">
-          <a href="#" onClick={(e) => { e.preventDefault(); router.push('/Physicsoard'); }} className="flex items-center space-x-3 bg-purple-800 text-white px-4 py-3 rounded-xl transition shadow-inner">
+          <a href="#" onClick={(e) => { e.preventDefault(); router.push('/dashboard'); }} className="flex items-center space-x-3 bg-purple-800 text-white px-4 py-3 rounded-xl transition shadow-inner">
             <span className="text-xl">🏠</span><span className="font-bold">මුල් තිරය</span>
           </a>
           
