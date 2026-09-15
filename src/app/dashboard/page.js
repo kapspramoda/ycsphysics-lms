@@ -169,7 +169,7 @@ export default function PhysicsoardPage() {
           
           {/* 🔴 Marking Schemes ලින්ක් එක අයින් කර ඇත (දැන් එය Tutes/Videos යටතටම එන බැවින්) */}
 
-          <a href="#" onClick={(e) => { e.preventDefault(); router.push('/Physicsoard/marks'); }} className="flex items-center space-x-3 hover:bg-purple-800/80 text-purple-200 hover:text-white px-4 py-3 rounded-xl transition">
+          <a href="#" onClick={(e) => { e.preventDefault(); router.push('/dashboard/marks'); }} className="flex items-center space-x-3 hover:bg-purple-800/80 text-purple-200 hover:text-white px-4 py-3 rounded-xl transition">
             <span className="text-xl">📊</span><span className="font-medium">ප්‍රගති වාර්තාව</span>
           </a>
           
@@ -255,7 +255,7 @@ export default function PhysicsoardPage() {
               <p className={`text-xs ${textMuted}`}>PDF / Marking</p>
             </div>
             
-            <div onClick={() => router.push('/Physicsoard/marks')} className={`${bgCard} p-6 rounded-2xl shadow-sm border border-t-4 border-t-amber-500 hover:shadow-lg transition duration-300 transform hover:-translate-y-1 cursor-pointer group flex flex-col items-center text-center`}>
+            <div onClick={() => router.push('/dashboard/marks')} className={`${bgCard} p-6 rounded-2xl shadow-sm border border-t-4 border-t-amber-500 hover:shadow-lg transition duration-300 transform hover:-translate-y-1 cursor-pointer group flex flex-col items-center text-center`}>
               <div className="w-14 h-14 bg-amber-50 text-amber-600 rounded-2xl flex items-center justify-center text-3xl mb-4 group-hover:scale-110 transition duration-300 relative">
                  📊<span className="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full animate-pulse border-2 border-white"></span>
               </div>
