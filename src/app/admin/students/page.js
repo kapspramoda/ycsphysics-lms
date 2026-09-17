@@ -3,7 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { Chart as ChartJS, CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend, Filler } from 'chart.js';
 import { Line } from 'react-chartjs-2';
-import * as XLSX from 'xlsx';
+import * as XLSX from 'xlsx'; 
 
 ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend, Filler);
 
@@ -18,14 +18,14 @@ export default function AdminStudentsPage() {
 
   // Single Form States
   const [formData, setFormData] = useState({
-    name: '', email: '', password: '', alYear: '2026', center: '',
+    name: '', email: '', password: '', alYear: '2027', center: '',
     isTheory: true, isRevision: false, isPaper: false
   });
 
   // Bulk Form State (Excel)
   const [bulkFile, setBulkFile] = useState(null);
   const [bulkSettings, setBulkSettings] = useState({
-    password: '', alYear: '2026', center: '',
+    password: '', alYear: '2027', center: '',
     isTheory: true, isRevision: false, isPaper: false
   });
 
@@ -97,27 +97,18 @@ export default function AdminStudentsPage() {
   // --- Search and Filter Logic ---
   useEffect(() => {
     let result = students;
-
-    // Search by Name
     if (searchTerm) {
       result = result.filter(s => s.name.toLowerCase().includes(searchTerm.toLowerCase()));
     }
-
-    // Filter by Year
     if (filterYear !== 'All') {
       result = result.filter(s => s.alYear === filterYear);
     }
-
-    // Filter by Center
     if (filterCenter !== 'All') {
       result = result.filter(s => s.center === filterCenter);
     }
-
-    // Filter by Class Type
     if (filterClass !== 'All') {
       result = result.filter(s => s.classTypes && s.classTypes.includes(filterClass));
     }
-
     setFilteredStudents(result);
   }, [searchTerm, filterYear, filterCenter, filterClass, students]);
 
@@ -171,7 +162,12 @@ export default function AdminStudentsPage() {
       const data = await res.json();
       if (res.ok) {
         setMsg({ type: 'success', text: 'සිසුවා සාර්ථකව පද්ධතියට එක් කළා! ✅' });
-        setFormData({ ...formData, name: '', email: '', password: '' });
+        // 🔴 Form එක සම්පූර්ණයෙන්ම Reset කිරීම
+        setFormData({ 
+          name: '', email: '', password: '', 
+          alYear: formData.alYear, center: formData.center, 
+          isTheory: true, isRevision: false, isPaper: false 
+        });
         fetchStudents(); 
       } else { throw new Error(data.message || 'දෝෂයක් මතු විය.'); }
     } catch (error) {
@@ -266,7 +262,7 @@ export default function AdminStudentsPage() {
       name: student.name,
       email: student.email,
       password: '',
-      alYear: student.alYear || '2026',
+      alYear: student.alYear || '2027',
       center: student.center || '',
       isTheory: student.classTypes?.includes('Theory') || false,
       isRevision: student.classTypes?.includes('Revision') || false,
@@ -303,13 +299,20 @@ export default function AdminStudentsPage() {
         body: JSON.stringify(payload)
       });
 
+      // 🔴 නිවැරදි Error Handling
       if (res.ok) {
         alert('සිසුවාගේ දත්ත යාවත්කාලීන විය! ✅');
         setIsEditModalOpen(false);
         fetchStudents();
       } else {
-        const data = await res.json();
-        throw new Error(data.message || 'දෝෂයක් මතු විය.');
+        let errorMsg = 'දෝෂයක් මතු විය.';
+        try {
+          const data = await res.json();
+          errorMsg = data.message || errorMsg;
+        } catch (e) {
+          errorMsg = `Server Error: Backend API (PUT route) එක සම්බන්ධ වීමේ ගැටලුවක්.`;
+        }
+        throw new Error(errorMsg);
       }
     } catch (error) {
       alert(error.message);
@@ -416,7 +419,7 @@ export default function AdminStudentsPage() {
                     Single Add
                   </button>
                   <button onClick={() => setAddMode('bulk')} className={`flex-1 py-2 rounded-lg text-sm font-bold transition ${addMode === 'bulk' ? 'bg-white text-blue-600 shadow-sm' : (isDarkMode ? 'text-slate-400 hover:text-white' : 'text-gray-500 hover:text-gray-800')}`}>
-                    Excel Bulk
+                    Excel Bulk Upload
                   </button>
                 </div>
 
@@ -442,7 +445,6 @@ export default function AdminStudentsPage() {
                       <div>
                         <label className={`block text-xs font-bold mb-1 ${isDarkMode ? 'text-slate-300' : 'text-gray-700'}`}>A/L වර්ෂය</label>
                         <select value={formData.alYear} onChange={(e) => setFormData({...formData, alYear: e.target.value})} className={`w-full px-3 py-3 rounded-xl border outline-none transition ${inputBg}`}>
-                          <option value="2026">2026</option>
                           <option value="2027">2027</option>
                           <option value="2028">2028</option>
                         </select>
@@ -457,7 +459,7 @@ export default function AdminStudentsPage() {
                     </div>
 
                     <div className={`p-4 rounded-xl border ${isDarkMode ? 'bg-slate-800/50 border-slate-700' : 'bg-blue-50/50 border-blue-100'}`}>
-                      <label className={`block text-xs font-bold mb-3 ${isDarkMode ? 'text-blue-400' : 'text-blue-800'}`}>පන්ති වර්ගය:</label>
+                      <label className={`block text-xs font-bold mb-3 ${isDarkMode ? 'text-blue-400' : 'text-blue-800'}`}>පන්ති වර්ගය (Revision පමණක් අවශ්‍ය නම් Theory ඉවත් කරන්න):</label>
                       <div className="flex flex-col gap-3">
                         <label className="flex items-center gap-3 cursor-pointer">
                           <input type="checkbox" checked={formData.isTheory} onChange={(e) => setFormData({...formData, isTheory: e.target.checked})} className="w-5 h-5 accent-blue-600 rounded" />
@@ -484,8 +486,8 @@ export default function AdminStudentsPage() {
                 {addMode === 'bulk' && (
                   <form onSubmit={handleExcelBulkSubmit} className="space-y-4 animate-fade-in">
                     <div className={`p-3 rounded-lg border text-xs leading-relaxed mb-4 ${isDarkMode ? 'bg-blue-900/20 border-blue-800 text-blue-300' : 'bg-blue-50 border-blue-200 text-blue-800'}`}>
-                      <strong>උපදෙස්:</strong> Excel (.xlsx) ෆයිල් එකක් තෝරන්න. <br/><br/>
-                      පළමු තීරුවේ (A) <strong>නම</strong> සහ දෙවන තීරුවේ (B) <strong>අංකය</strong> පමණක් තිබිය යුතුය. අනිත් සියලු විස්තර පහතින් තෝරා දෙන්න.
+                      <strong>උපදෙස්:</strong> Excel (.xlsx, .csv) ෆයිල් එකක් තෝරන්න. <br/><br/>
+                      පළමු තීරුවේ (Column A) <strong>නම</strong> සහ දෙවන තීරුවේ (Column B) <strong>WhatsApp අංකය</strong> පමණක් තිබිය යුතුය. අනිත් සියලු විස්තර පහතින් තෝරා දෙන්න.
                     </div>
                     
                     <div>
@@ -502,7 +504,6 @@ export default function AdminStudentsPage() {
                       <div>
                         <label className={`block text-xs font-bold mb-1 ${isDarkMode ? 'text-slate-300' : 'text-gray-700'}`}>A/L වර්ෂය</label>
                         <select value={bulkSettings.alYear} onChange={(e) => setBulkSettings({...bulkSettings, alYear: e.target.value})} className={`w-full px-3 py-3 rounded-xl border outline-none transition ${inputBg}`}>
-                          <option value="2026">2026</option>
                           <option value="2027">2027</option>
                           <option value="2028">2028</option>
                         </select>
@@ -663,7 +664,6 @@ export default function AdminStudentsPage() {
                     <div>
                       <label className={`block text-xs font-bold mb-1 ${isDarkMode ? 'text-slate-300' : 'text-gray-700'}`}>A/L වර්ෂය</label>
                       <select value={editStudentData.alYear} onChange={(e) => setEditStudentData({...editStudentData, alYear: e.target.value})} className={`w-full px-3 py-3 rounded-xl border outline-none transition ${inputBg}`}>
-                        <option value="2026">2026</option>
                         <option value="2027">2027</option>
                         <option value="2028">2028</option>
                       </select>

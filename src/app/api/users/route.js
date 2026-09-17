@@ -10,13 +10,13 @@ const UserSchema = new mongoose.Schema({
   username: { type: String }, 
   email: { type: String }, 
   password: { type: String, required: true },
-  alYear: { type: String, default: '2026' },
+  alYear: { type: String, default: '2027' }, // 🔴 2026 ඉවත් කර 2027 යොදා ඇත
   center: { type: String, default: 'Online' },
   classTypes: { type: [String], default: ['Theory'] }, 
   status: { type: String, default: 'Active' }, 
   role: { type: String, default: 'Student' },
   createdAt: { type: Date, default: Date.now }
-}, { strict: false }); // 🔴 පරණ දත්ත සමග ගැටීම වැළැක්වීමට
+}, { strict: false }); // පරණ දත්ත සමග ගැටීම වැළැක්වීමට
 
 const User = mongoose.models.User || mongoose.model('User', UserSchema);
 
@@ -39,7 +39,7 @@ export async function POST(req) {
       email: email, 
       username: email, 
       password, 
-      alYear: alYear || '2026', 
+      alYear: alYear || '2027', // 🔴 2026 ඉවත් කර 2027 යොදා ඇත
       center: center || 'Online', 
       classTypes: classTypes && classTypes.length > 0 ? classTypes : ['Theory'], 
       status: 'Active', 
@@ -61,7 +61,6 @@ export async function GET(req) {
     const year = searchParams.get('year') || 'All';
     await connectToDatabase();
     
-    // 🔴 'role: Student' ෆිල්ටර් එක ඉවත් කළා. පරණ ළමයින්වත් දැන් පෙනේවි.
     let query = {}; 
     
     // Admin සහ Editor ගිණුම් ළමයි ලැයිස්තුවෙන් ඉවත් කිරීම
@@ -75,7 +74,7 @@ export async function GET(req) {
       _id: u._id,
       name: u.name || 'Unknown',
       email: u.email || u.username || 'No Number', 
-      alYear: u.alYear || '2026',
+      alYear: u.alYear || '2027', // 🔴 2026 ඉවත් කර 2027 යොදා ඇත
       center: u.center || 'Online',
       classTypes: u.classTypes || ['Theory'],
       status: u.status || 'Active'
@@ -109,5 +108,36 @@ export async function DELETE(req) {
     return NextResponse.json({ message: 'User deleted' }, { status: 200 });
   } catch (error) {
     return NextResponse.json({ message: 'Error deleting' }, { status: 500 });
+  }
+}
+
+// --- 🔴 ළමයෙකුගේ දත්ත යාවත්කාලීන කිරීම (Edit Student) ---
+export async function PUT(request) {
+  try {
+    await connectToDatabase(); 
+
+    const body = await request.json();
+    const { id, name, email, password, alYear, center, classTypes } = body;
+
+    // Update කළ යුතු දත්ත
+    const updateData = { name, email, alYear, center, classTypes };
+    
+    // අලුත් පාස්වර්ඩ් එකක් දීලා තියෙනවා නම් පමණක් එය Update කිරීම
+    if (password) {
+       updateData.password = password; 
+    }
+
+    // Database එකේ දත්ත වෙනස් කිරීම
+    const updatedUser = await User.findByIdAndUpdate(id, updateData, { new: true });
+
+    if (!updatedUser) {
+      return NextResponse.json({ message: "සිසුවා සොයාගැනීමට නොහැක." }, { status: 404 });
+    }
+
+    return NextResponse.json({ message: "සිසුවා සාර්ථකව යාවත්කාලීන විය." }, { status: 200 });
+
+  } catch (error) {
+    console.error("Update Error:", error);
+    return NextResponse.json({ message: "දත්ත යාවත්කාලීන කිරීමේදී දෝෂයක් මතු විය." }, { status: 500 });
   }
 }
