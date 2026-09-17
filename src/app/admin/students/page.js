@@ -13,16 +13,13 @@ export default function AdminStudentsPage() {
   const [isAuthorized, setIsAuthorized] = useState(false);
   const [isDarkMode, setIsDarkMode] = useState(false);
 
-  // Add Mode: 'single' or 'bulk'
   const [addMode, setAddMode] = useState('single');
 
-  // Single Form States
   const [formData, setFormData] = useState({
     name: '', email: '', password: '', alYear: '2027', center: '',
     isTheory: true, isRevision: false, isPaper: false
   });
 
-  // Bulk Form State (Excel)
   const [bulkFile, setBulkFile] = useState(null);
   const [bulkSettings, setBulkSettings] = useState({
     password: '', alYear: '2027', center: '',
@@ -32,23 +29,19 @@ export default function AdminStudentsPage() {
   const [msg, setMsg] = useState({ type: '', text: '' });
   const [loading, setLoading] = useState(false);
   
-  // Students Data
   const [students, setStudents] = useState([]);
   const [filteredStudents, setFilteredStudents] = useState([]);
   const [isFetchingStudents, setIsFetchingStudents] = useState(true);
 
-  // Filters & Search
   const [searchTerm, setSearchTerm] = useState('');
   const [filterYear, setFilterYear] = useState('All');
   const [filterCenter, setFilterCenter] = useState('All');
   const [filterClass, setFilterClass] = useState('All');
 
-  // Student Profile Modal States
   const [selectedStudent, setSelectedStudent] = useState(null);
   const [studentMarks, setStudentMarks] = useState([]);
   const [modalLoading, setModalLoading] = useState(false);
 
-  // Edit Student States
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [editStudentData, setEditStudentData] = useState(null);
 
@@ -90,11 +83,9 @@ export default function AdminStudentsPage() {
     }
   };
 
-  // Unique lists for Dropdowns
   const uniqueCenters = [...new Set(students.map(s => s.center).filter(Boolean))];
   const uniqueYears = [...new Set(students.map(s => s.alYear).filter(Boolean))].sort();
 
-  // --- Search and Filter Logic ---
   useEffect(() => {
     let result = students;
     if (searchTerm) {
@@ -112,7 +103,6 @@ export default function AdminStudentsPage() {
     setFilteredStudents(result);
   }, [searchTerm, filterYear, filterCenter, filterClass, students]);
 
-  // --- Export to Excel ---
   const exportToExcel = () => {
     if (filteredStudents.length === 0) {
       alert("දත්ත නොමැත!"); return;
@@ -132,7 +122,6 @@ export default function AdminStudentsPage() {
     XLSX.writeFile(workbook, "PramodaChemistry_Students.xlsx");
   };
 
-  // --- Single Student Submit ---
   const handleSingleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
@@ -162,7 +151,6 @@ export default function AdminStudentsPage() {
       const data = await res.json();
       if (res.ok) {
         setMsg({ type: 'success', text: 'සිසුවා සාර්ථකව පද්ධතියට එක් කළා! ✅' });
-        // 🔴 Form එක සම්පූර්ණයෙන්ම Reset කිරීම
         setFormData({ 
           name: '', email: '', password: '', 
           alYear: formData.alYear, center: formData.center, 
@@ -178,7 +166,6 @@ export default function AdminStudentsPage() {
     }
   };
 
-  // --- Excel Bulk Submit ---
   const handleExcelBulkSubmit = async (e) => {
     e.preventDefault();
     if (!bulkFile) {
@@ -255,7 +242,6 @@ export default function AdminStudentsPage() {
     reader.readAsArrayBuffer(bulkFile);
   };
 
-  // --- Edit Student Logic ---
   const openEditModal = (student) => {
     setEditStudentData({
       id: student._id,
@@ -299,7 +285,6 @@ export default function AdminStudentsPage() {
         body: JSON.stringify(payload)
       });
 
-      // 🔴 නිවැරදි Error Handling
       if (res.ok) {
         alert('සිසුවාගේ දත්ත යාවත්කාලීන විය! ✅');
         setIsEditModalOpen(false);
@@ -459,7 +444,7 @@ export default function AdminStudentsPage() {
                     </div>
 
                     <div className={`p-4 rounded-xl border ${isDarkMode ? 'bg-slate-800/50 border-slate-700' : 'bg-blue-50/50 border-blue-100'}`}>
-                      <label className={`block text-xs font-bold mb-3 ${isDarkMode ? 'text-blue-400' : 'text-blue-800'}`}>පන්ති වර්ගය (Revision පමණක් අවශ්‍ය නම් Theory ඉවත් කරන්න):</label>
+                      <label className={`block text-xs font-bold mb-3 ${isDarkMode ? 'text-blue-400' : 'text-blue-800'}`}>පන්ති වර්ගය (සිසුවා Revision පමණක් නම්, Theory හි හරි ලකුණ ඉවත් කරන්න):</label>
                       <div className="flex flex-col gap-3">
                         <label className="flex items-center gap-3 cursor-pointer">
                           <input type="checkbox" checked={formData.isTheory} onChange={(e) => setFormData({...formData, isTheory: e.target.checked})} className="w-5 h-5 accent-blue-600 rounded" />
@@ -675,7 +660,7 @@ export default function AdminStudentsPage() {
                   </div>
 
                   <div className={`p-4 rounded-xl border ${isDarkMode ? 'bg-slate-800/50 border-slate-700' : 'bg-blue-50/50 border-blue-100'}`}>
-                    <label className={`block text-xs font-bold mb-3 ${isDarkMode ? 'text-blue-400' : 'text-blue-800'}`}>පන්ති වර්ගය:</label>
+                    <label className={`block text-xs font-bold mb-3 ${isDarkMode ? 'text-blue-400' : 'text-blue-800'}`}>පන්ති වර්ගය (සිසුවා Revision පමණක් නම්, Theory හි හරි ලකුණ ඉවත් කරන්න):</label>
                     <div className="flex flex-col gap-3">
                       <label className="flex items-center gap-3 cursor-pointer">
                         <input type="checkbox" checked={editStudentData.isTheory} onChange={(e) => setEditStudentData({...editStudentData, isTheory: e.target.checked})} className="w-5 h-5 accent-blue-600 rounded" />

@@ -2,7 +2,6 @@ import { NextResponse } from 'next/server';
 import connectToDatabase from '@/lib/mongodb';
 import mongoose from 'mongoose';
 
-// 🔴 අලුත් දත්ත වහාම පෙන්වීමට Cache වීම සම්පූර්ණයෙන්ම නවතාලීම
 export const dynamic = 'force-dynamic';
 
 const UserSchema = new mongoose.Schema({
@@ -10,15 +9,19 @@ const UserSchema = new mongoose.Schema({
   username: { type: String }, 
   email: { type: String }, 
   password: { type: String, required: true },
-  alYear: { type: String, default: '2027' }, // 🔴 2026 ඉවත් කර 2027 යොදා ඇත
+  alYear: { type: String, default: '2027' },
   center: { type: String, default: 'Online' },
   classTypes: { type: [String], default: ['Theory'] }, 
   status: { type: String, default: 'Active' }, 
   role: { type: String, default: 'Student' },
   createdAt: { type: Date, default: Date.now }
-}, { strict: false }); // පරණ දත්ත සමග ගැටීම වැළැක්වීමට
+}, { strict: false }); 
 
-const User = mongoose.models.User || mongoose.model('User', UserSchema);
+// 🔴 Database Cache ගැටලුව විසඳීමට පරණ Model එක ඉවත් කර අලුතින් යාවත්කාලීන කිරීම
+if (mongoose.models.User) {
+  delete mongoose.models.User;
+}
+const User = mongoose.model('User', UserSchema);
 
 // අලුත් සිසුවෙක් ඇතුළත් කිරීම (POST)
 export async function POST(req) {
@@ -39,9 +42,9 @@ export async function POST(req) {
       email: email, 
       username: email, 
       password, 
-      alYear: alYear || '2027', // 🔴 2026 ඉවත් කර 2027 යොදා ඇත
+      alYear: alYear || '2027', 
       center: center || 'Online', 
-      classTypes: classTypes && classTypes.length > 0 ? classTypes : ['Theory'], 
+      classTypes: Array.isArray(classTypes) && classTypes.length > 0 ? classTypes : ['Theory'], 
       status: 'Active', 
       role: 'Student'
     });
@@ -62,21 +65,19 @@ export async function GET(req) {
     await connectToDatabase();
     
     let query = {}; 
-    
-    // Admin සහ Editor ගිණුම් ළමයි ලැයිස්තුවෙන් ඉවත් කිරීම
     query.username = { $nin: ['admin', 'editor'] };
-    
     if (year !== 'All') query.alYear = year;
 
-    const users = await User.find(query).sort({ createdAt: -1 });
+    const users = await User.find(query).sort({ createdAt: -1 }).lean();
 
     const formattedUsers = users.map(u => ({
       _id: u._id,
       name: u.name || 'Unknown',
       email: u.email || u.username || 'No Number', 
-      alYear: u.alYear || '2027', // 🔴 2026 ඉවත් කර 2027 යොදා ඇත
+      alYear: u.alYear || '2027',
       center: u.center || 'Online',
-      classTypes: u.classTypes || ['Theory'],
+      // 🔴 නිවැරදිව පන්ති වර්ගය ලබා ගැනීම
+      classTypes: Array.isArray(u.classTypes) && u.classTypes.length > 0 ? u.classTypes : ['Theory'],
       status: u.status || 'Active'
     }));
 
@@ -111,7 +112,7 @@ export async function DELETE(req) {
   }
 }
 
-// --- 🔴 ළමයෙකුගේ දත්ත යාවත්කාලීන කිරීම (Edit Student) ---
+// ළමයෙකුගේ දත්ත යාවත්කාලීන කිරීම (Edit Student - PUT)
 export async function PUT(request) {
   try {
     await connectToDatabase(); 
@@ -119,16 +120,13 @@ export async function PUT(request) {
     const body = await request.json();
     const { id, name, email, password, alYear, center, classTypes } = body;
 
-    // Update කළ යුතු දත්ත
     const updateData = { name, email, alYear, center, classTypes };
-    
-    // අලුත් පාස්වර්ඩ් එකක් දීලා තියෙනවා නම් පමණක් එය Update කිරීම
     if (password) {
        updateData.password = password; 
     }
 
-    // Database එකේ දත්ත වෙනස් කිරීම
-    const updatedUser = await User.findByIdAndUpdate(id, updateData, { new: true });
+    // 🔴 $set හරහා බලහත්කාරයෙන් දත්ත යාවත්කාලීන කිරීම
+    const updatedUser = await User.findByIdAndUpdate(id, { $set: updateData }, { new: true, strict: false });
 
     if (!updatedUser) {
       return NextResponse.json({ message: "සිසුවා සොයාගැනීමට නොහැක." }, { status: 404 });
