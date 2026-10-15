@@ -7,8 +7,8 @@ export default function AdminVideosPage() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [isAuthorized, setIsAuthorized] = useState(false);
 
-  // අලුත් ෆෝල්ඩර් අංග (lessonName සහ tuteUrl) ඇතුළත් කර ඇත
-  const initialFormState = { title: '', url: '', category: 'Theory', alYear: 'All', lessonName: '', tuteUrl: '' };
+  // 🔴 අලුත් ෆෝල්ඩර් අංග (isPrivate සහ allowedStudents) ඇතුළත් කර ඇත
+  const initialFormState = { title: '', url: '', category: 'Theory', alYear: 'All', lessonName: '', tuteUrl: '', isPrivate: false, allowedStudents: '' };
   const [formData, setFormData] = useState(initialFormState);
   
   const [message, setMessage] = useState({ type: '', text: '' });
@@ -40,7 +40,6 @@ export default function AdminVideosPage() {
     if (isAuthorized) fetchVideos();
   }, [isAuthorized]);
 
-  // පද්ධතියේ දැනටමත් ඇති පාඩම් නම් ලැයිස්තුවක් සෑදීම (Admin ට ලේසි වීමට)
   const existingLessons = [...new Set(videos.map(v => v.lessonName).filter(Boolean))];
 
   const handleSubmit = async (e) => {
@@ -49,9 +48,17 @@ export default function AdminVideosPage() {
     setMessage({ type: '', text: '' });
 
     try {
-      // Edit කරනවාද, අලුතින් දානවාද යන්න තීරණය කිරීම
       const method = isEditing ? 'PUT' : 'POST';
-      const payload = isEditing ? { id: editId, ...formData } : formData;
+      const payload = isEditing ? { id: editId, ...formData } : { ...formData };
+      
+      // 🔴 WhatsApp අංක ටික Array එකක් විදිහට සකස් කිරීම
+      if (payload.isPrivate) {
+        payload.allowedStudents = typeof formData.allowedStudents === 'string' 
+          ? formData.allowedStudents.split(',').map(s => s.trim()).filter(Boolean) 
+          : [];
+      } else {
+        payload.allowedStudents = [];
+      }
 
       const response = await fetch('/api/videos', {
         method: method,
@@ -64,7 +71,6 @@ export default function AdminVideosPage() {
 
       setMessage({ type: 'success', text: isEditing ? 'වීඩියෝව සාර්ථකව යාවත්කාලීන කරන ලදී!' : 'නව වීඩියෝව සාර්ථකව එක් කරන ලදී!' });
       
-      // ෆෝම් එක හිස් කිරීම
       setFormData(initialFormState);
       setIsEditing(false);
       setEditId(null);
@@ -78,22 +84,23 @@ export default function AdminVideosPage() {
     }
   };
 
-  // Edit බොත්තම එබූ විට
   const handleEdit = (video) => {
     setFormData({
       title: video.title,
-      url: `https://www.youtube.com/watch?v=${video.youtubeId}`, // DB එකේ තියෙන ID එකෙන් ආයෙත් ලින්ක් එක හදනවා
+      url: `https://www.youtube.com/watch?v=${video.youtubeId}`,
       category: video.category || 'Theory',
       alYear: video.alYear || 'All',
       lessonName: video.lessonName || '',
-      tuteUrl: video.tuteUrl || ''
+      tuteUrl: video.tuteUrl || '',
+      // 🔴 අලුත් දත්ත Edit Form එකට ලබාදීම
+      isPrivate: video.isPrivate || false,
+      allowedStudents: video.allowedStudents && video.allowedStudents.length > 0 ? video.allowedStudents.join(', ') : ''
     });
     setIsEditing(true);
     setEditId(video._id);
-    window.scrollTo({ top: 0, behavior: 'smooth' }); // ෆෝම් එක ගාවට උඩටම යනවා
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
-  // Cancel Edit බොත්තම එබූ විට
   const cancelEdit = () => {
     setFormData(initialFormState);
     setIsEditing(false);
@@ -101,7 +108,6 @@ export default function AdminVideosPage() {
     setMessage({ type: '', text: '' });
   };
 
-  // Delete බොත්තම එබූ විට
   const handleDelete = async (id) => {
     if (!window.confirm("මෙම වීඩියෝව සම්පූර්ණයෙන්ම මකා දැමීමට අවශ්‍ය බව ඔබට විශ්වාසද? (මෙය නැවත ලබා ගත නොහැක!)")) return;
     
@@ -138,7 +144,6 @@ export default function AdminVideosPage() {
       
       <div className={`fixed inset-0 bg-black/50 z-40 md:hidden ${isSidebarOpen ? 'block' : 'hidden'}`} onClick={() => setIsSidebarOpen(false)}></div>
 
-      {/* Navigation (ඔබ ඉල්ලූ පරිදි කිසිදු වෙනසක් කර නොමැත) */}
       <aside className={`w-64 bg-slate-900 text-white flex flex-col fixed inset-y-0 left-0 z-50 transform ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'} md:translate-x-0 md:static transition-transform duration-300 shadow-xl`}>
         <div className="p-6 border-b border-slate-800 font-bold text-xl flex items-center justify-between">
           <span>⚙️ Admin Panel</span>
@@ -177,19 +182,16 @@ export default function AdminVideosPage() {
 
               <form onSubmit={handleSubmit} className="space-y-4">
                 
-                {/* 1. මාතෘකාව */}
                 <div>
                   <label className="block text-gray-700 text-sm font-bold mb-1">මාතෘකාව (Title)</label>
                   <input type="text" required value={formData.title} onChange={(e) => setFormData({...formData, title: e.target.value})} className="w-full px-4 py-2 rounded-lg bg-gray-50 border outline-none focus:border-red-500 focus:ring-1 focus:ring-red-500"/>
                 </div>
                 
-                {/* 2. YouTube ලින්ක් එක */}
                 <div>
                   <label className="block text-gray-700 text-sm font-bold mb-1">YouTube ලින්ක් එක</label>
                   <input type="url" required value={formData.url} onChange={(e) => setFormData({...formData, url: e.target.value})} className="w-full px-4 py-2 rounded-lg bg-gray-50 border outline-none focus:border-red-500 focus:ring-1 focus:ring-red-500"/>
                 </div>
 
-                {/* 3. පාඩමේ නම (Lesson Name) - Datalist සමග */}
                 <div>
                   <label className="block text-gray-700 text-sm font-bold mb-1">පාඩමේ නම (Lesson)</label>
                   <input 
@@ -208,7 +210,6 @@ export default function AdminVideosPage() {
                   </datalist>
                 </div>
 
-                {/* 4. නිබන්ධනයේ ලින්ක් එක (Tute URL) */}
                 <div>
                   <label className="block text-gray-700 text-sm font-bold mb-1">PDF නිබන්ධනයේ ලින්ක් එක (Drive URL)</label>
                   <input 
@@ -220,7 +221,6 @@ export default function AdminVideosPage() {
                   />
                 </div>
 
-                {/* 5. වර්ගය (Category) සහ 6. A/L Year එක පේළියට */}
                 <div className="grid grid-cols-2 gap-4">
                   <div>
                     <label className="block text-gray-700 text-sm font-bold mb-1">වර්ගය</label>
@@ -240,6 +240,25 @@ export default function AdminVideosPage() {
                     </select>
                   </div>
                 </div>
+
+                {/* 🔴 අලුත්: Private Video Checkbox සහ Input එක */}
+                <div className="flex items-center gap-3 p-4 bg-purple-50 rounded-lg border border-purple-100">
+                  <input type="checkbox" id="isPrivate" checked={formData.isPrivate} onChange={(e) => setFormData({...formData, isPrivate: e.target.checked})} className="w-5 h-5 accent-purple-600 rounded cursor-pointer" />
+                  <label htmlFor="isPrivate" className="font-bold text-purple-900 text-sm cursor-pointer">තෝරාගත් සිසුන්ට පමණක් පෙනෙන Private Video එකක්ද?</label>
+                </div>
+
+                {formData.isPrivate && (
+                  <div className="animate-fade-in">
+                    <label className="block text-gray-700 text-sm font-bold mb-1">අවසර ඇති සිසුන්ගේ WhatsApp අංක (කොමාවකින් වෙන් කර ඇතුළත් කරන්න)</label>
+                    <textarea 
+                      required 
+                      placeholder="උදා: 0712345678, 0771234567"
+                      value={formData.allowedStudents} 
+                      onChange={(e) => setFormData({...formData, allowedStudents: e.target.value})} 
+                      className="w-full px-4 py-2 rounded-lg bg-gray-50 border outline-none focus:border-red-500 focus:ring-1 focus:ring-red-500 min-h-[80px]"
+                    />
+                  </div>
+                )}
 
                 {/* Buttons */}
                 <div className="pt-2">
@@ -278,45 +297,25 @@ export default function AdminVideosPage() {
                         
                         <div className="min-w-0 flex-1">
                           <h3 className={`font-bold text-sm truncate ${video.isVisible === false ? 'text-gray-500 line-through' : 'text-gray-800'}`} title={video.title}>
-                            {video.title}
+                            {video.isPrivate ? '🔒 ' : ''}{video.title}
                           </h3>
                           <div className="text-xs text-gray-500 mt-0.5 truncate">
-                            📁 {video.lessonName || 'පාඩමක් නැත'} {video.tuteUrl ? ' • 📥 Tute' : ''}
+                            📁 {video.lessonName || 'පාඩමක් නැත'} {video.tuteUrl ? ' • 📥 Tute' : ''} {video.isPrivate ? ` • 👥 සිසුන් ${video.allowedStudents?.length || 0} යි` : ''}
                           </div>
                           <div className="flex flex-wrap gap-2 mt-2">
                             <span className="bg-blue-50 text-blue-700 text-[10px] px-2 py-0.5 rounded font-bold">{video.alYear}</span>
                             <span className="bg-gray-100 text-gray-600 text-[10px] px-2 py-0.5 rounded font-bold">{video.category}</span>
+                            {video.isPrivate && <span className="bg-purple-100 text-purple-700 text-[10px] px-2 py-0.5 rounded font-bold">Private</span>}
                           </div>
                         </div>
                       </div>
                       
-                      {/* Action Buttons (Hide, Edit, Delete) */}
                       <div className="flex items-center gap-2 w-full sm:w-auto justify-end border-t sm:border-t-0 pt-3 sm:pt-0 mt-2 sm:mt-0">
-                        
-                        <button 
-                          onClick={() => toggleVisibility(video._id, video.isVisible !== false)} 
-                          title={video.isVisible === false ? "සිසුන්ට පෙන්වන්න" : "සිසුන්ගෙන් සඟවන්න"}
-                          className={`p-2 rounded-lg transition-colors ${video.isVisible === false ? 'bg-green-100 text-green-700 hover:bg-green-200' : 'bg-amber-100 text-amber-700 hover:bg-amber-200'}`}
-                        >
+                        <button onClick={() => toggleVisibility(video._id, video.isVisible !== false)} title={video.isVisible === false ? "සිසුන්ට පෙන්වන්න" : "සිසුන්ගෙන් සඟවන්න"} className={`p-2 rounded-lg transition-colors ${video.isVisible === false ? 'bg-green-100 text-green-700 hover:bg-green-200' : 'bg-amber-100 text-amber-700 hover:bg-amber-200'}`}>
                           {video.isVisible === false ? '👁️' : '🚫'}
                         </button>
-
-                        <button 
-                          onClick={() => handleEdit(video)} 
-                          title="වෙනස් කරන්න"
-                          className="p-2 rounded-lg bg-blue-100 text-blue-700 hover:bg-blue-200 transition-colors"
-                        >
-                          ✏️
-                        </button>
-
-                        <button 
-                          onClick={() => handleDelete(video._id)} 
-                          title="මකා දමන්න"
-                          className="p-2 rounded-lg bg-red-100 text-red-700 hover:bg-red-200 transition-colors"
-                        >
-                          🗑️
-                        </button>
-
+                        <button onClick={() => handleEdit(video)} title="වෙනස් කරන්න" className="p-2 rounded-lg bg-blue-100 text-blue-700 hover:bg-blue-200 transition-colors">✏️</button>
+                        <button onClick={() => handleDelete(video._id)} title="මකා දමන්න" className="p-2 rounded-lg bg-red-100 text-red-700 hover:bg-red-200 transition-colors">🗑️</button>
                       </div>
                     </div>
                   ))

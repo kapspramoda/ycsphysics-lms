@@ -2,15 +2,18 @@ import { NextResponse } from 'next/server';
 import connectToDatabase from '@/lib/mongodb';
 import mongoose from 'mongoose';
 
-// 1. Database Schema යාවත්කාලීන කිරීම (lessonName සහ tuteUrl එකතු කර ඇත)
+// 1. Database Schema යාවත්කාලීන කිරීම
 const VideoSchema = new mongoose.Schema({
   title: { type: String, required: true },
   youtubeId: { type: String, required: true },
   category: { type: String, required: true },
   alYear: { type: String, required: true }, 
-  lessonName: { type: String, default: "" }, // අලුතින් එකතු කළා
-  tuteUrl: { type: String, default: "" },    // අලුතින් එකතු කළා
+  lessonName: { type: String, default: "" }, 
+  tuteUrl: { type: String, default: "" },    
   isVisible: { type: Boolean, default: true }, 
+  // 🔴 අලුත්: Private වීඩියෝ සඳහා
+  isPrivate: { type: Boolean, default: false },
+  allowedStudents: { type: [String], default: [] },
   date: { type: Date, default: Date.now }
 });
 
@@ -19,7 +22,7 @@ const Video = mongoose.models.Video || mongoose.model('Video', VideoSchema);
 // 2. අලුත් වීඩියෝවක් එක් කිරීම (POST)
 export async function POST(req) {
   try {
-    const { title, url, category, alYear, lessonName, tuteUrl } = await req.json();
+    const { title, url, category, alYear, lessonName, tuteUrl, isPrivate, allowedStudents } = await req.json();
     await connectToDatabase();
 
     let youtubeId = null;
@@ -41,7 +44,9 @@ export async function POST(req) {
       category, 
       alYear: finalYear,
       lessonName: lessonName || "",
-      tuteUrl: tuteUrl || ""
+      tuteUrl: tuteUrl || "",
+      isPrivate: isPrivate || false,
+      allowedStudents: Array.isArray(allowedStudents) ? allowedStudents : []
     });
     
     await newVideo.save();
@@ -90,10 +95,10 @@ export async function PATCH(req) {
   }
 }
 
-// 5. අලුතින් එක්කළා - වීඩියෝවක් වෙනස් කිරීම (PUT)
+// 5. වීඩියෝවක් වෙනස් කිරීම (PUT)
 export async function PUT(req) {
   try {
-    const { id, title, url, category, alYear, lessonName, tuteUrl } = await req.json();
+    const { id, title, url, category, alYear, lessonName, tuteUrl, isPrivate, allowedStudents } = await req.json();
     await connectToDatabase();
 
     let youtubeId = null;
@@ -114,7 +119,9 @@ export async function PUT(req) {
       category,
       alYear,
       lessonName: lessonName || "",
-      tuteUrl: tuteUrl || ""
+      tuteUrl: tuteUrl || "",
+      isPrivate: isPrivate || false,
+      allowedStudents: Array.isArray(allowedStudents) ? allowedStudents : []
     });
 
     return NextResponse.json({ message: 'වීඩියෝව සාර්ථකව යාවත්කාලීන කරන ලදී! ✅' }, { status: 200 });
@@ -123,7 +130,7 @@ export async function PUT(req) {
   }
 }
 
-// 6. අලුතින් එක්කළා - වීඩියෝවක් සම්පූර්ණයෙන්ම මකා දැමීම (DELETE)
+// 6. වීඩියෝවක් සම්පූර්ණයෙන්ම මකා දැමීම (DELETE)
 export async function DELETE(req) {
   try {
     const { searchParams } = new URL(req.url);

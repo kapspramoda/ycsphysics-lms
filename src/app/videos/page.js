@@ -53,6 +53,7 @@ export default function VideoLessonsPage() {
 
         const classes = userObj.classTypes || ['Theory'];
         setUserClasses(classes);
+        const userEmail = userObj.email; // 🔴 ළමයාගේ අංකය (Private Video Check කිරීමට)
 
         const response = await fetch(`/api/videos?year=${year}`, { cache: 'no-store' });
         const data = await response.json();
@@ -61,6 +62,14 @@ export default function VideoLessonsPage() {
           
           // 🔴 ළමයාගේ පන්තියට අදාළ වීඩියෝ පමණක් පෙරීම (Filter)
           const allowedVideos = data.videos.filter(video => {
+            
+            // 🔴 අලුත්: Private Video පරීක්ෂාව
+            if (video.isPrivate) {
+              if (!video.allowedStudents || !video.allowedStudents.includes(userEmail)) {
+                return false; // සිසුවාගේ අංකය ලැයිස්තුවේ නැත්නම් වීඩියෝව සඟවයි
+              }
+            }
+
             if (video.category === 'Paper') return classes.includes('Paper');
             if (video.category === 'Revision') return classes.includes('Revision');
             if (video.category === 'Theory') return classes.includes('Theory');
@@ -216,7 +225,6 @@ export default function VideoLessonsPage() {
           YCS<span className="text-purple-300">Physics</span>
         </div>      
         
-        {/* 🔴 Sidebar එක සරල කර ඇත */}
         <nav className="flex-1 p-4 space-y-2 overflow-y-auto custom-scrollbar">
           <a href="#" onClick={(e) => { e.preventDefault(); router.push('/dashboard'); }} className="flex items-center space-x-3 hover:bg-purple-800 px-4 py-3 rounded-lg transition">
             <span className="text-xl">🏠</span><span className="font-medium">මුල් තිරය</span>
@@ -467,7 +475,7 @@ export default function VideoLessonsPage() {
                       
                       <div className="flex-1 py-0.5 flex flex-col justify-center">
                         <h4 className={`text-xs line-clamp-2 leading-tight ${currentVideo?._id === video._id ? 'text-purple-600 font-black' : ''}`}>
-                          {video.title}
+                          {video.isPrivate ? '🔒 ' : ''}{video.title}
                         </h4>
                         <span className={`text-[10px] mt-1.5 font-bold px-2 py-0.5 rounded-md w-fit border ${
                           isDarkMode ? 'bg-slate-800 border-slate-700 text-slate-400' : 'bg-gray-50 border-gray-100 text-gray-500'
