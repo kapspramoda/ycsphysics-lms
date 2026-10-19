@@ -30,6 +30,7 @@ export default function PhysicsoardPage() {
   const [onlineLabels, setOnlineLabels] = useState(['දත්ත නැත']);
   const [onlineScores, setOnlineScores] = useState([0]);
   const [onlineAverage, setOnlineAverage] = useState(0);
+  
 
   useEffect(() => {
     const savedTheme = localStorage.getItem('theme');
@@ -151,31 +152,41 @@ export default function PhysicsoardPage() {
           YCS<span className="text-purple-300">Physics</span>
         </div>
         <nav className="flex-1 p-4 space-y-2 overflow-y-auto custom-scrollbar">
-          <a href="#" onClick={(e) => { e.preventDefault(); router.push('/dashboard'); }} className="flex items-center space-x-3 bg-purple-800 text-white px-4 py-3 rounded-xl transition shadow-inner">
-            <span className="text-xl">🏠</span><span className="font-bold">මුල් තිරය</span>
+          <a href="#" onClick={(e) => { e.preventDefault(); router.push('/dashboard'); }} className="flex items-center space-x-3 hover:bg-purple-800 px-4 py-3 rounded-lg transition">
+            <span className="text-xl">🏠</span><span className="font-medium">මුල් තිරය</span>
           </a>
           
-          <a href="#" onClick={(e) => { e.preventDefault(); router.push('/videos'); }} className="flex items-center space-x-3 hover:bg-purple-800/80 text-purple-200 hover:text-white px-4 py-3 rounded-xl transition">
-            <span className="text-xl">📺</span><span className="font-medium">වීඩියෝ පාඩම්</span>
-          </a>
-          
-          <a href="#" onClick={(e) => { e.preventDefault(); router.push('/exam'); }} className="flex items-center space-x-3 hover:bg-purple-800/80 text-purple-200 hover:text-white px-4 py-3 rounded-xl transition">
+          {(userClasses.includes('Theory') || userClasses.includes('Revision')) && (
+            <a href="#" onClick={(e) => { e.preventDefault(); router.push('/videos'); }} className="flex items-center space-x-3 hover:bg-purple-800 px-4 py-3 rounded-lg transition">
+              <span className="text-xl">📺</span><span className="font-medium">වීඩියෝ පාඩම්</span>
+            </a>
+          )}
+
+          <a href="#" onClick={(e) => { e.preventDefault(); router.push('/exam'); }} className="flex items-center space-x-3 hover:bg-purple-800 px-4 py-3 rounded-lg transition">
             <span className="text-xl">💻</span><span className="font-medium">Online විභාග</span>
           </a>
           
-          <a href="#" onClick={(e) => { e.preventDefault(); router.push('/tutes'); }} className="flex items-center space-x-3 hover:bg-purple-800/80 text-purple-200 hover:text-white px-4 py-3 rounded-xl transition">
+          <a href="#" onClick={(e) => { e.preventDefault(); router.push('/tutes'); }} className="flex items-center space-x-3 hover:bg-purple-800 px-4 py-3 rounded-lg transition">
             <span className="text-xl">📚</span><span className="font-medium">නිබන්ධන</span>
           </a>
-          
-          {/* 🔴 Marking Schemes ලින්ක් එක අයින් කර ඇත (දැන් එය Tutes/Videos යටතටම එන බැවින්) */}
 
-          <a href="#" onClick={(e) => { e.preventDefault(); router.push('/dashboard/marks'); }} className="flex items-center space-x-3 hover:bg-purple-800/80 text-purple-200 hover:text-white px-4 py-3 rounded-xl transition">
+          {userClasses.includes('Paper') && (
+            <>
+              <a href="#" onClick={(e) => { e.preventDefault(); router.push('/paper-discussion'); }} className="flex items-center space-x-3 hover:bg-purple-800 px-4 py-3 rounded-lg transition">
+                <span className="text-xl">📝</span><span className="font-medium">Paper Discussions</span>
+              </a>
+              <a href="#" onClick={(e) => { e.preventDefault(); router.push('/marking'); }} className="flex items-center space-x-3 hover:bg-purple-800 px-4 py-3 rounded-lg transition">
+                <span className="text-xl">✅</span><span className="font-medium">Marking Schemes</span>
+              </a>
+            </>
+          )}
+
+          <a href="#" onClick={(e) => { e.preventDefault(); router.push('/dashboard/marks'); }} className="flex items-center space-x-3 hover:bg-purple-800 px-4 py-3 rounded-lg transition">
             <span className="text-xl">📊</span><span className="font-medium">ප්‍රගති වාර්තාව</span>
           </a>
           
-          <div className="pt-4 border-t border-purple-800 mt-4 mb-2"></div>
-
-          <a href="#" onClick={(e) => { e.preventDefault(); router.push('/settings'); }} className="flex items-center space-x-3 hover:bg-purple-800/80 text-purple-200 hover:text-white px-4 py-3 rounded-xl transition">
+          <div className="pt-4 border-t border-purple-800/50 mt-4 mb-2"></div>
+          <a href="#" onClick={(e) => { e.preventDefault(); router.push('/settings'); }} className="flex items-center space-x-3 hover:bg-purple-800 px-4 py-3 rounded-lg transition">
             <span className="text-xl">⚙️</span><span className="font-medium">සැකසුම්</span>
           </a>
         </nav>

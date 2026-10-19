@@ -60,19 +60,30 @@ export default function VideoLessonsPage() {
         
         if (data.videos && data.videos.length > 0) {
           
-          // 🔴 ළමයාගේ පන්තියට අදාළ වීඩියෝ පමණක් පෙරීම (Filter)
+          // 🔴 ළමයාගේ පන්තියට අදාළ සහ Lesson වර්ගයේ වීඩියෝ පමණක් පෙරීම
           const allowedVideos = data.videos.filter(video => {
             
-            // 🔴 අලුත්: Private Video පරීක්ෂාව
+            // 🔴 1. වීඩියෝ පාඩම් (Lesson) පමණක් තේරීම (Paper Discussion මෙහි පෙන්වන්නේ නැත)
+            if (video.videoType === 'PaperDiscussion') return false;
+
+            // 🔴 2. Private Video පරීක්ෂාව
             if (video.isPrivate) {
               if (!video.allowedStudents || !video.allowedStudents.includes(userEmail)) {
                 return false; // සිසුවාගේ අංකය ලැයිස්තුවේ නැත්නම් වීඩියෝව සඟවයි
               }
             }
 
-            if (video.category === 'Paper') return classes.includes('Paper');
-            if (video.category === 'Revision') return classes.includes('Revision');
-            if (video.category === 'Theory') return classes.includes('Theory');
+            // 🔴 3. සිසුවාගේ පන්ති වලට අදාළව (Array Check)
+            if (video.classTypes && video.classTypes.length > 0) {
+              const hasAccess = video.classTypes.some(cls => classes.includes(cls));
+              if (!hasAccess) return false;
+            } else {
+              // පරණ දත්ත සඳහා (classTypes array එකක් නැත්නම්)
+              if (video.category === 'Paper' && !classes.includes('Paper')) return false;
+              if (video.category === 'Revision' && !classes.includes('Revision')) return false;
+              if (video.category === 'Theory' && !classes.includes('Theory')) return false;
+            }
+
             return true; 
           });
 
@@ -389,7 +400,7 @@ export default function VideoLessonsPage() {
                       {currentVideo.tuteUrl ? (
                         <a href={getDownloadUrl(currentVideo.tuteUrl)} target="_blank" rel="noopener noreferrer" className="flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-purple-600 to-fuchsia-600 hover:from-purple-700 hover:to-fuchsia-700 text-white px-4 py-2.5 md:px-5 md:py-3 text-xs md:text-sm font-bold transition-all shadow-sm flex-shrink-0">
                           <svg className="w-4 h-4 md:w-5 md:h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M12 16l-5-5h3V4h4v7h3l-5 5zm9-2v6H3v-6H1v8h22v-8h-2z"/></svg>
-                          {currentVideo.category === 'Paper' ? 'Marking (PDF)' : 'Tute (PDF)'}
+                          Tute (PDF)
                         </a>
                       ) : (
                         <button disabled className={`flex items-center justify-center gap-2 rounded-xl border border-dashed px-4 py-2.5 md:px-5 md:py-3 text-xs md:text-sm font-bold cursor-not-allowed flex-shrink-0 ${isDarkMode ? 'border-slate-700 text-slate-500' : 'border-gray-300 text-gray-400'}`}>

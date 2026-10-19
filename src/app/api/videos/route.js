@@ -2,27 +2,33 @@ import { NextResponse } from 'next/server';
 import connectToDatabase from '@/lib/mongodb';
 import mongoose from 'mongoose';
 
+export const dynamic = 'force-dynamic';
+
 // 1. Database Schema යාවත්කාලීන කිරීම
 const VideoSchema = new mongoose.Schema({
   title: { type: String, required: true },
   youtubeId: { type: String, required: true },
-  category: { type: String, required: true },
-  alYear: { type: String, required: true }, 
+  videoType: { type: String, default: 'Lesson' }, // 🔴 අලුත්: Lesson ද Paper Discussion ද යන්න
+  classTypes: { type: [String], default: ['Theory'] }, // 🔴 අලුත්: පන්ති කිහිපයක් සේව් වීමට
+  alYears: { type: [String], default: ['2027'] }, // 🔴 අලුත්: වර්ෂ කිහිපයක් සේව් වීමට
   lessonName: { type: String, default: "" }, 
   tuteUrl: { type: String, default: "" },    
   isVisible: { type: Boolean, default: true }, 
-  // 🔴 අලුත්: Private වීඩියෝ සඳහා
   isPrivate: { type: Boolean, default: false },
   allowedStudents: { type: [String], default: [] },
   date: { type: Date, default: Date.now }
-});
+}, { strict: false }); // පරණ දත්ත සමග ගැටීම වැළැක්වීමට
 
-const Video = mongoose.models.Video || mongoose.model('Video', VideoSchema);
+// Database Cache ගැටලුව මඟහැරීමට පරණ Model එක ඉවත් කිරීම
+if (mongoose.models.Video) {
+  delete mongoose.models.Video;
+}
+const Video = mongoose.model('Video', VideoSchema);
 
 // 2. අලුත් වීඩියෝවක් එක් කිරීම (POST)
 export async function POST(req) {
   try {
-    const { title, url, category, alYear, lessonName, tuteUrl, isPrivate, allowedStudents } = await req.json();
+    const { title, url, videoType, classTypes, alYears, lessonName, tuteUrl, isPrivate, allowedStudents } = await req.json();
     await connectToDatabase();
 
     let youtubeId = null;
@@ -37,12 +43,12 @@ export async function POST(req) {
       return NextResponse.json({ message: 'කරුණාකර නිවැරදි YouTube ලින්ක් එකක් ලබා දෙන්න.' }, { status: 400 });
     }
 
-    const finalYear = alYear || 'All';
     const newVideo = new Video({ 
       title, 
       youtubeId, 
-      category, 
-      alYear: finalYear,
+      videoType: videoType || 'Lesson',
+      classTypes: Array.isArray(classTypes) && classTypes.length > 0 ? classTypes : ['Theory'],
+      alYears: Array.isArray(alYears) && alYears.length > 0 ? alYears : ['2027'],
       lessonName: lessonName || "",
       tuteUrl: tuteUrl || "",
       isPrivate: isPrivate || false,
@@ -68,14 +74,15 @@ export async function GET(req) {
     
     let query = {};
     if (year !== 'All') {
-      query.$or = [{ alYear: year }, { alYear: 'All' }];
+      // 🔴 අලුත්: Arrays ඇතුළේ අදාළ වර්ෂය තියෙනවද කියලා බලනවා
+      query.alYears = year;
     }
     
     if (isAdmin !== 'true') {
       query.isVisible = { $ne: false }; 
     }
 
-    const videos = await Video.find(query).sort({ date: -1 });
+    const videos = await Video.find(query).sort({ date: -1 }).lean();
     return NextResponse.json({ videos }, { status: 200 });
   } catch (error) {
     return NextResponse.json({ message: 'දෝෂයක් මතු විය.' }, { status: 500 });
@@ -98,7 +105,7 @@ export async function PATCH(req) {
 // 5. වීඩියෝවක් වෙනස් කිරීම (PUT)
 export async function PUT(req) {
   try {
-    const { id, title, url, category, alYear, lessonName, tuteUrl, isPrivate, allowedStudents } = await req.json();
+    const { id, title, url, videoType, classTypes, alYears, lessonName, tuteUrl, isPrivate, allowedStudents } = await req.json();
     await connectToDatabase();
 
     let youtubeId = null;
@@ -116,13 +123,14 @@ export async function PUT(req) {
     await Video.findByIdAndUpdate(id, {
       title,
       youtubeId,
-      category,
-      alYear,
+      videoType: videoType || 'Lesson',
+      classTypes: Array.isArray(classTypes) && classTypes.length > 0 ? classTypes : ['Theory'],
+      alYears: Array.isArray(alYears) && alYears.length > 0 ? alYears : ['2027'],
       lessonName: lessonName || "",
       tuteUrl: tuteUrl || "",
       isPrivate: isPrivate || false,
       allowedStudents: Array.isArray(allowedStudents) ? allowedStudents : []
-    });
+    }, { new: true, strict: false });
 
     return NextResponse.json({ message: 'වීඩියෝව සාර්ථකව යාවත්කාලීන කරන ලදී! ✅' }, { status: 200 });
   } catch (error) {

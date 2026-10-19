@@ -7,15 +7,20 @@ export default function AdminVideosPage() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [isAuthorized, setIsAuthorized] = useState(false);
 
-  // 🔴 අලුත් ෆෝල්ඩර් අංග (isPrivate සහ allowedStudents) ඇතුළත් කර ඇත
-  const initialFormState = { title: '', url: '', category: 'Theory', alYear: 'All', lessonName: '', tuteUrl: '', isPrivate: false, allowedStudents: '' };
+  // 🔴 අලුත්: Form එක සඳහා අවශ්‍ය සියලුම අංග
+  const initialFormState = { 
+    title: '', url: '', lessonName: '', tuteUrl: '', 
+    videoType: 'Lesson', // 'Lesson' හෝ 'PaperDiscussion'
+    isTheory: true, isRevision: false, isPaper: false, // පන්ති
+    is2027: true, is2028: false, // වර්ෂ
+    isPrivate: false, allowedStudents: '' 
+  };
   const [formData, setFormData] = useState(initialFormState);
   
   const [message, setMessage] = useState({ type: '', text: '' });
   const [loading, setLoading] = useState(false);
   const [videos, setVideos] = useState([]);
   
-  // Edit කිරීම සඳහා අවශ්‍ය States
   const [isEditing, setIsEditing] = useState(false);
   const [editId, setEditId] = useState(null);
 
@@ -47,18 +52,43 @@ export default function AdminVideosPage() {
     setLoading(true);
     setMessage({ type: '', text: '' });
 
+    // 🔴 පන්ති ටික Array එකකට ගැනීම
+    const classTypes = [];
+    if (formData.isTheory) classTypes.push('Theory');
+    if (formData.isRevision) classTypes.push('Revision');
+    if (formData.isPaper) classTypes.push('Paper');
+
+    // 🔴 වර්ෂ ටික Array එකකට ගැනීම
+    const alYears = [];
+    if (formData.is2027) alYears.push('2027');
+    if (formData.is2028) alYears.push('2028');
+
+    if (classTypes.length === 0) {
+      setMessage({ type: 'error', text: 'අවම වශයෙන් එක් පන්ති වර්ගයක් හෝ තෝරන්න!' });
+      setLoading(false); return;
+    }
+    if (alYears.length === 0) {
+      setMessage({ type: 'error', text: 'අවම වශයෙන් එක් වර්ෂයක් හෝ තෝරන්න!' });
+      setLoading(false); return;
+    }
+
     try {
       const method = isEditing ? 'PUT' : 'POST';
-      const payload = isEditing ? { id: editId, ...formData } : { ...formData };
-      
-      // 🔴 WhatsApp අංක ටික Array එකක් විදිහට සකස් කිරීම
-      if (payload.isPrivate) {
-        payload.allowedStudents = typeof formData.allowedStudents === 'string' 
+      const payload = {
+        title: formData.title,
+        url: formData.url,
+        videoType: formData.videoType,
+        lessonName: formData.lessonName,
+        tuteUrl: formData.tuteUrl,
+        classTypes: classTypes,
+        alYears: alYears,
+        isPrivate: formData.isPrivate,
+        allowedStudents: formData.isPrivate && typeof formData.allowedStudents === 'string' 
           ? formData.allowedStudents.split(',').map(s => s.trim()).filter(Boolean) 
-          : [];
-      } else {
-        payload.allowedStudents = [];
-      }
+          : []
+      };
+
+      if (isEditing) payload.id = editId;
 
       const response = await fetch('/api/videos', {
         method: method,
@@ -69,12 +99,11 @@ export default function AdminVideosPage() {
       const data = await response.json();
       if (!response.ok) throw new Error(data.message || "දෝෂයක් මතු විය.");
 
-      setMessage({ type: 'success', text: isEditing ? 'වීඩියෝව සාර්ථකව යාවත්කාලීන කරන ලදී!' : 'නව වීඩියෝව සාර්ථකව එක් කරන ලදී!' });
+      setMessage({ type: 'success', text: isEditing ? 'සාර්ථකව යාවත්කාලීන කරන ලදී! ✅' : 'නව වීඩියෝව සාර්ථකව එක් කළා! ✅' });
       
       setFormData(initialFormState);
       setIsEditing(false);
       setEditId(null);
-      
       fetchVideos();
     } catch (error) {
       setMessage({ type: 'error', text: error.message });
@@ -88,11 +117,14 @@ export default function AdminVideosPage() {
     setFormData({
       title: video.title,
       url: `https://www.youtube.com/watch?v=${video.youtubeId}`,
-      category: video.category || 'Theory',
-      alYear: video.alYear || 'All',
+      videoType: video.videoType || 'Lesson',
       lessonName: video.lessonName || '',
       tuteUrl: video.tuteUrl || '',
-      // 🔴 අලුත් දත්ත Edit Form එකට ලබාදීම
+      isTheory: video.classTypes?.includes('Theory') || false,
+      isRevision: video.classTypes?.includes('Revision') || false,
+      isPaper: video.classTypes?.includes('Paper') || false,
+      is2027: video.alYears?.includes('2027') || false,
+      is2028: video.alYears?.includes('2028') || false,
       isPrivate: video.isPrivate || false,
       allowedStudents: video.allowedStudents && video.allowedStudents.length > 0 ? video.allowedStudents.join(', ') : ''
     });
@@ -109,21 +141,11 @@ export default function AdminVideosPage() {
   };
 
   const handleDelete = async (id) => {
-    if (!window.confirm("මෙම වීඩියෝව සම්පූර්ණයෙන්ම මකා දැමීමට අවශ්‍ය බව ඔබට විශ්වාසද? (මෙය නැවත ලබා ගත නොහැක!)")) return;
-    
+    if (!window.confirm("මෙය මකා දැමීමට අවශ්‍ය බව විශ්වාසද?")) return;
     try {
-      const response = await fetch(`/api/videos?id=${id}`, {
-        method: 'DELETE',
-      });
-      if (response.ok) {
-        setMessage({ type: 'success', text: 'වීඩියෝව සාර්ථකව මකා දමන ලදී.' });
-        fetchVideos();
-        setTimeout(() => setMessage({ type: '', text: '' }), 3000);
-      }
-    } catch (error) {
-      console.error(error);
-      alert("මකා දැමීමේදී දෝෂයක් මතු විය.");
-    }
+      const response = await fetch(`/api/videos?id=${id}`, { method: 'DELETE' });
+      if (response.ok) fetchVideos();
+    } catch (error) { console.error(error); }
   };
 
   const toggleVisibility = async (id, currentStatus) => {
@@ -137,7 +159,7 @@ export default function AdminVideosPage() {
     } catch (error) { console.error(error); }
   };
 
-  if (!isAuthorized) return <div className="min-h-screen bg-slate-900 flex items-center justify-center"><p className="font-bold text-slate-400">පද්ධතියට ඇතුළු වෙමින් පවතී...</p></div>;
+  if (!isAuthorized) return <div className="min-h-screen bg-slate-900 flex items-center justify-center"><p className="font-bold text-slate-400">Loading...</p></div>;
 
   return (
     <div className="bg-gray-100 font-sans flex h-screen overflow-hidden">
@@ -152,18 +174,18 @@ export default function AdminVideosPage() {
         <nav className="flex-1 p-4 space-y-2 overflow-y-auto custom-scrollbar">
           <a href="#" onClick={(e) => { e.preventDefault(); router.push('/admin'); }} className="flex items-center space-x-3 hover:bg-slate-800 px-4 py-3 rounded-lg transition text-gray-300 hover:text-white"><span>🏠</span><span>මුල් තිරය</span></a>
           <a href="#" onClick={(e) => { e.preventDefault(); router.push('/admin/students'); }} className="flex items-center space-x-3 hover:bg-slate-800 px-4 py-3 rounded-xl transition text-gray-300 hover:text-white"><span>👥</span><span>සිසුන් කළමනාකරණය</span></a>
-          <a href="#" onClick={(e) => { e.preventDefault(); router.push('/admin/attendance'); }} className="flex items-center space-x-3 hover:bg-slate-800 px-4 py-3 rounded-lg transition text-gray-300 hover:text-white"><span>✅</span><span>පැමිණීම (Attendance)</span></a>
-          <a href="#" onClick={(e) => { e.preventDefault(); router.push('/admin/videos'); }} className="flex items-center space-x-3 bg-red-600 px-4 py-3 rounded-lg text-white font-bold shadow-md"><span>📺</span><span>වීඩියෝ පාඩම්</span></a>
+          <a href="#" onClick={(e) => { e.preventDefault(); router.push('/admin/attendance'); }} className="flex items-center space-x-3 hover:bg-slate-800 px-4 py-3 rounded-lg transition text-gray-300 hover:text-white"><span>✅</span><span>පැමිණීම</span></a>
+          <a href="#" onClick={(e) => { e.preventDefault(); router.push('/admin/videos'); }} className="flex items-center space-x-3 bg-red-600 px-4 py-3 rounded-lg text-white font-bold shadow-md"><span>📺</span><span>වීඩියෝ සහ Paper Class</span></a>
           <a href="#" onClick={(e) => { e.preventDefault(); router.push('/admin/tutes'); }} className="flex items-center space-x-3 hover:bg-slate-800 px-4 py-3 rounded-lg transition text-gray-300 hover:text-white"><span>📚</span><span>නිබන්ධන</span></a>
           <a href="#" onClick={(e) => { e.preventDefault(); router.push('/admin/questions'); }} className="flex items-center space-x-3 hover:bg-slate-800 px-4 py-3 rounded-lg transition text-gray-300 hover:text-white"><span>📝</span><span>MCQ ප්‍රශ්න පත්‍ර</span></a>
-          <a href="#" onClick={(e) => { e.preventDefault(); router.push('/admin/marks'); }} className="flex items-center space-x-3 hover:bg-slate-800 px-4 py-3 rounded-lg transition text-gray-300 hover:text-white"><span>📊</span><span>ලකුණු ඇතුළත් කිරීම</span></a>
+          <a href="#" onClick={(e) => { e.preventDefault(); router.push('/admin/marks'); }} className="flex items-center space-x-3 hover:bg-slate-800 px-4 py-3 rounded-lg transition text-gray-300 hover:text-white"><span>📊</span><span>ලකුණු</span></a>
         </nav>
       </aside>
 
       <main className="flex-1 flex flex-col h-screen overflow-y-auto relative scroll-smooth">
         <header className="bg-white shadow-sm p-4 flex items-center sticky top-0 z-30 border-b border-gray-200">
           <button onClick={() => setIsSidebarOpen(true)} className="md:hidden p-2 mr-4 text-slate-800 hover:bg-gray-100 rounded-lg transition"><span className="text-2xl font-bold">☰</span></button>
-          <h1 className="text-xl font-bold text-slate-800">📺 වීඩියෝ පාඩම් කළමනාකරණය</h1>
+          <h1 className="text-xl font-bold text-slate-800">📺 වීඩියෝ සහ Paper Discussions</h1>
         </header>
 
         <div className="p-4 md:p-8 max-w-7xl mx-auto w-full grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -171,7 +193,7 @@ export default function AdminVideosPage() {
           <div className="lg:col-span-1">
             <div className={`bg-white p-6 rounded-2xl shadow-md border-t-8 h-fit sticky top-24 transition-colors ${isEditing ? 'border-amber-500' : 'border-red-600'}`}>
               <h2 className="text-xl font-bold text-gray-800 mb-6 text-center">
-                {isEditing ? '✏️ වීඩියෝව යාවත්කාලීන කිරීම' : '▶️ නව වීඩියෝවක් එක් කිරීම'}
+                {isEditing ? '✏️ යාවත්කාලීන කිරීම' : '▶️ අලුතින් එක් කිරීම'}
               </h2>
               
               {message.text && (
@@ -182,6 +204,15 @@ export default function AdminVideosPage() {
 
               <form onSubmit={handleSubmit} className="space-y-4">
                 
+                {/* 🔴 අලුත්: වීඩියෝ වර්ගය තේරීම */}
+                <div>
+                  <label className="block text-gray-700 text-sm font-bold mb-1">මෙය කුමක්ද?</label>
+                  <select value={formData.videoType} onChange={(e) => setFormData({...formData, videoType: e.target.value})} className="w-full px-4 py-2 rounded-lg bg-gray-50 border outline-none focus:border-red-500 focus:ring-1 focus:ring-red-500">
+                    <option value="Lesson">📺 වීඩියෝ පාඩමක් (Lesson)</option>
+                    <option value="PaperDiscussion">📝 ප්‍රශ්න පත්‍ර සාකච්ඡාවක් (Paper Discussion)</option>
+                  </select>
+                </div>
+
                 <div>
                   <label className="block text-gray-700 text-sm font-bold mb-1">මාතෘකාව (Title)</label>
                   <input type="text" required value={formData.title} onChange={(e) => setFormData({...formData, title: e.target.value})} className="w-full px-4 py-2 rounded-lg bg-gray-50 border outline-none focus:border-red-500 focus:ring-1 focus:ring-red-500"/>
@@ -194,54 +225,52 @@ export default function AdminVideosPage() {
 
                 <div>
                   <label className="block text-gray-700 text-sm font-bold mb-1">පාඩමේ නම (Lesson)</label>
-                  <input 
-                    type="text" 
-                    list="lessons" 
-                    required 
-                    placeholder="උදා: තාපය, යාන්ත්‍ර විද්‍යාව"
-                    value={formData.lessonName} 
-                    onChange={(e) => setFormData({...formData, lessonName: e.target.value})} 
-                    className="w-full px-4 py-2 rounded-lg bg-gray-50 border outline-none focus:border-red-500 focus:ring-1 focus:ring-red-500"
-                  />
+                  <input type="text" list="lessons" required value={formData.lessonName} onChange={(e) => setFormData({...formData, lessonName: e.target.value})} className="w-full px-4 py-2 rounded-lg bg-gray-50 border outline-none focus:border-red-500 focus:ring-1 focus:ring-red-500"/>
                   <datalist id="lessons">
-                    {existingLessons.map((lesson, idx) => (
-                      <option key={idx} value={lesson} />
-                    ))}
+                    {existingLessons.map((lesson, idx) => <option key={idx} value={lesson} />)}
                   </datalist>
                 </div>
 
                 <div>
                   <label className="block text-gray-700 text-sm font-bold mb-1">PDF නිබන්ධනයේ ලින්ක් එක (Drive URL)</label>
-                  <input 
-                    type="url" 
-                    placeholder="පසුව දැමීමට හිස්ව තබන්න"
-                    value={formData.tuteUrl} 
-                    onChange={(e) => setFormData({...formData, tuteUrl: e.target.value})} 
-                    className="w-full px-4 py-2 rounded-lg bg-gray-50 border outline-none focus:border-red-500 focus:ring-1 focus:ring-red-500"
-                  />
+                  <input type="url" value={formData.tuteUrl} onChange={(e) => setFormData({...formData, tuteUrl: e.target.value})} className="w-full px-4 py-2 rounded-lg bg-gray-50 border outline-none focus:border-red-500 focus:ring-1 focus:ring-red-500" />
                 </div>
 
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-gray-700 text-sm font-bold mb-1">වර්ගය</label>
-                    <select value={formData.category} onChange={(e) => setFormData({...formData, category: e.target.value})} className="w-full px-3 py-2 rounded-lg bg-gray-50 border outline-none focus:border-red-500">
-                      <option value="Theory">Theory</option>
-                      <option value="Revision">Revision</option>
-                      <option value="Paper">Paper</option>
-                    </select>
+                {/* 🔴 අලුත්: පන්ති සහ වර්ෂ Checkboxes */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="p-4 rounded-xl border bg-red-50/50 border-red-100">
+                    <label className="block text-xs font-bold mb-3 text-red-800">පන්ති වර්ගය (කිහිපයක් තේරිය හැක):</label>
+                    <div className="flex flex-col gap-3">
+                      <label className="flex items-center gap-3 cursor-pointer">
+                        <input type="checkbox" checked={formData.isTheory} onChange={(e) => setFormData({...formData, isTheory: e.target.checked})} className="w-5 h-5 accent-red-600 rounded" />
+                        <span className="text-sm font-bold text-gray-700">Theory</span>
+                      </label>
+                      <label className="flex items-center gap-3 cursor-pointer">
+                        <input type="checkbox" checked={formData.isRevision} onChange={(e) => setFormData({...formData, isRevision: e.target.checked})} className="w-5 h-5 accent-red-600 rounded" />
+                        <span className="text-sm font-bold text-gray-700">Revision</span>
+                      </label>
+                      <label className="flex items-center gap-3 cursor-pointer">
+                        <input type="checkbox" checked={formData.isPaper} onChange={(e) => setFormData({...formData, isPaper: e.target.checked})} className="w-5 h-5 accent-red-600 rounded" />
+                        <span className="text-sm font-bold text-gray-700">Paper Class</span>
+                      </label>
+                    </div>
                   </div>
-                  <div>
-                    <label className="block text-gray-700 text-sm font-bold mb-1">A/L Year</label>
-                    <select value={formData.alYear} onChange={(e) => setFormData({...formData, alYear: e.target.value})} className="w-full px-3 py-2 rounded-lg bg-gray-50 border outline-none focus:border-red-500">
-                      <option value="All">සියලුම</option>
-                      <option value="2026">2026</option>
-                      <option value="2027">2027</option>
-                      <option value="2028">2028</option>
-                    </select>
+
+                  <div className="p-4 rounded-xl border bg-red-50/50 border-red-100">
+                    <label className="block text-xs font-bold mb-3 text-red-800">A/L වර්ෂය (කිහිපයක් තේරිය හැක):</label>
+                    <div className="flex flex-col gap-3">
+                      <label className="flex items-center gap-3 cursor-pointer">
+                        <input type="checkbox" checked={formData.is2027} onChange={(e) => setFormData({...formData, is2027: e.target.checked})} className="w-5 h-5 accent-red-600 rounded" />
+                        <span className="text-sm font-bold text-gray-700">2027</span>
+                      </label>
+                      <label className="flex items-center gap-3 cursor-pointer">
+                        <input type="checkbox" checked={formData.is2028} onChange={(e) => setFormData({...formData, is2028: e.target.checked})} className="w-5 h-5 accent-red-600 rounded" />
+                        <span className="text-sm font-bold text-gray-700">2028</span>
+                      </label>
+                    </div>
                   </div>
                 </div>
 
-                {/* 🔴 අලුත්: Private Video Checkbox සහ Input එක */}
                 <div className="flex items-center gap-3 p-4 bg-purple-50 rounded-lg border border-purple-100">
                   <input type="checkbox" id="isPrivate" checked={formData.isPrivate} onChange={(e) => setFormData({...formData, isPrivate: e.target.checked})} className="w-5 h-5 accent-purple-600 rounded cursor-pointer" />
                   <label htmlFor="isPrivate" className="font-bold text-purple-900 text-sm cursor-pointer">තෝරාගත් සිසුන්ට පමණක් පෙනෙන Private Video එකක්ද?</label>
@@ -260,7 +289,6 @@ export default function AdminVideosPage() {
                   </div>
                 )}
 
-                {/* Buttons */}
                 <div className="pt-2">
                   <button type="submit" disabled={loading} className={`w-full text-white font-bold rounded-lg px-4 py-3 shadow-md transition ${isEditing ? 'bg-amber-500 hover:bg-amber-600' : 'bg-red-600 hover:bg-red-700'}`}>
                     {loading ? 'රැඳී සිටින්න...' : (isEditing ? 'යාවත්කාලීන කරන්න' : 'එක් කරන්න')}
@@ -300,12 +328,24 @@ export default function AdminVideosPage() {
                             {video.isPrivate ? '🔒 ' : ''}{video.title}
                           </h3>
                           <div className="text-xs text-gray-500 mt-0.5 truncate">
-                            📁 {video.lessonName || 'පාඩමක් නැත'} {video.tuteUrl ? ' • 📥 Tute' : ''} {video.isPrivate ? ` • 👥 සිසුන් ${video.allowedStudents?.length || 0} යි` : ''}
+                            📁 {video.lessonName || 'පාඩමක් නැත'} {video.tuteUrl ? ' • 📥 Tute' : ''}
                           </div>
+                          
+                          {/* 🔴 අලුත්: Tags පෙන්වන කොටස */}
                           <div className="flex flex-wrap gap-2 mt-2">
-                            <span className="bg-blue-50 text-blue-700 text-[10px] px-2 py-0.5 rounded font-bold">{video.alYear}</span>
-                            <span className="bg-gray-100 text-gray-600 text-[10px] px-2 py-0.5 rounded font-bold">{video.category}</span>
-                            {video.isPrivate && <span className="bg-purple-100 text-purple-700 text-[10px] px-2 py-0.5 rounded font-bold">Private</span>}
+                            <span className="bg-amber-100 text-amber-800 text-[10px] px-2 py-0.5 rounded font-bold border border-amber-200">
+                              {video.videoType === 'PaperDiscussion' ? '📝 Paper Discussion' : '📺 Lesson'}
+                            </span>
+                            
+                            {video.alYears?.map((y, i) => (
+                              <span key={i} className="bg-blue-50 text-blue-700 text-[10px] px-2 py-0.5 rounded font-bold border border-blue-200">{y}</span>
+                            ))}
+                            
+                            {video.classTypes?.map((c, i) => (
+                              <span key={i} className="bg-gray-100 text-gray-600 text-[10px] px-2 py-0.5 rounded font-bold border border-gray-200">{c}</span>
+                            ))}
+                            
+                            {video.isPrivate && <span className="bg-purple-100 text-purple-700 text-[10px] px-2 py-0.5 rounded font-bold border border-purple-200">Private</span>}
                           </div>
                         </div>
                       </div>

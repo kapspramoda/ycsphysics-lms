@@ -9,7 +9,7 @@ export default function ExamPage() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [userName, setUserName] = useState('');
   const [avatar, setAvatar] = useState(null);
-
+  const [userClasses, setUserClasses] = useState([])
   // --- Exam States ---
   const [questions, setQuestions] = useState([]); 
   const [examLoading, setExamLoading] = useState(true); 
@@ -125,31 +125,41 @@ export default function ExamPage() {
         <div onClick={() => router.push('/')} className="p-6 border-b border-purple-800 font-bold text-xl tracking-wider cursor-pointer hover:opacity-80 transition">
           YCS<span className="text-purple-300">Physics</span>
         </div>
-        <nav className="flex-1 p-4 space-y-2 overflow-y-auto custom-scrollbar">
+       <nav className="flex-1 p-4 space-y-2 overflow-y-auto custom-scrollbar">
           <a href="#" onClick={(e) => { e.preventDefault(); router.push('/dashboard'); }} className="flex items-center space-x-3 hover:bg-purple-800 px-4 py-3 rounded-lg transition">
             <span className="text-xl">🏠</span><span className="font-medium">මුල් තිරය</span>
           </a>
-          <a href="#" onClick={(e) => { e.preventDefault(); router.push('/videos'); }} className="flex items-center space-x-3 hover:bg-purple-800 px-4 py-3 rounded-lg transition">
-            <span className="text-xl">📺</span><span className="font-medium">වීඩියෝ පාඩම්</span>
+          
+          {(userClasses.includes('Theory') || userClasses.includes('Revision')) && (
+            <a href="#" onClick={(e) => { e.preventDefault(); router.push('/videos'); }} className="flex items-center space-x-3 hover:bg-purple-800 px-4 py-3 rounded-lg transition">
+              <span className="text-xl">📺</span><span className="font-medium">වීඩියෝ පාඩම්</span>
+            </a>
+          )}
+
+          <a href="#" onClick={(e) => { e.preventDefault(); router.push('/exam'); }} className="flex items-center space-x-3 hover:bg-purple-800 px-4 py-3 rounded-lg transition">
+            <span className="text-xl">💻</span><span className="font-medium">Online විභාග</span>
           </a>
-          <a href="#" onClick={(e) => { e.preventDefault(); router.push('/exam'); }} className="flex items-center space-x-3 bg-purple-800 px-4 py-3 rounded-lg transition border-l-4 border-purple-400">
-            <span className="text-xl">💻</span><span className="font-bold text-purple-100">Online විභාග</span>
-          </a>
+          
           <a href="#" onClick={(e) => { e.preventDefault(); router.push('/tutes'); }} className="flex items-center space-x-3 hover:bg-purple-800 px-4 py-3 rounded-lg transition">
             <span className="text-xl">📚</span><span className="font-medium">නිබන්ධන</span>
           </a>
-          {/* <a href="#" onClick={(e) => { e.preventDefault(); router.push('/marking'); }} className="flex items-center space-x-3 hover:bg-purple-800 px-4 py-3 rounded-lg transition">
-            <span className="text-xl">✅</span><span className="font-medium">Marking Schemes</span>
-          </a> */}
+
+          {userClasses.includes('Paper') && (
+            <>
+              <a href="#" onClick={(e) => { e.preventDefault(); router.push('/paper-discussion'); }} className="flex items-center space-x-3 hover:bg-purple-800 px-4 py-3 rounded-lg transition">
+                <span className="text-xl">📝</span><span className="font-medium">Paper Discussions</span>
+              </a>
+              <a href="#" onClick={(e) => { e.preventDefault(); router.push('/marking'); }} className="flex items-center space-x-3 hover:bg-purple-800 px-4 py-3 rounded-lg transition">
+                <span className="text-xl">✅</span><span className="font-medium">Marking Schemes</span>
+              </a>
+            </>
+          )}
+
           <a href="#" onClick={(e) => { e.preventDefault(); router.push('/dashboard/marks'); }} className="flex items-center space-x-3 hover:bg-purple-800 px-4 py-3 rounded-lg transition">
             <span className="text-xl">📊</span><span className="font-medium">ප්‍රගති වාර්තාව</span>
           </a>
           
           <div className="pt-4 border-t border-purple-800/50 mt-4 mb-2"></div>
-
-          {/* <a href="#" onClick={(e) => { e.preventDefault(); router.push('/notifications'); }} className="flex items-center space-x-3 hover:bg-purple-800 px-4 py-3 rounded-lg transition">
-            <span className="text-xl">🔔</span><span className="font-medium">දැනුම්දීම්</span>
-          </a> */}
           <a href="#" onClick={(e) => { e.preventDefault(); router.push('/settings'); }} className="flex items-center space-x-3 hover:bg-purple-800 px-4 py-3 rounded-lg transition">
             <span className="text-xl">⚙️</span><span className="font-medium">සැකසුම්</span>
           </a>

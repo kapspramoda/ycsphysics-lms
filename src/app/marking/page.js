@@ -9,7 +9,7 @@ export default function MarkingSchemesPage() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [userName, setUserName] = useState('');
   const [avatar, setAvatar] = useState(null);
-
+  const [userClasses, setUserClasses] = useState([]);
   const [markings, setMarkings] = useState([]);
   const [userYear, setUserYear] = useState('');
   const [loading, setLoading] = useState(true);
@@ -64,36 +64,45 @@ export default function MarkingSchemesPage() {
         >
         YCS<span className="text-purple-300">Physics</span>
       </div>
-        <nav className="flex-1 p-4 space-y-2 overflow-y-auto custom-scrollbar">
-  <a href="#" onClick={(e) => { e.preventDefault(); router.push('/dashboard'); }} className="flex items-center space-x-3 hover:bg-purple-800 px-4 py-3 rounded-lg transition">
-    <span className="text-xl">🏠</span><span className="font-medium">මුල් තිරය</span>
-  </a>
-  <a href="#" onClick={(e) => { e.preventDefault(); router.push('/videos'); }} className="flex items-center space-x-3 hover:bg-purple-800 px-4 py-3 rounded-lg transition">
-    <span className="text-xl">📺</span><span className="font-medium">වීඩියෝ පාඩම්</span>
-  </a>
-  <a href="#" onClick={(e) => { e.preventDefault(); router.push('/exam'); }} className="flex items-center space-x-3 hover:bg-purple-800 px-4 py-3 rounded-lg transition">
-    <span className="text-xl">💻</span><span className="font-medium">Online විභාග</span>
-  </a>
-  <a href="#" onClick={(e) => { e.preventDefault(); router.push('/tutes'); }} className="flex items-center space-x-3 hover:bg-purple-800 px-4 py-3 rounded-lg transition">
-    <span className="text-xl">📚</span><span className="font-medium">නිබන්ධන</span>
-  </a>
-  {/* <a href="#" onClick={(e) => { e.preventDefault(); router.push('/marking'); }} className="flex items-center space-x-3 hover:bg-purple-800 px-4 py-3 rounded-lg transition">
-    <span className="text-xl">✅</span><span className="font-medium">Marking Schemes</span>
-  </a> */}
-  <a href="#" onClick={(e) => { e.preventDefault(); router.push('/dashboard/marks'); }} className="flex items-center space-x-3 hover:bg-purple-800 px-4 py-3 rounded-lg transition">
-    <span className="text-xl">📊</span><span className="font-medium">ප්‍රගති වාර්තාව</span>
-  </a>
-  
-  {/* අලුතින් එකතු කළ දැනුම්දීම් සහ සැකසුම් */}
-  <div className="pt-4 border-t border-purple-800/50 mt-4 mb-2"></div>
+       <nav className="flex-1 p-4 space-y-2 overflow-y-auto custom-scrollbar">
+          <a href="#" onClick={(e) => { e.preventDefault(); router.push('/dashboard'); }} className="flex items-center space-x-3 hover:bg-purple-800 px-4 py-3 rounded-lg transition">
+            <span className="text-xl">🏠</span><span className="font-medium">මුල් තිරය</span>
+          </a>
+          
+          {(userClasses.includes('Theory') || userClasses.includes('Revision')) && (
+            <a href="#" onClick={(e) => { e.preventDefault(); router.push('/videos'); }} className="flex items-center space-x-3 hover:bg-purple-800 px-4 py-3 rounded-lg transition">
+              <span className="text-xl">📺</span><span className="font-medium">වීඩියෝ පාඩම්</span>
+            </a>
+          )}
 
-  {/* <a href="#" onClick={(e) => { e.preventDefault(); router.push('/notifications'); }} className="flex items-center space-x-3 hover:bg-purple-800 px-4 py-3 rounded-lg transition">
-    <span className="text-xl">🔔</span><span className="font-medium">දැනුම්දීම්</span>
-  </a> */}
-  <a href="#" onClick={(e) => { e.preventDefault(); router.push('/settings'); }} className="flex items-center space-x-3 hover:bg-purple-800 px-4 py-3 rounded-lg transition">
-    <span className="text-xl">⚙️</span><span className="font-medium">සැකසුම්</span>
-  </a>
-</nav>
+          <a href="#" onClick={(e) => { e.preventDefault(); router.push('/exam'); }} className="flex items-center space-x-3 hover:bg-purple-800 px-4 py-3 rounded-lg transition">
+            <span className="text-xl">💻</span><span className="font-medium">Online විභාග</span>
+          </a>
+          
+          <a href="#" onClick={(e) => { e.preventDefault(); router.push('/tutes'); }} className="flex items-center space-x-3 hover:bg-purple-800 px-4 py-3 rounded-lg transition">
+            <span className="text-xl">📚</span><span className="font-medium">නිබන්ධන</span>
+          </a>
+
+          {userClasses.includes('Paper') && (
+            <>
+              <a href="#" onClick={(e) => { e.preventDefault(); router.push('/paper-discussion'); }} className="flex items-center space-x-3 hover:bg-purple-800 px-4 py-3 rounded-lg transition">
+                <span className="text-xl">📝</span><span className="font-medium">Paper Discussions</span>
+              </a>
+              <a href="#" onClick={(e) => { e.preventDefault(); router.push('/marking'); }} className="flex items-center space-x-3 hover:bg-purple-800 px-4 py-3 rounded-lg transition">
+                <span className="text-xl">✅</span><span className="font-medium">Marking Schemes</span>
+              </a>
+            </>
+          )}
+
+          <a href="#" onClick={(e) => { e.preventDefault(); router.push('/dashboard/marks'); }} className="flex items-center space-x-3 hover:bg-purple-800 px-4 py-3 rounded-lg transition">
+            <span className="text-xl">📊</span><span className="font-medium">ප්‍රගති වාර්තාව</span>
+          </a>
+          
+          <div className="pt-4 border-t border-purple-800/50 mt-4 mb-2"></div>
+          <a href="#" onClick={(e) => { e.preventDefault(); router.push('/settings'); }} className="flex items-center space-x-3 hover:bg-purple-800 px-4 py-3 rounded-lg transition">
+            <span className="text-xl">⚙️</span><span className="font-medium">සැකසුම්</span>
+          </a>
+        </nav>
         <div className="p-4 border-t border-purple-800">
           <button onClick={handleLogout} className="w-full flex items-center space-x-3 hover:bg-red-500/20 p-3 rounded-lg transition text-purple-200 hover:text-red-400">
             <div className="w-8 h-8 rounded-full bg-purple-800 flex items-center justify-center text-white font-bold text-sm">
