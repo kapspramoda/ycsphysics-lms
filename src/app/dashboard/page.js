@@ -265,7 +265,7 @@ export default function PhysicsoardPage() {
               <h3 className="text-lg font-bold mb-1 group-hover:text-green-500 transition">නිබන්ධන</h3>
               <p className={`text-xs ${textMuted}`}>PDF / Marking</p>
             </div>
-            
+
             {/* 🔴 අලුත්: Paper Discussion Card */}
             {userClasses.includes('Paper') && (
               <div onClick={() => router.push('/paper-discussion')} className={`${bgCard} p-6 rounded-2xl shadow-sm border border-t-4 border-t-blue-500 hover:shadow-lg transition duration-300 transform hover:-translate-y-1 cursor-pointer group flex flex-col items-center text-center`}>
@@ -274,13 +274,13 @@ export default function PhysicsoardPage() {
                 <p className={`text-xs ${textMuted}`}>Past Papers / Model</p>
               </div>
             )}
-
+            
             <div onClick={() => router.push('/dashboard/marks')} className={`${bgCard} p-6 rounded-2xl shadow-sm border border-t-4 border-t-amber-500 hover:shadow-lg transition duration-300 transform hover:-translate-y-1 cursor-pointer group flex flex-col items-center text-center`}>
               <div className="w-14 h-14 bg-amber-50 text-amber-600 rounded-2xl flex items-center justify-center text-3xl mb-4 group-hover:scale-110 transition duration-300 relative">
                  📊<span className="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full animate-pulse border-2 border-white"></span>
               </div>
               <h3 className="text-lg font-bold mb-1 group-hover:text-amber-500 transition">ප්‍රගති වාර්තාව</h3>
-              <p className={`text-xs ${textMuted}`}>මගේ ලකුණු</p>
+              <p className={`text-xs ${textMuted}`}>මගේ ලකුණු සහ ප්‍රස්ථාර</p>
             </div>
 
           </div>
