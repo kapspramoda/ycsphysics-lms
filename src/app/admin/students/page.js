@@ -17,7 +17,7 @@ export default function AdminStudentsPage() {
 
   const [formData, setFormData] = useState({
     name: '', email: '', password: '', alYear: '2027', center: '',
-    isTheory: true, isRevision: false, isPaper: false
+    isTheory: false, isRevision: false, isPaper: false // 🔴 මෙතන ඩිෆල්ට් එක Paper දාන්න පුළුවන් හෝ අවශ්‍ය විදිහට තියන්න
   });
 
   const [bulkFile, setBulkFile] = useState(null);
@@ -122,11 +122,12 @@ export default function AdminStudentsPage() {
     XLSX.writeFile(workbook, "PramodaChemistry_Students.xlsx");
   };
 
-  const handleSingleSubmit = async (e) => {
+const handleSingleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
     setMsg({ type: '', text: '' });
 
+    // 🔴 ළමයා ටික් කරපු පන්ති ටික හරියටම Array එකට Push වීම
     const classes = [];
     if (formData.isTheory) classes.push('Theory');
     if (formData.isRevision) classes.push('Revision');
@@ -139,12 +140,17 @@ export default function AdminStudentsPage() {
 
     try {
       const payload = {
-        name: formData.name, email: formData.email, password: formData.password,
-        alYear: formData.alYear, center: formData.center, classTypes: classes
+        name: formData.name, 
+        email: formData.email, 
+        password: formData.password,
+        alYear: formData.alYear, 
+        center: formData.center, 
+        classTypes: classes // 🔴 මෙතන 'classes' array එක හරියටම යවනවාදැයි බලන්න
       };
 
       const res = await fetch('/api/users', {
-        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        method: 'POST', 
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload)
       });
 
