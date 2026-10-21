@@ -68,7 +68,15 @@ export default function PaperDiscussionPage() {
               }
             }
 
-            
+            // 3. Paper Class ළමයින්ට පමණක් පෙන්වීම (නම කුමක් වුවත් ගැළපෙන ලෙස)
+            if (video.classTypes && video.classTypes.length > 0) {
+              // මෙහිදී 'Paper' හෝ 'Paper Class' කුemer තිබුණත් ළමයාට පෙන්වීමට සකස් කර ඇත
+              const hasAccess = video.classTypes.some(cls => 
+                classes.includes(cls) || 
+                (cls.toLowerCase().includes('paper') && classes.includes('Paper'))
+              );
+              if (!hasAccess) return false;
+            }
 
             return true; 
           });
