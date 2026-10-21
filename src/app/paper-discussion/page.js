@@ -58,17 +58,17 @@ export default function PaperDiscussionPage() {
         if (data.videos && data.videos.length > 0) {
           
           const allowedVideos = data.videos.filter(video => {
-            // 🔴 1. Paper Discussion පමණක් තේරීම
+            // 1. Paper Discussion පමණක් දැයි පරීක්ෂා කිරීම
             if (video.videoType !== 'PaperDiscussion') return false;
 
-            // 🔴 2. Private Video පරීක්ෂාව
+            // 2. Private Video පරීක්ෂාව
             if (video.isPrivate) {
               if (!video.allowedStudents || !video.allowedStudents.includes(userEmail)) {
                 return false; 
               }
             }
 
-            // 🔴 3. සිසුවාගේ පන්ති වලට අදාළව (Array Check)
+            // 3. සිසුවාගේ පන්ති වර්ග (උදා: 'Paper') පරීක්ෂා කිරීම
             if (video.classTypes && video.classTypes.length > 0) {
               const hasAccess = video.classTypes.some(cls => classes.includes(cls));
               if (!hasAccess) return false;
@@ -245,7 +245,6 @@ export default function PaperDiscussionPage() {
             <span className="text-xl">📚</span><span className="font-medium">නිබන්ධන</span>
           </a>
 
-          {/* 🔴 Paper Discussions සහ Marking Schemes හැමෝටම පේන විදිහට හැදුවා */}
           <a href="#" onClick={(e) => { e.preventDefault(); router.push('/paper-discussion'); }} className="flex items-center space-x-3 bg-purple-800 px-4 py-3 rounded-lg transition shadow-inner border border-purple-800/30">
             <span className="text-xl">📝</span><span className="font-bold text-white">Paper Discussions</span>
           </a>
