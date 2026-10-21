@@ -29,6 +29,7 @@ export default function StudentTutes() {
       const year = user.alYear || 'All';
       setUserYear(year);
 
+      // 🔴 අත්‍යවශ්‍යයි: ළමයාගේ පන්ති වර්ග ලබා ගැනීම
       const classes = user.classTypes || ['Theory'];
       setUserClasses(classes);
 
@@ -96,20 +97,17 @@ export default function StudentTutes() {
             <span className="text-xl">💻</span><span className="font-medium">Online විභාග</span>
           </a>
           
-          <a href="#" onClick={(e) => { e.preventDefault(); router.push('/tutes'); }} className="flex items-center space-x-3 hover:bg-purple-800 px-4 py-3 rounded-lg transition">
-            <span className="text-xl">📚</span><span className="font-medium">නිබන්ධන</span>
+          <a href="#" onClick={(e) => { e.preventDefault(); router.push('/tutes'); }} className="flex items-center space-x-3 bg-purple-800 px-4 py-3 rounded-lg transition shadow-inner border border-purple-800/30">
+            <span className="text-xl">📚</span><span className="font-bold text-white">නිබන්ධන</span>
           </a>
 
-          {userClasses.includes('Paper') && (
-            <>
-              <a href="#" onClick={(e) => { e.preventDefault(); router.push('/paper-discussion'); }} className="flex items-center space-x-3 hover:bg-purple-800 px-4 py-3 rounded-lg transition">
-                <span className="text-xl">📝</span><span className="font-medium">Paper Discussions</span>
-              </a>
-              <a href="#" onClick={(e) => { e.preventDefault(); router.push('/marking'); }} className="flex items-center space-x-3 hover:bg-purple-800 px-4 py-3 rounded-lg transition">
-                <span className="text-xl">✅</span><span className="font-medium">Marking Schemes</span>
-              </a>
-            </>
-          )}
+          {/* 🔴 Paper Discussions සහ Marking Schemes හැමෝටම පේන විදිහට හැදුවා */}
+          <a href="#" onClick={(e) => { e.preventDefault(); router.push('/paper-discussion'); }} className="flex items-center space-x-3 hover:bg-purple-800 px-4 py-3 rounded-lg transition">
+            <span className="text-xl">📝</span><span className="font-medium">Paper Discussions</span>
+          </a>
+          <a href="#" onClick={(e) => { e.preventDefault(); router.push('/marking'); }} className="flex items-center space-x-3 hover:bg-purple-800 px-4 py-3 rounded-lg transition">
+            <span className="text-xl">✅</span><span className="font-medium">Marking Schemes</span>
+          </a>
 
           <a href="#" onClick={(e) => { e.preventDefault(); router.push('/dashboard/marks'); }} className="flex items-center space-x-3 hover:bg-purple-800 px-4 py-3 rounded-lg transition">
             <span className="text-xl">📊</span><span className="font-medium">ප්‍රගති වාර්තාව</span>

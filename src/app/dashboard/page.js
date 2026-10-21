@@ -44,7 +44,7 @@ export default function PhysicsoardPage() {
       setUserName(userObj.name);
       setAlYear(userObj.alYear || '');
       setCenter(userObj.center || '');
-      setUserClasses(userObj.classTypes || ['Theory']); // පන්ති වර්ගය සේව් කරගැනීම
+      setUserClasses(userObj.classTypes || ['Theory']); // 🔴 පන්ති වර්ගය සේව් කරගැනීම
       setIsAuthorized(true);
 
       const storedAvatar = localStorage.getItem('userAvatar');
@@ -150,8 +150,8 @@ export default function PhysicsoardPage() {
           YCS<span className="text-purple-300">Physics</span>
         </div>
         <nav className="flex-1 p-4 space-y-2 overflow-y-auto custom-scrollbar">
-          <a href="#" onClick={(e) => { e.preventDefault(); router.push('/dashboard'); }} className="flex items-center space-x-3 hover:bg-purple-800 px-4 py-3 rounded-lg transition">
-            <span className="text-xl">🏠</span><span className="font-medium">මුල් තිරය</span>
+          <a href="#" onClick={(e) => { e.preventDefault(); router.push('/dashboard'); }} className="flex items-center space-x-3 bg-purple-800 px-4 py-3 rounded-lg transition shadow-inner border border-purple-800/30">
+            <span className="text-xl">🏠</span><span className="font-bold text-white">මුල් තිරය</span>
           </a>
           
           {(userClasses.includes('Theory') || userClasses.includes('Revision')) && (
@@ -168,16 +168,13 @@ export default function PhysicsoardPage() {
             <span className="text-xl">📚</span><span className="font-medium">නිබන්ධන</span>
           </a>
 
-          {userClasses.includes('Paper') && (
-            <>
-              <a href="#" onClick={(e) => { e.preventDefault(); router.push('/paper-discussion'); }} className="flex items-center space-x-3 hover:bg-purple-800 px-4 py-3 rounded-lg transition">
-                <span className="text-xl">📝</span><span className="font-medium">Paper Discussions</span>
-              </a>
-              <a href="#" onClick={(e) => { e.preventDefault(); router.push('/marking'); }} className="flex items-center space-x-3 hover:bg-purple-800 px-4 py-3 rounded-lg transition">
-                <span className="text-xl">✅</span><span className="font-medium">Marking Schemes</span>
-              </a>
-            </>
-          )}
+          {/* 🔴 Paper Discussions සහ Marking Schemes හැමෝටම පේන විදිහට හැදුවා */}
+          <a href="#" onClick={(e) => { e.preventDefault(); router.push('/paper-discussion'); }} className="flex items-center space-x-3 hover:bg-purple-800 px-4 py-3 rounded-lg transition">
+            <span className="text-xl">📝</span><span className="font-medium">Paper Discussions</span>
+          </a>
+          <a href="#" onClick={(e) => { e.preventDefault(); router.push('/marking'); }} className="flex items-center space-x-3 hover:bg-purple-800 px-4 py-3 rounded-lg transition">
+            <span className="text-xl">✅</span><span className="font-medium">Marking Schemes</span>
+          </a>
 
           <a href="#" onClick={(e) => { e.preventDefault(); router.push('/dashboard/marks'); }} className="flex items-center space-x-3 hover:bg-purple-800 px-4 py-3 rounded-lg transition">
             <span className="text-xl">📊</span><span className="font-medium">ප්‍රගති වාර්තාව</span>
@@ -243,7 +240,6 @@ export default function PhysicsoardPage() {
             <div className="absolute top-0 right-0 w-64 h-64 bg-white opacity-10 rounded-full blur-3xl transform translate-x-1/2 -translate-y-1/2"></div>
           </div>
 
-          {/* 🔴 අලුත්: Grid එක Columns 5කට ගළපා, Paper Discussion Card එක එකතු කර ඇත */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-6">
             
             {(userClasses.includes('Theory') || userClasses.includes('Revision')) && (
@@ -266,18 +262,16 @@ export default function PhysicsoardPage() {
               <p className={`text-xs ${textMuted}`}>PDF / Marking</p>
             </div>
 
-            {/* 🔴 අලුත්: Paper Discussion Card */}
-            {userClasses.includes('Paper') && (
-              <div onClick={() => router.push('/paper-discussion')} className={`${bgCard} p-6 rounded-2xl shadow-sm border border-t-4 border-t-blue-500 hover:shadow-lg transition duration-300 transform hover:-translate-y-1 cursor-pointer group flex flex-col items-center text-center`}>
-                <div className="w-14 h-14 bg-blue-50 text-blue-600 rounded-2xl flex items-center justify-center text-3xl mb-4 group-hover:scale-110 transition duration-300">📝</div>
-                <h3 className="text-lg font-bold mb-1 group-hover:text-blue-500 transition">Paper Discussions</h3>
-                <p className={`text-xs ${textMuted}`}>Past Papers / Model</p>
-              </div>
-            )}
+            {/* 🔴 Paper Discussion Card */}
+            <div onClick={() => router.push('/paper-discussion')} className={`${bgCard} p-6 rounded-2xl shadow-sm border border-t-4 border-t-blue-500 hover:shadow-lg transition duration-300 transform hover:-translate-y-1 cursor-pointer group flex flex-col items-center text-center`}>
+              <div className="w-14 h-14 bg-blue-50 text-blue-600 rounded-2xl flex items-center justify-center text-3xl mb-4 group-hover:scale-110 transition duration-300">📝</div>
+              <h3 className="text-lg font-bold mb-1 group-hover:text-blue-500 transition">Paper Discussions</h3>
+              <p className={`text-xs ${textMuted}`}>Past Papers / Model</p>
+            </div>
             
             <div onClick={() => router.push('/dashboard/marks')} className={`${bgCard} p-6 rounded-2xl shadow-sm border border-t-4 border-t-amber-500 hover:shadow-lg transition duration-300 transform hover:-translate-y-1 cursor-pointer group flex flex-col items-center text-center`}>
               <div className="w-14 h-14 bg-amber-50 text-amber-600 rounded-2xl flex items-center justify-center text-3xl mb-4 group-hover:scale-110 transition duration-300 relative">
-                 📊<span className="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full animate-pulse border-2 border-white"></span>
+                  📊<span className="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full animate-pulse border-2 border-white"></span>
               </div>
               <h3 className="text-lg font-bold mb-1 group-hover:text-amber-500 transition">ප්‍රගති වාර්තාව</h3>
               <p className={`text-xs ${textMuted}`}>මගේ ලකුණු සහ ප්‍රස්ථාර</p>

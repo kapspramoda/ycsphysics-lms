@@ -9,12 +9,13 @@ export default function ExamPage() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [userName, setUserName] = useState('');
   const [avatar, setAvatar] = useState(null);
-  const [userClasses, setUserClasses] = useState([])
+  const [userClasses, setUserClasses] = useState([]);
+  
   // --- Exam States ---
   const [questions, setQuestions] = useState([]); 
   const [examLoading, setExamLoading] = useState(true); 
   
-  const [examStarted, setExamStarted] = useState(false); // <--- විභාගය පටන් ගත්තද බලන අලුත් State එක
+  const [examStarted, setExamStarted] = useState(false); 
   const [currentQuestion, setCurrentQuestion] = useState(0);
   const [answers, setAnswers] = useState({}); 
   const [timeLeft, setTimeLeft] = useState(600); // තත්පර 600 (විනාඩි 10)
@@ -30,6 +31,10 @@ export default function ExamPage() {
 
     const userObj = JSON.parse(storedUser);
     setUserName(userObj.name);
+    
+    // 🔴 අත්‍යවශ්‍යයි: ළමයාගේ පන්ති වර්ග ලබා ගැනීම
+    setUserClasses(userObj.classTypes || ['Theory']);
+
     const storedAvatar = localStorage.getItem('userAvatar');
     if (storedAvatar) setAvatar(storedAvatar);
 
@@ -136,24 +141,21 @@ export default function ExamPage() {
             </a>
           )}
 
-          <a href="#" onClick={(e) => { e.preventDefault(); router.push('/exam'); }} className="flex items-center space-x-3 hover:bg-purple-800 px-4 py-3 rounded-lg transition">
-            <span className="text-xl">💻</span><span className="font-medium">Online විභාග</span>
+          <a href="#" onClick={(e) => { e.preventDefault(); router.push('/exam'); }} className="flex items-center space-x-3 bg-purple-800 px-4 py-3 rounded-lg transition shadow-inner border border-purple-800/30">
+            <span className="text-xl">💻</span><span className="font-bold text-white">Online විභාග</span>
           </a>
           
           <a href="#" onClick={(e) => { e.preventDefault(); router.push('/tutes'); }} className="flex items-center space-x-3 hover:bg-purple-800 px-4 py-3 rounded-lg transition">
             <span className="text-xl">📚</span><span className="font-medium">නිබන්ධන</span>
           </a>
 
-          {userClasses.includes('Paper') && (
-            <>
-              <a href="#" onClick={(e) => { e.preventDefault(); router.push('/paper-discussion'); }} className="flex items-center space-x-3 hover:bg-purple-800 px-4 py-3 rounded-lg transition">
-                <span className="text-xl">📝</span><span className="font-medium">Paper Discussions</span>
-              </a>
-              <a href="#" onClick={(e) => { e.preventDefault(); router.push('/marking'); }} className="flex items-center space-x-3 hover:bg-purple-800 px-4 py-3 rounded-lg transition">
-                <span className="text-xl">✅</span><span className="font-medium">Marking Schemes</span>
-              </a>
-            </>
-          )}
+          {/* 🔴 Paper Discussions සහ Marking Schemes හැමෝටම පේන විදිහට හැදුවා */}
+          <a href="#" onClick={(e) => { e.preventDefault(); router.push('/paper-discussion'); }} className="flex items-center space-x-3 hover:bg-purple-800 px-4 py-3 rounded-lg transition">
+            <span className="text-xl">📝</span><span className="font-medium">Paper Discussions</span>
+          </a>
+          <a href="#" onClick={(e) => { e.preventDefault(); router.push('/marking'); }} className="flex items-center space-x-3 hover:bg-purple-800 px-4 py-3 rounded-lg transition">
+            <span className="text-xl">✅</span><span className="font-medium">Marking Schemes</span>
+          </a>
 
           <a href="#" onClick={(e) => { e.preventDefault(); router.push('/dashboard/marks'); }} className="flex items-center space-x-3 hover:bg-purple-800 px-4 py-3 rounded-lg transition">
             <span className="text-xl">📊</span><span className="font-medium">ප්‍රගති වාර්තාව</span>
@@ -191,7 +193,7 @@ export default function ExamPage() {
           {/* විභාගය පටන් ගත්තට පස්සේ විතරක් Timer එක පෙන්වයි */}
           {(examStarted && !isSubmitted && questions.length > 0) && (
              <div className={`flex items-center gap-2 px-4 py-2 rounded-lg font-mono text-lg sm:text-xl font-bold shadow-sm ${timeLeft < 60 ? 'bg-red-100 text-red-600 animate-pulse' : 'bg-purple-50 text-purple-700'}`}>
-               <span>⏱️</span> {formatTime(timeLeft)}
+              <span>⏱️</span> {formatTime(timeLeft)}
              </div>
           )}
         </header>

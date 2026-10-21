@@ -53,32 +53,30 @@ export default function VideoLessonsPage() {
 
         const classes = userObj.classTypes || ['Theory'];
         setUserClasses(classes);
-        const userEmail = userObj.email; // 🔴 ළමයාගේ අංකය (Private Video Check කිරීමට)
+        const userEmail = userObj.email; 
 
         const response = await fetch(`/api/videos?year=${year}`, { cache: 'no-store' });
         const data = await response.json();
         
         if (data.videos && data.videos.length > 0) {
           
-          // 🔴 ළමයාගේ පන්තියට අදාළ සහ Lesson වර්ගයේ වීඩියෝ පමණක් පෙරීම
           const allowedVideos = data.videos.filter(video => {
             
-            // 🔴 1. වීඩියෝ පාඩම් (Lesson) පමණක් තේරීම (Paper Discussion මෙහි පෙන්වන්නේ නැත)
+            // 1. වීඩියෝ පාඩම් (Lesson) පමණක් තේරීම
             if (video.videoType === 'PaperDiscussion') return false;
 
-            // 🔴 2. Private Video පරීක්ෂාව
+            // 2. Private Video පරීක්ෂාව
             if (video.isPrivate) {
               if (!video.allowedStudents || !video.allowedStudents.includes(userEmail)) {
-                return false; // සිසුවාගේ අංකය ලැයිස්තුවේ නැත්නම් වීඩියෝව සඟවයි
+                return false; 
               }
             }
 
-            // 🔴 3. සිසුවාගේ පන්ති වලට අදාළව (Array Check)
+            // 3. සිසුවාගේ පන්ති වලට අදාළව
             if (video.classTypes && video.classTypes.length > 0) {
               const hasAccess = video.classTypes.some(cls => classes.includes(cls));
               if (!hasAccess) return false;
             } else {
-              // පරණ දත්ත සඳහා (classTypes array එකක් නැත්නම්)
               if (video.category === 'Paper' && !classes.includes('Paper')) return false;
               if (video.category === 'Revision' && !classes.includes('Revision')) return false;
               if (video.category === 'Theory' && !classes.includes('Theory')) return false;
@@ -249,6 +247,15 @@ export default function VideoLessonsPage() {
           <a href="#" onClick={(e) => { e.preventDefault(); router.push('/tutes'); }} className="flex items-center space-x-3 hover:bg-purple-800 px-4 py-3 rounded-lg transition">
             <span className="text-xl">📚</span><span className="font-medium">නිබන්ධන</span>
           </a>
+
+          {/* 🔴 Paper Discussions සහ Marking Schemes හැමෝටම පේන විදිහට හැදුවා */}
+          <a href="#" onClick={(e) => { e.preventDefault(); router.push('/paper-discussion'); }} className="flex items-center space-x-3 hover:bg-purple-800 px-4 py-3 rounded-lg transition">
+            <span className="text-xl">📝</span><span className="font-medium">Paper Discussions</span>
+          </a>
+          <a href="#" onClick={(e) => { e.preventDefault(); router.push('/marking'); }} className="flex items-center space-x-3 hover:bg-purple-800 px-4 py-3 rounded-lg transition">
+            <span className="text-xl">✅</span><span className="font-medium">Marking Schemes</span>
+          </a>
+
           <a href="#" onClick={(e) => { e.preventDefault(); router.push('/dashboard/marks'); }} className="flex items-center space-x-3 hover:bg-purple-800 px-4 py-3 rounded-lg transition">
             <span className="text-xl">📊</span><span className="font-medium">ප්‍රගති වාර්තාව</span>
           </a>

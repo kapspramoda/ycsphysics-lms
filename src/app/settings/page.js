@@ -26,6 +26,9 @@ export default function SettingsPage() {
       setUser(userObj);
       setUserName(userObj.name);
 
+      // 🔴 අත්‍යවශ්‍යයි: ළමයාගේ පන්ති වර්ග ලබා ගැනීම
+      setUserClasses(userObj.classTypes || ['Theory']);
+
       const storedAvatar = localStorage.getItem('userAvatar');
       if (storedAvatar) setAvatar(storedAvatar);
     }
@@ -122,8 +125,6 @@ export default function SettingsPage() {
     }
   };
 
-  // මෙන්න මේ ආරක්ෂිත කේතය තමයි අලුතින් දැම්මේ.
-  // user දත්ත නැත්නම් Error එන්නේ නැතුව Loading එකක් පෙන්වනවා.
   if (!user) {
     return <div className="min-h-screen flex items-center justify-center font-bold text-purple-600 bg-gray-50">ගිණුම පරීක්ෂා කරමින් පවතී... ⏳</div>;
   }
@@ -136,9 +137,14 @@ export default function SettingsPage() {
 
       {/* Sidebar Navigation */}
       <aside className={`w-64 bg-purple-900 text-white flex flex-col fixed inset-y-0 left-0 z-50 transform ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'} md:translate-x-0 md:static transition-transform duration-300 shadow-2xl`}>
-        <div className="p-6 border-b border-purple-800 font-bold text-xl tracking-wider">
+        <div 
+          onClick={() => router.push('/')} 
+          className="p-6 border-b border-purple-800 font-bold text-xl tracking-wider cursor-pointer hover:opacity-80 transition flex items-center gap-2"
+        >
+          <div className="bg-white text-purple-700 font-bold rounded-lg p-1.5 text-xs">YS</div>
           YCS<span className="text-purple-300">Physics</span>
         </div>
+
         <nav className="flex-1 p-4 space-y-2 overflow-y-auto custom-scrollbar">
           <a href="#" onClick={(e) => { e.preventDefault(); router.push('/dashboard'); }} className="flex items-center space-x-3 hover:bg-purple-800 px-4 py-3 rounded-lg transition">
             <span className="text-xl">🏠</span><span className="font-medium">මුල් තිරය</span>
@@ -158,26 +164,24 @@ export default function SettingsPage() {
             <span className="text-xl">📚</span><span className="font-medium">නිබන්ධන</span>
           </a>
 
-          {userClasses.includes('Paper') && (
-            <>
-              <a href="#" onClick={(e) => { e.preventDefault(); router.push('/paper-discussion'); }} className="flex items-center space-x-3 hover:bg-purple-800 px-4 py-3 rounded-lg transition">
-                <span className="text-xl">📝</span><span className="font-medium">Paper Discussions</span>
-              </a>
-              <a href="#" onClick={(e) => { e.preventDefault(); router.push('/marking'); }} className="flex items-center space-x-3 hover:bg-purple-800 px-4 py-3 rounded-lg transition">
-                <span className="text-xl">✅</span><span className="font-medium">Marking Schemes</span>
-              </a>
-            </>
-          )}
+          {/* 🔴 Paper Discussions සහ Marking Schemes හැමෝටම පේන විදිහට හැදුවා */}
+          <a href="#" onClick={(e) => { e.preventDefault(); router.push('/paper-discussion'); }} className="flex items-center space-x-3 hover:bg-purple-800 px-4 py-3 rounded-lg transition">
+            <span className="text-xl">📝</span><span className="font-medium">Paper Discussions</span>
+          </a>
+          <a href="#" onClick={(e) => { e.preventDefault(); router.push('/marking'); }} className="flex items-center space-x-3 hover:bg-purple-800 px-4 py-3 rounded-lg transition">
+            <span className="text-xl">✅</span><span className="font-medium">Marking Schemes</span>
+          </a>
 
           <a href="#" onClick={(e) => { e.preventDefault(); router.push('/dashboard/marks'); }} className="flex items-center space-x-3 hover:bg-purple-800 px-4 py-3 rounded-lg transition">
             <span className="text-xl">📊</span><span className="font-medium">ප්‍රගති වාර්තාව</span>
           </a>
           
           <div className="pt-4 border-t border-purple-800/50 mt-4 mb-2"></div>
-          <a href="#" onClick={(e) => { e.preventDefault(); router.push('/settings'); }} className="flex items-center space-x-3 hover:bg-purple-800 px-4 py-3 rounded-lg transition">
-            <span className="text-xl">⚙️</span><span className="font-medium">සැකසුම්</span>
+          <a href="#" onClick={(e) => { e.preventDefault(); router.push('/settings'); }} className="flex items-center space-x-3 bg-purple-800 px-4 py-3 rounded-lg transition shadow-inner border border-purple-800/30">
+            <span className="text-xl">⚙️</span><span className="font-bold text-white">සැකසුම්</span>
           </a>
         </nav>
+
         <div className="p-4 border-t border-purple-800">
           <button onClick={handleLogout} className="w-full flex items-center space-x-3 hover:bg-red-500/20 p-3 rounded-lg transition text-purple-200 hover:text-red-400">
             <div className="w-8 h-8 rounded-full bg-purple-800 flex items-center justify-center text-white font-bold text-sm">
@@ -271,7 +275,6 @@ export default function SettingsPage() {
                     onChange={(e) => setPasswords({...passwords, new: e.target.value})}
                     className="w-full px-4 py-3 rounded-xl bg-gray-50 border border-gray-200 focus:border-purple-500 outline-none transition" 
                   />
-                  {/* අකුරු 6ක් තියෙනවද කියලා පෙන්වන කොටස */}
                   {passwords.new.length > 0 && passwords.new.length < 6 && (
                     <p className="text-red-500 text-xs mt-1 font-bold">⚠️ මුරපදය අවම වශයෙන් අකුරු 6ක් විය යුතුය.</p>
                   )}
@@ -284,7 +287,6 @@ export default function SettingsPage() {
                     onChange={(e) => setPasswords({...passwords, confirm: e.target.value})}
                     className="w-full px-4 py-3 rounded-xl bg-gray-50 border border-gray-200 focus:border-purple-500 outline-none transition" 
                   />
-                  {/* අලුතින් එකතු කළ Real-time Validation පණිවිඩය */}
                   {passwords.confirm.length > 0 && (
                     <p className={`text-sm mt-2 font-bold flex items-center gap-1 ${passwords.new === passwords.confirm ? 'text-green-600' : 'text-red-500'}`}>
                       {passwords.new === passwords.confirm ? '✅ මුරපද දෙක ගැලපේ' : '❌ මුරපද එකිනෙකට නොගැලපේ'}

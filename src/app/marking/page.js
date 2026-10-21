@@ -22,6 +22,9 @@ export default function MarkingSchemesPage() {
       const user = JSON.parse(userStr);
       setUserName(user.name);
       
+      // 🔴 අත්‍යවශ්‍යයි: ළමයාගේ පන්ති වර්ග ලබා ගැනීම
+      setUserClasses(user.classTypes || ['Theory']);
+      
       const storedAvatar = localStorage.getItem('userAvatar');
       if (storedAvatar) setAvatar(storedAvatar);
 
@@ -32,7 +35,6 @@ export default function MarkingSchemesPage() {
         const res = await fetch(`/api/tutes?year=${year}`);
         const data = await res.json();
         
-        // පද්ධතියේ තියෙන Tutes වලින් 'Marking' කියන ඒවා විතරක් පෙරලා ගන්නවා
         const markingSchemes = (data.tutes || []).filter(t => t.category === 'Marking');
         setMarkings(markingSchemes);
       } catch (error) {
@@ -49,6 +51,22 @@ export default function MarkingSchemesPage() {
     localStorage.removeItem('user');
     router.push('/');
   };
+
+  // 🔴 Paper Class එක නැති ළමයින්ට පිටුව සීමා කිරීම
+  const hasPaperAccess = userClasses.includes('Paper');
+
+  if (!loading && !hasPaperAccess) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center p-6 text-center">
+        <div className="bg-white p-8 rounded-3xl shadow-sm border border-slate-100 max-w-md w-full">
+          <span className="text-6xl mb-4 block">🔒</span>
+          <h2 className="text-xl font-bold text-gray-800 mb-2">අවසර නැත</h2>
+          <p className="text-gray-500 text-sm mb-6">මෙම Marking Schemes නැරඹීමට ඔබට Paper Class සඳහා ලියාපදිංචි වීමට අවශ්‍ය වේ.</p>
+          <button onClick={() => router.push('/dashboard')} className="bg-purple-600 text-white px-6 py-3 rounded-xl font-bold hover:bg-purple-700 transition w-full">මුල් තිරයට යන්න</button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="bg-gray-50 font-sans text-gray-800 flex h-screen overflow-hidden">
@@ -83,12 +101,13 @@ export default function MarkingSchemesPage() {
             <span className="text-xl">📚</span><span className="font-medium">නිබන්ධන</span>
           </a>
 
+          {/* 🔴 Paper Class එක ඇති ළමයින්ට Sidebar එකේ පෙන්වීම */}
           {userClasses.includes('Paper') && (
             <>
               <a href="#" onClick={(e) => { e.preventDefault(); router.push('/paper-discussion'); }} className="flex items-center space-x-3 hover:bg-purple-800 px-4 py-3 rounded-lg transition">
                 <span className="text-xl">📝</span><span className="font-medium">Paper Discussions</span>
               </a>
-              <a href="#" onClick={(e) => { e.preventDefault(); router.push('/marking'); }} className="flex items-center space-x-3 hover:bg-purple-800 px-4 py-3 rounded-lg transition">
+              <a href="#" onClick={(e) => { e.preventDefault(); router.push('/marking'); }} className="flex items-center space-x-3 bg-purple-800 px-4 py-3 rounded-lg transition">
                 <span className="text-xl">✅</span><span className="font-medium">Marking Schemes</span>
               </a>
             </>
