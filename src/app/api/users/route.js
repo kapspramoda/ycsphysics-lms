@@ -37,7 +37,6 @@ export async function POST(req) {
       return NextResponse.json({ message: 'මෙම අංකයෙන් ගිණුමක් දැනටමත් පවතී!' }, { status: 400 });
     }
 
-    // 🔴 Frontend එකෙන් එවන classTypes කෙලින්ම පාවිච්චි කිරීම (නැත්නම් ඩිෆල්ට් Theory)
     const finalClasses = (Array.isArray(classTypes) && classTypes.length > 0) ? classTypes : ['Theory'];
 
     const newUser = new User({
@@ -47,7 +46,7 @@ export async function POST(req) {
       password, 
       alYear: alYear || '2027', 
       center: center || 'Online', 
-      classTypes: finalClasses, // 🔴 මෙතැන නිවැරදි Array එක සේව් වීම
+      classTypes: finalClasses, 
       status: 'Active', 
       role: 'Student'
     });
@@ -122,7 +121,6 @@ export async function PUT(request) {
     const body = await request.json();
     const { id, name, email, password, alYear, center, classTypes } = body;
 
-    // 🔴 Edit කරද්දීත් Admin එකෙන් එවන classTypes නිවැරදිව ලබා ගැනීම
     const finalClasses = (Array.isArray(classTypes) && classTypes.length > 0) ? classTypes : ['Theory'];
 
     const updateData = { 
@@ -130,7 +128,7 @@ export async function PUT(request) {
       email, 
       alYear, 
       center, 
-      classTypes: finalClasses // 🔴 මෙතැන නිවැරදි Array එක යැවීම
+      classTypes: finalClasses 
     };
     
     if (password) {
