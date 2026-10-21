@@ -17,13 +17,13 @@ export default function AdminStudentsPage() {
 
   const [formData, setFormData] = useState({
     name: '', email: '', password: '', alYear: '2027', center: '',
-    isTheory: false, isRevision: false, isPaper: false // 🔴 මෙතන ඩිෆල්ට් එක Paper දාන්න පුළුවන් හෝ අවශ්‍ය විදිහට තියන්න
+    isTheory: false, isRevision: false, isPaper: false
   });
 
   const [bulkFile, setBulkFile] = useState(null);
   const [bulkSettings, setBulkSettings] = useState({
     password: '', alYear: '2027', center: '',
-    isTheory: true, isRevision: false, isPaper: false
+    isTheory: false, isRevision: false, isPaper: false
   });
 
   const [msg, setMsg] = useState({ type: '', text: '' });
@@ -122,12 +122,11 @@ export default function AdminStudentsPage() {
     XLSX.writeFile(workbook, "PramodaChemistry_Students.xlsx");
   };
 
-const handleSingleSubmit = async (e) => {
+  const handleSingleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
     setMsg({ type: '', text: '' });
 
-    // 🔴 ළමයා ටික් කරපු පන්ති ටික හරියටම Array එකට Push වීම
     const classes = [];
     if (formData.isTheory) classes.push('Theory');
     if (formData.isRevision) classes.push('Revision');
@@ -145,7 +144,7 @@ const handleSingleSubmit = async (e) => {
         password: formData.password,
         alYear: formData.alYear, 
         center: formData.center, 
-        classTypes: classes // 🔴 මෙතන 'classes' array එක හරියටම යවනවාදැයි බලන්න
+        classTypes: classes 
       };
 
       const res = await fetch('/api/users', {
@@ -160,7 +159,7 @@ const handleSingleSubmit = async (e) => {
         setFormData({ 
           name: '', email: '', password: '', 
           alYear: formData.alYear, center: formData.center, 
-          isTheory: true, isRevision: false, isPaper: false 
+          isTheory: false, isRevision: false, isPaper: false 
         });
         fetchStudents(); 
       } else { throw new Error(data.message || 'දෝෂයක් මතු විය.'); }
@@ -256,10 +255,9 @@ const handleSingleSubmit = async (e) => {
       password: '',
       alYear: student.alYear || '2027',
       center: student.center || '',
-      // 🔴 මෙහි student ගේ සැබෑ classTypes අඩංගු දැයි නිවැරදිව පරීක්ෂා කර සෙට් වේ
-      isTheory: student.classTypes?.includes('Theory') || false,
-      isRevision: student.classTypes?.includes('Revision') || false,
-      isPaper: student.classTypes?.includes('Paper') || false,
+      isTheory: Array.isArray(student.classTypes) && student.classTypes.includes('Theory'),
+      isRevision: Array.isArray(student.classTypes) && student.classTypes.includes('Revision'),
+      isPaper: Array.isArray(student.classTypes) && student.classTypes.includes('Paper'),
     });
     setIsEditModalOpen(true);
   };
@@ -676,15 +674,30 @@ const handleSingleSubmit = async (e) => {
                     <label className={`block text-xs font-bold mb-3 ${isDarkMode ? 'text-blue-400' : 'text-blue-800'}`}>පන්ති වර්ගය (අවශ්‍ය ඒවා තෝරන්න):</label>
                     <div className="flex flex-col gap-3">
                       <label className="flex items-center gap-3 cursor-pointer">
-                        <input type="checkbox" checked={editStudentData.isTheory} onChange={(e) => setEditStudentData({...editStudentData, isTheory: e.target.checked})} className="w-5 h-5 accent-blue-600 rounded" />
+                        <input 
+                          type="checkbox" 
+                          checked={editStudentData.isTheory} 
+                          onChange={(e) => setEditStudentData({...editStudentData, isTheory: e.target.checked})} 
+                          className="w-5 h-5 accent-blue-600 rounded" 
+                        />
                         <span className={`text-sm font-bold ${isDarkMode ? 'text-slate-200' : 'text-gray-700'}`}>Theory</span>
                       </label>
                       <label className="flex items-center gap-3 cursor-pointer">
-                        <input type="checkbox" checked={editStudentData.isRevision} onChange={(e) => setEditStudentData({...editStudentData, isRevision: e.target.checked})} className="w-5 h-5 accent-blue-600 rounded" />
+                        <input 
+                          type="checkbox" 
+                          checked={editStudentData.isRevision} 
+                          onChange={(e) => setEditStudentData({...editStudentData, isRevision: e.target.checked})} 
+                          className="w-5 h-5 accent-blue-600 rounded" 
+                        />
                         <span className={`text-sm font-bold ${isDarkMode ? 'text-slate-200' : 'text-gray-700'}`}>Revision</span>
                       </label>
                       <label className="flex items-center gap-3 cursor-pointer">
-                        <input type="checkbox" checked={editStudentData.isPaper} onChange={(e) => setEditStudentData({...editStudentData, isPaper: e.target.checked})} className="w-5 h-5 accent-blue-600 rounded" />
+                        <input 
+                          type="checkbox" 
+                          checked={editStudentData.isPaper} 
+                          onChange={(e) => setEditStudentData({...editStudentData, isPaper: e.target.checked})} 
+                          className="w-5 h-5 accent-blue-600 rounded" 
+                        />
                         <span className={`text-sm font-bold ${isDarkMode ? 'text-slate-200' : 'text-gray-700'}`}>Paper Class</span>
                       </label>
                     </div>
