@@ -68,11 +68,7 @@ export default function PaperDiscussionPage() {
               }
             }
 
-            // 3. සිසුවාගේ පන්ති වර්ග (උදා: 'Paper') පරීක්ෂා කිරීම
-            if (video.classTypes && video.classTypes.length > 0) {
-              const hasAccess = video.classTypes.some(cls => classes.includes(cls));
-              if (!hasAccess) return false;
-            }
+            
 
             return true; 
           });
