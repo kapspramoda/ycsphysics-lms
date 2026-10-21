@@ -10,6 +10,7 @@ const UserSchema = new mongoose.Schema({
   password: String,
   alYear: String,
   center: { type: String, default: "Online" },
+  classTypes: { type: [String], default: ['Theory'] }, // 🔴 අලුතින් එකතු කළා
   status: { type: String, default: "Active" } // Active / Inactive
 }, { strict: false });
 
@@ -51,7 +52,8 @@ export async function POST(req) {
           username: user.email || user.username, 
           email: user.email,
           alYear: user.alYear, 
-          center: user.center  
+          center: user.center,
+          classTypes: user.classTypes || ['Theory'] // 🔴 මේ පේළිය අලුතින් එකතු කළා
         } 
       }, 
       { status: 200 }
