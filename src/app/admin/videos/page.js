@@ -52,7 +52,7 @@ export default function AdminVideosPage() {
     setLoading(true);
     setMessage({ type: '', text: '' });
 
-    // 🔴 පන්ති ටික Array එකකට ගැනීම
+    // 🔴 පන්ති ටික Array එකකට ගැනීම (Paper Class සඳහා 'Paper' ලෙස දැමීම අත්‍යවශ්‍යයි)
     const classTypes = [];
     if (formData.isTheory) classTypes.push('Theory');
     if (formData.isRevision) classTypes.push('Revision');
@@ -204,7 +204,6 @@ export default function AdminVideosPage() {
 
               <form onSubmit={handleSubmit} className="space-y-4">
                 
-                {/* 🔴 අලුත්: වීඩියෝ වර්ගය තේරීම */}
                 <div>
                   <label className="block text-gray-700 text-sm font-bold mb-1">මෙය කුමක්ද?</label>
                   <select value={formData.videoType} onChange={(e) => setFormData({...formData, videoType: e.target.value})} className="w-full px-4 py-2 rounded-lg bg-gray-50 border outline-none focus:border-red-500 focus:ring-1 focus:ring-red-500">
@@ -236,7 +235,6 @@ export default function AdminVideosPage() {
                   <input type="url" value={formData.tuteUrl} onChange={(e) => setFormData({...formData, tuteUrl: e.target.value})} className="w-full px-4 py-2 rounded-lg bg-gray-50 border outline-none focus:border-red-500 focus:ring-1 focus:ring-red-500" />
                 </div>
 
-                {/* 🔴 අලුත්: පන්ති සහ වර්ෂ Checkboxes */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="p-4 rounded-xl border bg-red-50/50 border-red-100">
                     <label className="block text-xs font-bold mb-3 text-red-800">පන්ති වර්ගය (කිහිපයක් තේරිය හැක):</label>
@@ -331,7 +329,6 @@ export default function AdminVideosPage() {
                             📁 {video.lessonName || 'පාඩමක් නැත'} {video.tuteUrl ? ' • 📥 Tute' : ''}
                           </div>
                           
-                          {/* 🔴 අලුත්: Tags පෙන්වන කොටස */}
                           <div className="flex flex-wrap gap-2 mt-2">
                             <span className="bg-amber-100 text-amber-800 text-[10px] px-2 py-0.5 rounded font-bold border border-amber-200">
                               {video.videoType === 'PaperDiscussion' ? '📝 Paper Discussion' : '📺 Lesson'}
