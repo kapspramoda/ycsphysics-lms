@@ -250,6 +250,7 @@ export default function AdminStudentsPage() {
       password: '',
       alYear: student.alYear || '2027',
       center: student.center || '',
+      // 🔴 මෙහි student ගේ සැබෑ classTypes අඩංගු දැයි නිවැරදිව පරීක්ෂා කර සෙට් වේ
       isTheory: student.classTypes?.includes('Theory') || false,
       isRevision: student.classTypes?.includes('Revision') || false,
       isPaper: student.classTypes?.includes('Paper') || false,
@@ -265,6 +266,12 @@ export default function AdminStudentsPage() {
     if (editStudentData.isTheory) classes.push('Theory');
     if (editStudentData.isRevision) classes.push('Revision');
     if (editStudentData.isPaper) classes.push('Paper');
+
+    if (classes.length === 0) {
+      alert('අවම වශයෙන් එක් පන්ති වර්ගයක් හෝ තෝරන්න!');
+      setLoading(false);
+      return;
+    }
 
     try {
       const payload = {
@@ -444,7 +451,7 @@ export default function AdminStudentsPage() {
                     </div>
 
                     <div className={`p-4 rounded-xl border ${isDarkMode ? 'bg-slate-800/50 border-slate-700' : 'bg-blue-50/50 border-blue-100'}`}>
-                      <label className={`block text-xs font-bold mb-3 ${isDarkMode ? 'text-blue-400' : 'text-blue-800'}`}>පන්ති වර්ගය (සිසුවා Revision පමණක් නම්, Theory හි හරි ලකුණ ඉවත් කරන්න):</label>
+                      <label className={`block text-xs font-bold mb-3 ${isDarkMode ? 'text-blue-400' : 'text-blue-800'}`}>පන්ති වර්ගය (අවශ්‍ය ඒවා තෝරන්න):</label>
                       <div className="flex flex-col gap-3">
                         <label className="flex items-center gap-3 cursor-pointer">
                           <input type="checkbox" checked={formData.isTheory} onChange={(e) => setFormData({...formData, isTheory: e.target.checked})} className="w-5 h-5 accent-blue-600 rounded" />
@@ -660,7 +667,7 @@ export default function AdminStudentsPage() {
                   </div>
 
                   <div className={`p-4 rounded-xl border ${isDarkMode ? 'bg-slate-800/50 border-slate-700' : 'bg-blue-50/50 border-blue-100'}`}>
-                    <label className={`block text-xs font-bold mb-3 ${isDarkMode ? 'text-blue-400' : 'text-blue-800'}`}>පන්ති වර්ගය (සිසුවා Revision පමණක් නම්, Theory හි හරි ලකුණ ඉවත් කරන්න):</label>
+                    <label className={`block text-xs font-bold mb-3 ${isDarkMode ? 'text-blue-400' : 'text-blue-800'}`}>පන්ති වර්ගය (අවශ්‍ය ඒවා තෝරන්න):</label>
                     <div className="flex flex-col gap-3">
                       <label className="flex items-center gap-3 cursor-pointer">
                         <input type="checkbox" checked={editStudentData.isTheory} onChange={(e) => setEditStudentData({...editStudentData, isTheory: e.target.checked})} className="w-5 h-5 accent-blue-600 rounded" />
@@ -711,7 +718,7 @@ export default function AdminStudentsPage() {
                     {modalLoading ? (
                       <div className="h-48 flex items-center justify-center">Loading...</div>
                     ) : studentMarks.length === 0 ? (
-                      <div className="h-48 flex items-center justify-center text-sm opacity-50">දත්ත නොමැත</div>
+                      <div className="h-48 flex items-center justify-center text-sm opacity-50">දත්ත නැත</div>
                     ) : (
                       <div className="h-48 w-full">
                         <Line data={chartData} options={{ responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { display: true, min: 0, max: 100 } } }} />

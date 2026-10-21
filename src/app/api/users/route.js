@@ -17,7 +17,6 @@ const UserSchema = new mongoose.Schema({
   createdAt: { type: Date, default: Date.now }
 }, { strict: false }); 
 
-// 🔴 Database Cache ගැටලුව විසඳීමට පරණ Model එක ඉවත් කර අලුතින් යාවත්කාලීන කිරීම
 if (mongoose.models.User) {
   delete mongoose.models.User;
 }
@@ -37,6 +36,9 @@ export async function POST(req) {
       return NextResponse.json({ message: 'මෙම අංකයෙන් ගිණුමක් දැනටමත් පවතී!' }, { status: 400 });
     }
 
+    // පන්ති වර්ග නිවැරදිව ලබා ගැනීම
+    const validClasses = Array.isArray(classTypes) && classTypes.length > 0 ? classTypes : ['Theory'];
+
     const newUser = new User({
       name, 
       email: email, 
@@ -44,7 +46,7 @@ export async function POST(req) {
       password, 
       alYear: alYear || '2027', 
       center: center || 'Online', 
-      classTypes: Array.isArray(classTypes) && classTypes.length > 0 ? classTypes : ['Theory'], 
+      classTypes: validClasses, 
       status: 'Active', 
       role: 'Student'
     });
@@ -76,7 +78,6 @@ export async function GET(req) {
       email: u.email || u.username || 'No Number', 
       alYear: u.alYear || '2027',
       center: u.center || 'Online',
-      // 🔴 නිවැරදිව පන්ති වර්ගය ලබා ගැනීම
       classTypes: Array.isArray(u.classTypes) && u.classTypes.length > 0 ? u.classTypes : ['Theory'],
       status: u.status || 'Active'
     }));
@@ -120,12 +121,21 @@ export async function PUT(request) {
     const body = await request.json();
     const { id, name, email, password, alYear, center, classTypes } = body;
 
-    const updateData = { name, email, alYear, center, classTypes };
+    // 🔴 පන්ති වර්ග නිවැරදිව ලැබී ඇති බව තහවුරු කරගැනීම
+    const validClasses = Array.isArray(classTypes) && classTypes.length > 0 ? classTypes : ['Theory'];
+
+    const updateData = { 
+      name, 
+      email, 
+      alYear, 
+      center, 
+      classTypes: validClasses 
+    };
+    
     if (password) {
        updateData.password = password; 
     }
 
-    // 🔴 $set හරහා බලහත්කාරයෙන් දත්ත යාවත්කාලීන කිරීම
     const updatedUser = await User.findByIdAndUpdate(id, { $set: updateData }, { new: true, strict: false });
 
     if (!updatedUser) {
