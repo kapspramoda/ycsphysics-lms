@@ -25,7 +25,8 @@ const User = mongoose.model('User', UserSchema);
 // අලුත් සිසුවෙක් ඇතුළත් කිරීම (POST)
 export async function POST(req) {
   try {
-    const { name, email, password, alYear, center, classTypes } = await req.json();
+    const body = await req.json();
+    const { name, email, password, alYear, center, classTypes } = body;
     await connectToDatabase();
 
     const existingUser = await User.findOne({
@@ -36,8 +37,8 @@ export async function POST(req) {
       return NextResponse.json({ message: 'මෙම අංකයෙන් ගිණුමක් දැනටමත් පවතී!' }, { status: 400 });
     }
 
-    // පන්ති වර්ග නිවැරදිව ලබා ගැනීම
-    const validClasses = Array.isArray(classTypes) && classTypes.length > 0 ? classTypes : ['Theory'];
+    // 🔴 Frontend එකෙන් එවන classTypes කෙලින්ම පාවිච්චි කිරීම (නැත්නම් ඩිෆල්ට් Theory)
+    const finalClasses = (Array.isArray(classTypes) && classTypes.length > 0) ? classTypes : ['Theory'];
 
     const newUser = new User({
       name, 
@@ -46,7 +47,7 @@ export async function POST(req) {
       password, 
       alYear: alYear || '2027', 
       center: center || 'Online', 
-      classTypes: validClasses, 
+      classTypes: finalClasses, // 🔴 මෙතැන නිවැරදි Array එක සේව් වීම
       status: 'Active', 
       role: 'Student'
     });
@@ -121,15 +122,15 @@ export async function PUT(request) {
     const body = await request.json();
     const { id, name, email, password, alYear, center, classTypes } = body;
 
-    // 🔴 පන්ති වර්ග නිවැරදිව ලැබී ඇති බව තහවුරු කරගැනීම
-    const validClasses = Array.isArray(classTypes) && classTypes.length > 0 ? classTypes : ['Theory'];
+    // 🔴 Edit කරද්දීත් Admin එකෙන් එවන classTypes නිවැරදිව ලබා ගැනීම
+    const finalClasses = (Array.isArray(classTypes) && classTypes.length > 0) ? classTypes : ['Theory'];
 
     const updateData = { 
       name, 
       email, 
       alYear, 
       center, 
-      classTypes: validClasses 
+      classTypes: finalClasses // 🔴 මෙතැන නිවැරදි Array එක යැවීම
     };
     
     if (password) {
