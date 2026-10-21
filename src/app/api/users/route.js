@@ -37,7 +37,13 @@ export async function POST(req) {
       return NextResponse.json({ message: 'මෙම අංකයෙන් ගිණුමක් දැනටමත් පවතී!' }, { status: 400 });
     }
 
-    const finalClasses = (Array.isArray(classTypes) && classTypes.length > 0) ? classTypes : ['Theory'];
+    // 🔴 ඔබ ඉල්ලා සිටි ආකාරයට සකස් කළ කොටස
+    const finalClasses = [];
+    if (classTypes && classTypes.length > 0) {
+      classTypes.forEach(c => finalClasses.push(c));
+    } else {
+      finalClasses.push('Theory');
+    }
 
     const newUser = new User({
       name, 
@@ -113,7 +119,7 @@ export async function DELETE(req) {
   }
 }
 
-// ළමයෙකුගේ දත්ත යාවත්කාලීන කිරීම (Edit Student - PUT)
+// ළමයෙකුගේ දත්ත යාවත්ಕාලීන කිරීම (Edit Student - PUT)
 export async function PUT(request) {
   try {
     await connectToDatabase(); 
@@ -121,7 +127,12 @@ export async function PUT(request) {
     const body = await request.json();
     const { id, name, email, password, alYear, center, classTypes } = body;
 
-    const finalClasses = (Array.isArray(classTypes) && classTypes.length > 0) ? classTypes : ['Theory'];
+    const finalClasses = [];
+    if (classTypes && classTypes.length > 0) {
+      classTypes.forEach(c => finalClasses.push(c));
+    } else {
+      finalClasses.push('Theory');
+    }
 
     const updateData = { 
       name, 
