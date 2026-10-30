@@ -29,9 +29,10 @@ export default function StudentTutes() {
       const year = user.alYear || 'All';
       setUserYear(year);
 
-      // 🔴 අත්‍යවශ්‍යයි: ළමයාගේ පන්ති වර්ග ලබා ගැනීම
+      // ළමයාගේ පන්ති සහ දුරකථන අංකය ලබා ගැනීම
       const classes = user.classTypes || ['Theory'];
       setUserClasses(classes);
+      const userPhone = user.username || user.email || '';
 
       try {
         const res = await fetch(`/api/tutes?year=${year}`);
@@ -39,12 +40,23 @@ export default function StudentTutes() {
         
         if (data.tutes && data.tutes.length > 0) {
           
-          // 🔴 ළමයාගේ පන්තියට අදාළ නිබන්ධන පමණක් පෙරීම
+          // 🔴 අලුත් Filter කිරීමේ ක්‍රමය
           const allowedTutes = data.tutes.filter(tute => {
-            if (tute.category === 'Marking') return classes.includes('Paper');
-            if (tute.category === 'Revision') return classes.includes('Revision');
-            if (tute.category === 'Theory') return classes.includes('Theory');
-            return true; 
+            // 1. Marking Schemes Tutes පිටුවෙන් ඉවත් කිරීම
+            if (tute.category === 'Marking') return false; 
+
+            // 2. පන්ති වර්ගය ගැලපෙනවාදැයි බැලීම (Admin එකෙන් ටික් කළ classTypes ළමයාට ඇත්දැයි බැලීම)
+            const tuteClasses = tute.classTypes || [];
+            const hasClassAccess = tuteClasses.length === 0 || tuteClasses.some(c => classes.includes(c));
+            if (!hasClassAccess) return false;
+
+            // 3. Private නිබන්ධනයක් නම්, ළමයාගේ අංකය allowedStudents හි ඇත්දැයි බැලීම
+            if (tute.isPrivate) {
+              const allowed = tute.allowedStudents || [];
+              if (!allowed.includes(userPhone)) return false;
+            }
+
+            return true; // ඉහත කොන්දේසි සපුරනවා නම් පමණක් පෙන්වයි
           });
 
           setTutes(allowedTutes);
@@ -69,10 +81,8 @@ export default function StudentTutes() {
   return (
     <div className="bg-gray-50 font-sans text-gray-800 flex h-screen overflow-hidden">
       
-      {/* Mobile Overlay */}
       <div className={`fixed inset-0 bg-black/50 z-40 md:hidden ${isSidebarOpen ? 'block' : 'hidden'}`} onClick={() => setIsSidebarOpen(false)}></div>
 
-      {/* Sidebar Navigation */}
       <aside className={`w-64 bg-purple-900 text-white flex flex-col fixed inset-y-0 left-0 z-50 transform ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'} md:translate-x-0 md:static transition-transform duration-300 shadow-2xl`}>
         <div 
           onClick={() => router.push('/')} 
@@ -101,13 +111,16 @@ export default function StudentTutes() {
             <span className="text-xl">📚</span><span className="font-bold text-white">නිබන්ධන</span>
           </a>
 
-          {/* 🔴 Paper Discussions සහ Marking Schemes හැමෝටම පේන විදිහට හැදුවා */}
-          <a href="#" onClick={(e) => { e.preventDefault(); router.push('/paper-discussion'); }} className="flex items-center space-x-3 hover:bg-purple-800 px-4 py-3 rounded-lg transition">
-            <span className="text-xl">📝</span><span className="font-medium">Paper Discussions</span>
-          </a>
-          <a href="#" onClick={(e) => { e.preventDefault(); router.push('/marking'); }} className="flex items-center space-x-3 hover:bg-purple-800 px-4 py-3 rounded-lg transition">
-            <span className="text-xl">✅</span><span className="font-medium">Marking Schemes</span>
-          </a>
+          {userClasses.includes('Paper') && (
+            <>
+              <a href="#" onClick={(e) => { e.preventDefault(); router.push('/paper-discussion'); }} className="flex items-center space-x-3 hover:bg-purple-800 px-4 py-3 rounded-lg transition">
+                <span className="text-xl">📝</span><span className="font-medium">Paper Discussions</span>
+              </a>
+              <a href="#" onClick={(e) => { e.preventDefault(); router.push('/marking'); }} className="flex items-center space-x-3 hover:bg-purple-800 px-4 py-3 rounded-lg transition">
+                <span className="text-xl">✅</span><span className="font-medium">Marking Schemes</span>
+              </a>
+            </>
+          )}
 
           <a href="#" onClick={(e) => { e.preventDefault(); router.push('/dashboard/marks'); }} className="flex items-center space-x-3 hover:bg-purple-800 px-4 py-3 rounded-lg transition">
             <span className="text-xl">📊</span><span className="font-medium">ප්‍රගති වාර්තාව</span>
@@ -129,10 +142,8 @@ export default function StudentTutes() {
         </div>
       </aside>
 
-      {/* Main Content Area */}
       <main className="flex-1 flex flex-col h-screen overflow-y-auto">
         
-        {/* Header */}
         <header className="bg-white shadow-sm p-4 flex justify-between items-center sticky top-0 z-30 border-b border-gray-200">
           <div className="flex items-center gap-4">
             <button onClick={() => setIsSidebarOpen(true)} className="md:hidden p-2 text-slate-600 hover:bg-slate-100 rounded-lg transition">
@@ -153,7 +164,6 @@ export default function StudentTutes() {
           </div>
         </header>
 
-        {/* Content */}
         <div className="p-4 md:p-8 pb-20 max-w-6xl mx-auto w-full">
           {loading ? (
              <div className="text-center mt-20 text-slate-500 font-bold text-lg animate-pulse">පූරණය වෙමින් පවතී... ⏳</div>
@@ -165,18 +175,13 @@ export default function StudentTutes() {
                     <span className={`text-xs font-bold uppercase px-3 py-1 rounded-full mb-2 inline-block ${
                       tute.category === 'Theory' ? 'bg-purple-100 text-purple-700' : 
                       tute.category === 'Revision' ? 'bg-amber-100 text-amber-700' : 
-                      tute.category === 'Marking' ? 'bg-green-100 text-green-700' : 
                       'bg-purple-100 text-purple-700'
                     }`}>
-                      {tute.category === 'Marking' ? 'MARKING SCHEME' : tute.category}
+                      {tute.category}
                     </span>
-                    <h3 className="text-lg font-bold text-gray-800 leading-tight">{tute.title}</h3>
+                    <h3 className="text-lg font-bold text-gray-800 leading-tight">{tute.isPrivate ? '🔒 ' : ''}{tute.title}</h3>
                   </div>
-                  <a href={tute.pdfUrl} target="_blank" rel="noopener noreferrer" className={`text-white px-6 py-3 rounded-xl font-bold transition shadow-sm border flex items-center gap-2 w-full sm:w-auto justify-center ${
-                    tute.category === 'Marking' 
-                      ? 'bg-green-600 hover:bg-green-700 border-green-700' 
-                      : 'bg-purple-600 hover:bg-purple-700 border-purple-700'
-                  }`}>
+                  <a href={tute.pdfUrl} target="_blank" rel="noopener noreferrer" className="text-white px-6 py-3 rounded-xl font-bold transition shadow-sm border flex items-center gap-2 w-full sm:w-auto justify-center bg-purple-600 hover:bg-purple-700 border-purple-700">
                     <span>📥</span> Download
                   </a>
                 </div>

@@ -22,8 +22,9 @@ export default function MarkingSchemesPage() {
       const user = JSON.parse(userStr);
       setUserName(user.name);
       
-      // 🔴 අත්‍යවශ්‍යයි: ළමයාගේ පන්ති වර්ග ලබා ගැනීම
-      setUserClasses(user.classTypes || ['Theory']);
+      const classes = user.classTypes || ['Theory'];
+      setUserClasses(classes);
+      const userPhone = user.username || user.email || '';
       
       const storedAvatar = localStorage.getItem('userAvatar');
       if (storedAvatar) setAvatar(storedAvatar);
@@ -35,8 +36,28 @@ export default function MarkingSchemesPage() {
         const res = await fetch(`/api/tutes?year=${year}`);
         const data = await res.json();
         
-        const markingSchemes = (data.tutes || []).filter(t => t.category === 'Marking');
-        setMarkings(markingSchemes);
+        if (data.tutes && data.tutes.length > 0) {
+          
+          // 🔴 Marking Schemes පමණක් පෙරා ගැනීම සහ Private Access පරීක්ෂාව
+          const markingSchemes = data.tutes.filter(tute => {
+            if (tute.category !== 'Marking') return false;
+            
+            const tuteClasses = tute.classTypes || [];
+            const hasClassAccess = tuteClasses.length === 0 || tuteClasses.some(c => classes.includes(c));
+            if (!hasClassAccess) return false;
+
+            if (tute.isPrivate) {
+              const allowed = tute.allowedStudents || [];
+              if (!allowed.includes(userPhone)) return false;
+            }
+
+            return true;
+          });
+
+          setMarkings(markingSchemes);
+        } else {
+          setMarkings([]);
+        }
       } catch (error) {
         console.error(error);
       } finally {
@@ -52,7 +73,6 @@ export default function MarkingSchemesPage() {
     router.push('/');
   };
 
-  // 🔴 Paper Class එක නැති ළමයින්ට පිටුව සීමා කිරීම
   const hasPaperAccess = userClasses.includes('Paper');
 
   if (!loading && !hasPaperAccess) {
@@ -71,14 +91,12 @@ export default function MarkingSchemesPage() {
   return (
     <div className="bg-gray-50 font-sans text-gray-800 flex h-screen overflow-hidden">
       
-      {/* Mobile Overlay */}
       <div className={`fixed inset-0 bg-black/50 z-40 md:hidden ${isSidebarOpen ? 'block' : 'hidden'}`} onClick={() => setIsSidebarOpen(false)}></div>
 
-      {/* Sidebar Navigation */}
       <aside className={`w-64 bg-purple-900 text-white flex flex-col fixed inset-y-0 left-0 z-50 transform ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'} md:translate-x-0 md:static transition-transform duration-300 shadow-2xl`}>
         <div 
           onClick={() => router.push('/')} 
-            className="p-6 border-b border-purple-800 font-bold text-xl tracking-wider cursor-pointer hover:opacity-80 transition"
+          className="p-6 border-b border-purple-800 font-bold text-xl tracking-wider cursor-pointer hover:opacity-80 transition"
         >
         YCS<span className="text-purple-300">Physics</span>
       </div>
@@ -101,14 +119,13 @@ export default function MarkingSchemesPage() {
             <span className="text-xl">📚</span><span className="font-medium">නිබන්ධන</span>
           </a>
 
-          {/* 🔴 Paper Class එක ඇති ළමයින්ට Sidebar එකේ පෙන්වීම */}
           {userClasses.includes('Paper') && (
             <>
               <a href="#" onClick={(e) => { e.preventDefault(); router.push('/paper-discussion'); }} className="flex items-center space-x-3 hover:bg-purple-800 px-4 py-3 rounded-lg transition">
                 <span className="text-xl">📝</span><span className="font-medium">Paper Discussions</span>
               </a>
-              <a href="#" onClick={(e) => { e.preventDefault(); router.push('/marking'); }} className="flex items-center space-x-3 bg-purple-800 px-4 py-3 rounded-lg transition">
-                <span className="text-xl">✅</span><span className="font-medium">Marking Schemes</span>
+              <a href="#" onClick={(e) => { e.preventDefault(); router.push('/marking'); }} className="flex items-center space-x-3 bg-purple-800 px-4 py-3 rounded-lg transition shadow-inner border border-purple-800/30">
+                <span className="text-xl">✅</span><span className="font-bold text-white">Marking Schemes</span>
               </a>
             </>
           )}
@@ -132,10 +149,8 @@ export default function MarkingSchemesPage() {
         </div>
       </aside>
 
-      {/* Main Content Area */}
       <main className="flex-1 flex flex-col h-screen overflow-y-auto">
         
-        {/* Header */}
         <header className="bg-white shadow-sm p-4 flex justify-between items-center sticky top-0 z-30 border-b border-gray-200">
           <div className="flex items-center gap-4">
             <button onClick={() => setIsSidebarOpen(true)} className="md:hidden p-2 text-slate-600 hover:bg-slate-100 rounded-lg transition">
@@ -156,7 +171,6 @@ export default function MarkingSchemesPage() {
           </div>
         </header>
 
-        {/* Content */}
         <div className="p-4 md:p-8 pb-20 max-w-6xl mx-auto w-full">
           {loading ? (
              <div className="text-center mt-20 text-slate-500 font-bold text-lg animate-pulse">පූරණය වෙමින් පවතී... ⏳</div>
@@ -165,12 +179,12 @@ export default function MarkingSchemesPage() {
               {markings.map(mark => (
                 <div key={mark._id} className="bg-white p-6 rounded-3xl shadow-sm border border-slate-100 flex flex-col sm:flex-row justify-between items-start sm:items-center hover:shadow-md transition gap-4">
                   <div>
-                    <span className="text-xs font-bold uppercase px-3 py-1 rounded-full mb-2 inline-block bg-purple-100 text-purple-700">
-                      {mark.category}
+                    <span className="text-xs font-bold uppercase px-3 py-1 rounded-full mb-2 inline-block bg-green-100 text-green-700">
+                      MARKING SCHEME
                     </span>
-                    <h3 className="text-lg font-bold text-gray-800 leading-tight">{mark.title}</h3>
+                    <h3 className="text-lg font-bold text-gray-800 leading-tight">{mark.isPrivate ? '🔒 ' : ''}{mark.title}</h3>
                   </div>
-                  <a href={mark.pdfUrl} target="_blank" rel="noopener noreferrer" className="bg-purple-600 text-white px-6 py-3 rounded-xl font-bold hover:bg-purple-700 transition shadow-sm border border-purple-700 flex items-center gap-2 w-full sm:w-auto justify-center">
+                  <a href={mark.pdfUrl} target="_blank" rel="noopener noreferrer" className="bg-green-600 text-white px-6 py-3 rounded-xl font-bold hover:bg-green-700 transition shadow-sm border border-green-700 flex items-center gap-2 w-full sm:w-auto justify-center">
                     <span>📥</span> Download
                   </a>
                 </div>
