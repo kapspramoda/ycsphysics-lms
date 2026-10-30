@@ -5,7 +5,6 @@ import { useRouter } from 'next/navigation';
 export default function StudentTutes() {
   const router = useRouter();
   
-  // --- Sidebar States ---
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [userName, setUserName] = useState('');
   const [avatar, setAvatar] = useState(null);
@@ -29,8 +28,8 @@ export default function StudentTutes() {
       const year = user.alYear || 'All';
       setUserYear(year);
 
-      // ළමයාගේ පන්ති සහ දුරකථන අංකය ලබා ගැනීම
-      const classes = user.classTypes || ['Theory'];
+      // 🔴 ළමයාගේ පන්ති සහ දුරකථන අංකය නිවැරදිව ලබා ගැනීම
+      const classes = Array.isArray(user.classTypes) ? user.classTypes : ['Theory'];
       setUserClasses(classes);
       const userPhone = user.username || user.email || '';
 
@@ -40,23 +39,24 @@ export default function StudentTutes() {
         
         if (data.tutes && data.tutes.length > 0) {
           
-          // 🔴 අලුත් Filter කිරීමේ ක්‍රමය
+          // 🔴 100% නිවැරදි Filter ක්‍රමය
           const allowedTutes = data.tutes.filter(tute => {
-            // 1. Marking Schemes Tutes පිටුවෙන් ඉවත් කිරීම
+            // 1. Tutes පිටුවේ Marking Schemes පෙන්වන්නේ නැත!
             if (tute.category === 'Marking') return false; 
 
-            // 2. පන්ති වර්ගය ගැලපෙනවාදැයි බැලීම (Admin එකෙන් ටික් කළ classTypes ළමයාට ඇත්දැයි බැලීම)
-            const tuteClasses = tute.classTypes || [];
-            const hasClassAccess = tuteClasses.length === 0 || tuteClasses.some(c => classes.includes(c));
-            if (!hasClassAccess) return false;
+            // 2. පන්ති වර්ගය ගැලපෙනවාදැයි බැලීම
+            if (tute.classTypes && tute.classTypes.length > 0) {
+              const hasClassAccess = tute.classTypes.some(c => classes.includes(c));
+              if (!hasClassAccess) return false;
+            }
 
-            // 3. Private නිබන්ධනයක් නම්, ළමයාගේ අංකය allowedStudents හි ඇත්දැයි බැලීම
+            // 3. Private Tute එකක් නම් පමණක් අංකය පරීක්ෂා කිරීම
             if (tute.isPrivate) {
               const allowed = tute.allowedStudents || [];
               if (!allowed.includes(userPhone)) return false;
             }
 
-            return true; // ඉහත කොන්දේසි සපුරනවා නම් පමණක් පෙන්වයි
+            return true; 
           });
 
           setTutes(allowedTutes);
@@ -143,7 +143,6 @@ export default function StudentTutes() {
       </aside>
 
       <main className="flex-1 flex flex-col h-screen overflow-y-auto">
-        
         <header className="bg-white shadow-sm p-4 flex justify-between items-center sticky top-0 z-30 border-b border-gray-200">
           <div className="flex items-center gap-4">
             <button onClick={() => setIsSidebarOpen(true)} className="md:hidden p-2 text-slate-600 hover:bg-slate-100 rounded-lg transition">

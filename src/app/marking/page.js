@@ -5,7 +5,6 @@ import { useRouter } from 'next/navigation';
 export default function MarkingSchemesPage() {
   const router = useRouter();
   
-  // --- Sidebar States ---
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [userName, setUserName] = useState('');
   const [avatar, setAvatar] = useState(null);
@@ -22,7 +21,7 @@ export default function MarkingSchemesPage() {
       const user = JSON.parse(userStr);
       setUserName(user.name);
       
-      const classes = user.classTypes || ['Theory'];
+      const classes = Array.isArray(user.classTypes) ? user.classTypes : ['Theory'];
       setUserClasses(classes);
       const userPhone = user.username || user.email || '';
       
@@ -38,14 +37,17 @@ export default function MarkingSchemesPage() {
         
         if (data.tutes && data.tutes.length > 0) {
           
-          // 🔴 Marking Schemes පමණක් පෙරා ගැනීම සහ Private Access පරීක්ෂාව
           const markingSchemes = data.tutes.filter(tute => {
+            // 1. Marking Schemes පමණක් පෙරා ගැනීම
             if (tute.category !== 'Marking') return false;
             
-            const tuteClasses = tute.classTypes || [];
-            const hasClassAccess = tuteClasses.length === 0 || tuteClasses.some(c => classes.includes(c));
-            if (!hasClassAccess) return false;
+            // 2. පන්ති වර්ගය පරීක්ෂාව
+            if (tute.classTypes && tute.classTypes.length > 0) {
+              const hasClassAccess = tute.classTypes.some(c => classes.includes(c));
+              if (!hasClassAccess) return false;
+            }
 
+            // 3. Private පරීක්ෂාව
             if (tute.isPrivate) {
               const allowed = tute.allowedStudents || [];
               if (!allowed.includes(userPhone)) return false;
@@ -150,7 +152,6 @@ export default function MarkingSchemesPage() {
       </aside>
 
       <main className="flex-1 flex flex-col h-screen overflow-y-auto">
-        
         <header className="bg-white shadow-sm p-4 flex justify-between items-center sticky top-0 z-30 border-b border-gray-200">
           <div className="flex items-center gap-4">
             <button onClick={() => setIsSidebarOpen(true)} className="md:hidden p-2 text-slate-600 hover:bg-slate-100 rounded-lg transition">
