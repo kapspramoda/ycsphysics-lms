@@ -8,7 +8,6 @@ export default function AdminTutesPage() {
   const [isAuthorized, setIsAuthorized] = useState(false); 
   const [isDarkMode, setIsDarkMode] = useState(false);
 
-  // 🔴 අලුත්: Form එක සඳහා අවශ්‍ය සියලුම අංග එකතු කිරීම
   const initialFormState = { 
     title: '', 
     pdfUrl: '', 
@@ -26,6 +25,10 @@ export default function AdminTutesPage() {
   const [tutes, setTutes] = useState([]);
   const [msg, setMsg] = useState({ type: '', text: '' });
   const [loading, setLoading] = useState(false);
+
+  // Edit Modal States
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [editTuteData, setEditTuteData] = useState(null);
 
   useEffect(() => {
     const savedTheme = localStorage.getItem('theme');
@@ -62,23 +65,17 @@ export default function AdminTutesPage() {
     setLoading(true);
     setMsg({ type: '', text: '' });
 
-    // 🔴 පන්ති ටික Array එකකට ගැනීම
     const classTypes = [];
     if (formData.isTheory) classTypes.push('Theory');
     if (formData.isRevision) classTypes.push('Revision');
     if (formData.isPaper) classTypes.push('Paper');
 
-    // 🔴 වර්ෂ ටික Array එකකට ගැනීම
     const alYears = [];
     if (formData.is2027) alYears.push('2027');
     if (formData.is2028) alYears.push('2028');
 
-    if (classTypes.length === 0) {
-      setMsg({ type: 'error', text: 'අවම වශයෙන් එක් පන්ති වර්ගයක් හෝ තෝරන්න!' });
-      setLoading(false); return;
-    }
-    if (alYears.length === 0) {
-      setMsg({ type: 'error', text: 'අවම වශයෙන් එක් වර්ෂයක් හෝ තෝරන්න!' });
+    if (classTypes.length === 0 || alYears.length === 0) {
+      setMsg({ type: 'error', text: 'අවම වශයෙන් එක් පන්ති වර්ගයක් සහ වර්ෂයක් හෝ තෝරන්න!' });
       setLoading(false); return;
     }
 
@@ -103,7 +100,7 @@ export default function AdminTutesPage() {
 
       if (response.ok) {
         setMsg({ type: 'success', text: 'නිබන්ධනය සාර්ථකව එක් කළා! ✅' });
-        setFormData(initialFormState); // ෆෝම් එක රීසෙට් කිරීම
+        setFormData(initialFormState);
         fetchTutes();
       } else { 
         throw new Error('අසාර්ථකයි.'); 
@@ -113,6 +110,77 @@ export default function AdminTutesPage() {
     } finally {
       setLoading(false);
       setTimeout(() => setMsg({ type: '', text: '' }), 2000);
+    }
+  };
+
+  // Edit Handlers
+  const handleEdit = (tute) => {
+    setEditTuteData({
+      id: tute._id,
+      title: tute.title,
+      pdfUrl: tute.pdfUrl,
+      category: tute.category || 'Theory',
+      isTheory: tute.classTypes?.includes('Theory') || false,
+      isRevision: tute.classTypes?.includes('Revision') || false,
+      isPaper: tute.classTypes?.includes('Paper') || false,
+      is2027: tute.alYears?.includes('2027') || false,
+      is2028: tute.alYears?.includes('2028') || false,
+      isPrivate: tute.isPrivate || false,
+      allowedStudents: tute.allowedStudents && tute.allowedStudents.length > 0 ? tute.allowedStudents.join(', ') : ''
+    });
+    setIsEditModalOpen(true);
+  };
+
+  const handleEditSubmit = async (e) => {
+    e.preventDefault();
+    setLoading(true);
+
+    const classTypes = [];
+    if (editTuteData.isTheory) classTypes.push('Theory');
+    if (editTuteData.isRevision) classTypes.push('Revision');
+    if (editTuteData.isPaper) classTypes.push('Paper');
+
+    const alYears = [];
+    if (editTuteData.is2027) alYears.push('2027');
+    if (editTuteData.is2028) alYears.push('2028');
+
+    if (classTypes.length === 0 || alYears.length === 0) {
+      alert('අවම වශයෙන් එක් පන්ති වර්ගයක් සහ වර්ෂයක් හෝ තෝරන්න!');
+      setLoading(false);
+      return;
+    }
+
+    try {
+      const payload = {
+        id: editTuteData.id,
+        title: editTuteData.title,
+        pdfUrl: editTuteData.pdfUrl,
+        category: editTuteData.category,
+        classTypes: classTypes,
+        alYears: alYears,
+        isPrivate: editTuteData.isPrivate,
+        allowedStudents: editTuteData.isPrivate && typeof editTuteData.allowedStudents === 'string' 
+          ? editTuteData.allowedStudents.split(',').map(s => s.trim()).filter(Boolean) 
+          : []
+      };
+
+      const res = await fetch('/api/tutes', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+
+      if (res.ok) {
+        alert('නිබන්ධනය සාර්ථකව යාවත්කාලීන විය! ✅');
+        setIsEditModalOpen(false);
+        fetchTutes();
+      } else {
+        throw new Error('යාවත්කාලීන කිරීම අසාර්ථකයි.');
+      }
+    } catch (error) {
+      alert(error.message);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -290,6 +358,7 @@ export default function AdminTutesPage() {
                         <button onClick={() => toggleVisibility(tute._id, tute.isVisible !== false)} className={`flex-1 sm:flex-none px-4 py-2 rounded-xl font-bold text-sm transition-all transform hover:scale-105 shadow-sm ${tute.isVisible === false ? (isDarkMode ? 'bg-slate-700 text-slate-300 hover:bg-slate-600' : 'bg-gray-200 text-gray-700 hover:bg-gray-300') : (isDarkMode ? 'bg-yellow-900/40 text-yellow-500 hover:bg-yellow-900/60 border border-yellow-900' : 'bg-yellow-100 text-yellow-700 hover:bg-yellow-200')}`}>
                           {tute.isVisible === false ? '👁️ Show' : '🚫 Hide'}
                         </button>
+                        <button onClick={() => handleEdit(tute)} className={`flex-1 sm:flex-none px-4 py-2 rounded-xl font-bold text-sm transition-all transform hover:scale-105 shadow-sm ${isDarkMode ? 'bg-blue-900/30 text-blue-500 hover:bg-blue-900/50 border border-blue-900/50' : 'bg-blue-100 text-blue-700 hover:bg-blue-200'}`}>✏️ Edit</button>
                         <button onClick={() => deleteTute(tute._id)} className={`flex-1 sm:flex-none px-4 py-2 rounded-xl font-bold text-sm transition-all transform hover:scale-105 shadow-sm ${isDarkMode ? 'bg-red-900/30 text-red-500 hover:bg-red-900/50 border border-red-900/50' : 'bg-red-100 text-red-600 hover:bg-red-200'}`}>🗑️ Erase</button>
                       </div>
                     </div>
@@ -300,6 +369,92 @@ export default function AdminTutesPage() {
           </div>
 
         </div>
+
+        {/* --- Edit Tute Modal --- */}
+        {isEditModalOpen && editTuteData && (
+          <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm transition-opacity animate-fade-in">
+            <div className={`relative w-full max-w-lg overflow-y-auto p-6 md:p-8 rounded-3xl shadow-2xl ${isDarkMode ? 'bg-slate-900 border border-slate-700 text-white' : 'bg-white text-gray-900'}`}>
+              
+              <button onClick={() => setIsEditModalOpen(false)} className={`absolute top-4 right-4 p-2 rounded-full font-bold text-xl ${isDarkMode ? 'bg-slate-800 text-gray-400 hover:text-white' : 'bg-gray-100 text-gray-600 hover:text-red-500'}`}>✖</button>
+              <h2 className="text-2xl font-bold mb-6 flex items-center gap-2">✏️ නිබන්ධනය යාවත්කාලීන කිරීම</h2>
+
+              <form onSubmit={handleEditSubmit} className="space-y-4">
+                <div>
+                  <label className={`block text-xs font-bold mb-1 ${isDarkMode ? 'text-slate-300' : 'text-gray-700'}`}>මාතෘකාව</label>
+                  <input type="text" required value={editTuteData.title} onChange={(e) => setEditTuteData({...editTuteData, title: e.target.value})} className={`w-full px-4 py-3 rounded-xl border outline-none transition ${inputBg}`}/>
+                </div>
+                <div>
+                  <label className={`block text-xs font-bold mb-1 ${isDarkMode ? 'text-slate-300' : 'text-gray-700'}`}>PDF Link</label>
+                  <input type="url" required value={editTuteData.pdfUrl} onChange={(e) => setEditTuteData({...editTuteData, pdfUrl: e.target.value})} className={`w-full px-4 py-3 rounded-xl border outline-none transition ${inputBg}`} />
+                </div>
+                <div>
+                  <label className={`block text-xs font-bold mb-1 ${isDarkMode ? 'text-slate-300' : 'text-gray-700'}`}>වර්ගය</label>
+                  <select value={editTuteData.category} onChange={(e) => setEditTuteData({...editTuteData, category: e.target.value})} className={`w-full px-4 py-3 rounded-xl border outline-none transition ${inputBg}`}>
+                    <option value="Theory">සිද්ධාන්ත</option>
+                    <option value="Revision">පුනරීක්ෂණ</option>
+                    <option value="Marking">Marking Scheme</option>
+                  </select>
+                </div>
+                
+                <div className={`p-4 rounded-xl border ${isDarkMode ? 'bg-slate-800/50 border-slate-700' : 'bg-green-50/50 border-green-100'}`}>
+                  <label className={`block text-xs font-bold mb-3 ${isDarkMode ? 'text-green-400' : 'text-green-800'}`}>පන්ති වර්ගය (අවශ්‍ය ඒවා තෝරන්න):</label>
+                  <div className="flex flex-col gap-3">
+                    <label className="flex items-center gap-3 cursor-pointer">
+                      <input type="checkbox" checked={editTuteData.isTheory} onChange={(e) => setEditTuteData({...editTuteData, isTheory: e.target.checked})} className="w-5 h-5 accent-green-600 rounded" />
+                      <span className={`text-sm font-bold ${isDarkMode ? 'text-slate-200' : 'text-gray-700'}`}>Theory</span>
+                    </label>
+                    <label className="flex items-center gap-3 cursor-pointer">
+                      <input type="checkbox" checked={editTuteData.isRevision} onChange={(e) => setEditTuteData({...editTuteData, isRevision: e.target.checked})} className="w-5 h-5 accent-green-600 rounded" />
+                      <span className={`text-sm font-bold ${isDarkMode ? 'text-slate-200' : 'text-gray-700'}`}>Revision</span>
+                    </label>
+                    <label className="flex items-center gap-3 cursor-pointer">
+                      <input type="checkbox" checked={editTuteData.isPaper} onChange={(e) => setEditTuteData({...editTuteData, isPaper: e.target.checked})} className="w-5 h-5 accent-green-600 rounded" />
+                      <span className={`text-sm font-bold ${isDarkMode ? 'text-slate-200' : 'text-gray-700'}`}>Paper Class</span>
+                    </label>
+                  </div>
+                </div>
+
+                <div className={`p-4 rounded-xl border ${isDarkMode ? 'bg-slate-800/50 border-slate-700' : 'bg-green-50/50 border-green-100'}`}>
+                  <label className={`block text-xs font-bold mb-3 ${isDarkMode ? 'text-green-400' : 'text-green-800'}`}>A/L වර්ෂය (අවශ්‍ය ඒවා තෝරන්න):</label>
+                  <div className="flex flex-col gap-3">
+                    <label className="flex items-center gap-3 cursor-pointer">
+                      <input type="checkbox" checked={editTuteData.is2027} onChange={(e) => setEditTuteData({...editTuteData, is2027: e.target.checked})} className="w-5 h-5 accent-green-600 rounded" />
+                      <span className={`text-sm font-bold ${isDarkMode ? 'text-slate-200' : 'text-gray-700'}`}>2027</span>
+                    </label>
+                    <label className="flex items-center gap-3 cursor-pointer">
+                      <input type="checkbox" checked={editTuteData.is2028} onChange={(e) => setEditTuteData({...editTuteData, is2028: e.target.checked})} className="w-5 h-5 accent-green-600 rounded" />
+                      <span className={`text-sm font-bold ${isDarkMode ? 'text-slate-200' : 'text-gray-700'}`}>2028</span>
+                    </label>
+                  </div>
+                </div>
+
+                <div className={`flex items-center gap-3 p-4 rounded-lg border ${isDarkMode ? 'bg-purple-900/20 border-purple-900/50' : 'bg-purple-50 border-purple-100'}`}>
+                  <input type="checkbox" id="editIsPrivate" checked={editTuteData.isPrivate} onChange={(e) => setEditTuteData({...editTuteData, isPrivate: e.target.checked})} className="w-5 h-5 accent-purple-600 rounded cursor-pointer" />
+                  <label htmlFor="editIsPrivate" className={`font-bold text-sm cursor-pointer ${isDarkMode ? 'text-purple-300' : 'text-purple-900'}`}>Private Tute එකක්ද?</label>
+                </div>
+
+                {editTuteData.isPrivate && (
+                  <div className="animate-fade-in">
+                    <label className={`block text-sm font-bold mb-1 ${isDarkMode ? 'text-slate-300' : 'text-gray-700'}`}>අවසර ඇති සිසුන්ගේ WhatsApp අංක</label>
+                    <textarea 
+                      required 
+                      placeholder="උදා: 0712345678, 0771234567"
+                      value={editTuteData.allowedStudents} 
+                      onChange={(e) => setEditTuteData({...editTuteData, allowedStudents: e.target.value})} 
+                      className={`w-full px-4 py-2 rounded-lg border outline-none transition min-h-[80px] ${inputBg}`}
+                    />
+                  </div>
+                )}
+
+                <button type="submit" disabled={loading} className={`w-full text-white font-bold rounded-xl px-4 py-4 shadow-md transition mt-4 ${loading ? 'bg-blue-400' : 'bg-blue-600 hover:bg-blue-700'}`}>
+                  {loading ? 'රැඳී සිටින්න...' : 'යාවත්කාලීන කරන්න'}
+                </button>
+              </form>
+
+            </div>
+          </div>
+        )}
+
       </main>
     </div>
   );

@@ -102,3 +102,35 @@ export async function DELETE(req) {
     return NextResponse.json({ message: 'දෝෂයකි.' }, { status: 500 }); 
   }
 }
+
+// නිබන්ධනයක් යාවත්කාලීන කිරීම (Edit Tute - PUT)
+export async function PUT(request) {
+  try {
+    await connectToDatabase(); 
+
+    const body = await request.json();
+    const { id, title, pdfUrl, category, classTypes, alYears, isPrivate, allowedStudents } = body;
+
+    const updateData = { 
+      title, 
+      pdfUrl, 
+      category, 
+      classTypes: Array.isArray(classTypes) ? classTypes : [],
+      alYears: Array.isArray(alYears) ? alYears : [],
+      isPrivate: isPrivate || false,
+      allowedStudents: Array.isArray(allowedStudents) ? allowedStudents : []
+    };
+
+    const updatedTute = await mongoose.models.Tute.findByIdAndUpdate(id, { $set: updateData }, { new: true, strict: false });
+
+    if (!updatedTute) {
+      return NextResponse.json({ message: "නිබන්ධනය සොයාගැනීමට නොහැක." }, { status: 404 });
+    }
+
+    return NextResponse.json({ message: "සාර්ථකව යාවත්කාලීන විය." }, { status: 200 });
+
+  } catch (error) {
+    console.error("Tute PUT Error:", error);
+    return NextResponse.json({ message: "දෝෂයකි." }, { status: 500 });
+  }
+}
