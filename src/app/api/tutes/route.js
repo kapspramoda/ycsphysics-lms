@@ -29,7 +29,6 @@ const Tute = mongoose.model('Tute', TuteSchema);
 export async function POST(req) {
   try {
     const body = await req.json();
-    // 🔴 Frontend එකෙන් එවන අලුත් දත්ත සියල්ල ලබා ගැනීම
     const { title, pdfUrl, category, classTypes, alYears, isPrivate, allowedStudents } = body;
     
     await connectToDatabase();
@@ -61,16 +60,22 @@ export async function GET(req) {
     await connectToDatabase();
     
     let query = {};
-    if (year !== 'All') {
-      // 🔴 Array එක තුළ අදාළ වර්ෂය තිබේදැයි පරීක්ෂා කිරීම
-      query.alYears = year; 
-    }
     
     if (isAdmin !== 'true') { 
       query.isVisible = { $ne: false }; 
     }
 
-    // 🔴 .lean() මඟින් සැබෑ දත්ත ලබා ගැනීම
+    // 🔴 පරණ Tutes (alYears නැති) සහ අදාළ year එක තියෙන ඒවා ඔක්කොම ගන්න
+    if (year !== 'All') {
+      query.$or = [
+        { alYears: year }, 
+        { alYears: 'All' }, 
+        { alYears: { $exists: false } }, // පරණ දත්ත වල Field එක නැත්නම්
+        { alYears: { $size: 0 } }        // පරණ දත්ත වල Array එක හිස් නම්
+      ];
+    }
+
+    // .lean() මඟින් සැබෑ දත්ත ලබා ගැනීම
     const tutes = await Tute.find(query).sort({ date: -1 }).lean();
     return NextResponse.json({ tutes }, { status: 200 });
   } catch (error) { 

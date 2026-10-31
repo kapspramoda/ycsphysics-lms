@@ -37,6 +37,9 @@ export default function StudentTutes() {
         const res = await fetch(`/api/tutes?year=${year}`);
         const data = await res.json();
         
+        // 🔴 දත්ත පරීක්ෂා කිරීම සඳහා Console Log එක මෙතැනට ඇතුළත් කර ඇත
+        console.log("Database එකෙන් ආපු මුල්ම Tutes ලැයිස්තුව:", data.tutes);
+        
         if (data.tutes && data.tutes.length > 0) {
           
           // 🔴 100% නිවැරදි Filter ක්‍රමය
