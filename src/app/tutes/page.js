@@ -28,7 +28,6 @@ export default function StudentTutes() {
       const year = user.alYear || 'All';
       setUserYear(year);
 
-      // 🔴 ළමයාගේ පන්ති සහ දුරකථන අංකය නිවැරදිව ලබා ගැනීම
       const classes = Array.isArray(user.classTypes) ? user.classTypes : ['Theory'];
       setUserClasses(classes);
       const userPhone = user.username || user.email || '';
@@ -37,20 +36,22 @@ export default function StudentTutes() {
         const res = await fetch(`/api/tutes?year=${year}`);
         const data = await res.json();
         
-        // 🔴 දත්ත පරීක්ෂා කිරීම සඳහා Console Log එක මෙතැනට ඇතුළත් කර ඇත
-        console.log("Database එකෙන් ආපු මුල්ම Tutes ලැයිස්තුව:", data.tutes);
-        
         if (data.tutes && data.tutes.length > 0) {
           
-          // 🔴 100% නිවැරදි Filter ක්‍රමය
           const allowedTutes = data.tutes.filter(tute => {
             // 1. Tutes පිටුවේ Marking Schemes පෙන්වන්නේ නැත!
             if (tute.category === 'Marking') return false; 
 
-            // 2. පන්ති වර්ගය ගැලපෙනවාදැයි බැලීම
-            if (tute.classTypes && tute.classTypes.length > 0) {
-              const hasClassAccess = tute.classTypes.some(c => classes.includes(c));
+            const tuteClasses = tute.classTypes || [];
+            
+            // 2. පන්ති වර්ගය පරීක්ෂාව (පරණ සහ අලුත් Tutes දෙකටම සහාය වීම)
+            if (tuteClasses.length > 0) {
+              const hasClassAccess = tuteClasses.some(c => classes.includes(c));
               if (!hasClassAccess) return false;
+            } else {
+              // 🔴 පරණ ක්‍රමයට (classTypes නැති) Tutes නම් Category එකෙන් පරීක්ෂා කිරීම
+              if (tute.category === 'Theory' && !classes.includes('Theory')) return false;
+              if (tute.category === 'Revision' && !classes.includes('Revision')) return false;
             }
 
             // 3. Private Tute එකක් නම් පමණක් අංකය පරීක්ෂා කිරීම
@@ -193,7 +194,7 @@ export default function StudentTutes() {
             <div className="bg-white p-12 rounded-3xl shadow-sm border border-slate-100 text-center mt-10">
               <span className="text-6xl block mb-4 opacity-50">📭</span>
               <h2 className="text-xl font-bold text-slate-700">දැනට නිබන්ධන කිසිවක් එක් කර නොමැත.</h2>
-              <p className="text-slate-500 mt-2">කරුණාකර පසුව නැවත පරීක්ෂා කරන්න.</p>
+              <p className="text-slate-500 mt-2">ඔබ අදාළ පන්ති වලට ඇතුළත් වී ඇත්දැයි පරීක්ෂා කරන්න.</p>
             </div>
           )}
         </div>

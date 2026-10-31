@@ -41,10 +41,15 @@ export default function MarkingSchemesPage() {
             // 1. Marking Schemes පමණක් පෙරා ගැනීම
             if (tute.category !== 'Marking') return false;
             
+            const tuteClasses = tute.classTypes || [];
+            
             // 2. පන්ති වර්ගය පරීක්ෂාව
-            if (tute.classTypes && tute.classTypes.length > 0) {
-              const hasClassAccess = tute.classTypes.some(c => classes.includes(c));
+            if (tuteClasses.length > 0) {
+              const hasClassAccess = tuteClasses.some(c => classes.includes(c));
               if (!hasClassAccess) return false;
+            } else {
+              // 🔴 පරණ Marking Schemes නම්, ළමයාට Paper Class තිබිය යුතුමයි
+              if (!classes.includes('Paper')) return false;
             }
 
             // 3. Private පරීක්ෂාව
@@ -195,7 +200,7 @@ export default function MarkingSchemesPage() {
             <div className="bg-white p-12 rounded-3xl shadow-sm border border-slate-100 text-center mt-10">
               <span className="text-6xl block mb-4 opacity-50">📭</span>
               <h2 className="text-xl font-bold text-slate-700">දැනට Marking Schemes කිසිවක් එක් කර නොමැත.</h2>
-              <p className="text-slate-500 mt-2">කරුණාකර පසුව නැවත පරීක්ෂා කරන්න.</p>
+              <p className="text-slate-500 mt-2">ඔබ අදාළ පන්ති වලට ඇතුළත් වී ඇත්දැයි පරීක්ෂා කරන්න.</p>
             </div>
           )}
         </div>
