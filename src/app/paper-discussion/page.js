@@ -341,6 +341,71 @@ export default function PaperDiscussionPage() {
                       allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
                     ></iframe>
                   </div>
+
+                  {/* 🔴 Full Screen Controls (Seek Line + Buttons) */}
+                  {isFullscreen && (
+                    <div className="w-full bg-black/95 border-t border-white/15 px-3 py-2.5 md:px-6 md:py-3 z-[1000] flex flex-col gap-2.5 shrink-0">
+                      <div className="flex items-center gap-3 w-full">
+                        <span className="text-xs font-bold w-10 text-right text-slate-300">{formatTime(currentTime)}</span>
+                        <input 
+                          type="range" 
+                          min="0" 
+                          max={duration || 100} 
+                          value={currentTime} 
+                          onChange={handleSeek}
+                          style={{ background: `linear-gradient(to right, #dc2626 ${duration ? (currentTime / duration) * 100 : 0}%, #334155 ${duration ? (currentTime / duration) * 100 : 0}%)` }}
+                          className="flex-1 h-2 rounded-lg appearance-none cursor-pointer accent-red-600 focus:outline-none"
+                        />
+                        <span className="text-xs font-bold w-10 text-slate-300">{formatTime(duration)}</span>
+                      </div>
+
+                      <div className="flex items-center justify-between gap-2 flex-wrap">
+                        <div className="flex items-center gap-2 flex-wrap">
+                          <div className="flex items-center rounded-xl border border-slate-700 bg-slate-900 overflow-hidden">
+                            <button onClick={togglePlay} className="px-3 py-2 text-purple-400 hover:bg-slate-800 transition-colors" title={isPlaying ? "නවත්වන්න" : "ධාවනය කරන්න"}>
+                              {isPlaying ? (
+                                <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zM7 8a1 1 0 012 0v4a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v4a1 1 0 102 0V8a1 1 0 00-1-1z" clipRule="evenodd" /></svg>
+                              ) : (
+                                <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" clipRule="evenodd" /></svg>
+                              )}
+                            </button>
+                            <button onClick={skipBackward} className="px-2.5 py-2 text-slate-300 hover:bg-slate-800 border-l border-slate-700 transition-colors" title="තත්පර 10ක් ආපස්සට">
+                              <svg className="w-4 h-4 md:w-5 md:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12.066 11.2a1 1 0 000 1.6l5.334 4A1 1 0 0019 16V8a1 1 0 00-1.6-.8l-5.333 4zM4.066 11.2a1 1 0 000 1.6l5.334 4A1 1 0 0011 16V8a1 1 0 00-1.6-.8l-5.334 4z" /></svg>
+                            </button>
+                            <button onClick={skipForward} className="px-2.5 py-2 text-slate-300 hover:bg-slate-800 border-l border-slate-700 transition-colors" title="තත්පර 10ක් ඉදිරියට">
+                              <svg className="w-4 h-4 md:w-5 md:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M11.933 12.8a1 1 0 000-1.6l-5.333-4A1 1 0 005 8v8a1 1 0 001.6.8l5.333-4zM19.933 12.8a1 1 0 000-1.6l-5.334-4A1 1 0 0013 8v8a1 1 0 001.6.8l5.334-4z" /></svg>
+                            </button>
+                          </div>
+                          <button onClick={toggleSpeed} className="px-3 py-2 rounded-xl border border-slate-700 bg-slate-900 text-amber-400 hover:bg-slate-800 font-bold text-xs md:text-sm transition-colors" title="ධාවන වේගය වෙනස් කරන්න">
+                            {playbackRate}x
+                          </button>
+                        </div>
+
+                        <div className="flex items-center gap-2 flex-wrap">
+                          <div className="flex items-center rounded-xl border border-slate-700 bg-slate-900 overflow-hidden">
+                            <button onClick={handleVolumeDown} className="px-2.5 py-2 text-slate-300 hover:bg-slate-800 transition-colors">
+                              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M18 12H6" /></svg>
+                            </button>
+                            <button onClick={handleToggleMute} className="px-2.5 py-2 border-x border-slate-700 hover:bg-slate-800 transition-colors">
+                              {isMuted ? (
+                                <svg className="w-4 h-4 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2" /></svg>
+                              ) : (
+                                <svg className="w-4 h-4 text-purple-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z" /></svg>
+                              )}
+                            </button>
+                            <button onClick={handleVolumeUp} className="px-2.5 py-2 text-slate-300 hover:bg-slate-800 transition-colors">
+                              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M12 6v6m0 0v6m0-6h6m-6 0H6" /></svg>
+                            </button>
+                          </div>
+
+                          <button onClick={toggleFullScreen} className="flex items-center gap-1.5 rounded-xl border border-slate-700 bg-slate-900 text-white hover:bg-slate-800 px-3 py-2 text-xs md:text-sm font-bold transition-colors">
+                            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
+                            Exit
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  )}
                 </div>
 
                 <div className={`p-4 md:p-5 rounded-2xl border shadow-sm flex flex-col gap-4 transition-all ${isDarkMode ? 'bg-slate-800/50 border-purple-900/30' : 'bg-purple-50/40 border-purple-100/50'}`}>
