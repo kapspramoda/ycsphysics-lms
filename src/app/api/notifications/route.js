@@ -43,3 +43,14 @@ export async function GET(req) {
     return NextResponse.json({ success: false, message: 'දෝෂයක් මතු විය.' }, { status: 500 });
   }
 }
+
+export async function DELETE(req) {
+  try {
+    const { id } = await req.json();
+    await connectToDatabase();
+    await Notification.findByIdAndDelete(id); // ඔබේ Model නම වෙනස් නම් එය යොදන්න
+    return NextResponse.json({ message: 'පණිවිඩය සාර්ථකව ඉවත් කළා.' }, { status: 200 });
+  } catch (error) {
+    return NextResponse.json({ message: 'දෝෂයකි.' }, { status: 500 });
+  }
+}
