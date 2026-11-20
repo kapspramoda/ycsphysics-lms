@@ -14,6 +14,7 @@ export default function AdminDashboard() {
   const [notiGroup, setNotiGroup] = useState('All');
   const [notiLoading, setNotiLoading] = useState(false);
   const [notiFeedback, setNotiFeedback] = useState({ type: '', text: '' });
+  const [notifications, setNotifications] = useState([]); // 🔴 අලුත්: පණිවිඩ ලැයිස්තුව
 
   // Password Requests State
   const [pwRequests, setPwRequests] = useState([]);
@@ -32,6 +33,7 @@ export default function AdminDashboard() {
       setIsAuthorized(true);
       if (role === 'Admin') {
         fetchPwRequests(); // Admin ට පමණක් මුරපද ඉල්ලීම් ලබාගැනීම
+        fetchNotifications(); // 🔴 අලුත්: පණිවිඩ ලැයිස්තුව ලබාගැනීම
       }
     }
   }, [router]);
@@ -49,6 +51,41 @@ export default function AdminDashboard() {
       const data = await res.json();
       if (data.requests) setPwRequests(data.requests);
     } catch (e) { console.error(e); }
+  };
+
+  // 🔴 අලුත්: පළ කළ පණිවිඩ ලබාගැනීම
+  const fetchNotifications = async () => {
+    try {
+      const res = await fetch('/api/notifications?year=All', { cache: 'no-store' });
+      const data = await res.json();
+      if (data.notifications) {
+        setNotifications(data.notifications);
+      } else if (Array.isArray(data)) {
+        setNotifications(data);
+      }
+    } catch (e) { console.error(e); }
+  };
+
+  // 🔴 අලුත්: පණිවිඩයක් මකා දැමීම
+  const handleDeleteNotification = async (id) => {
+    if (!window.confirm("මෙම පණිවිඩය ස්ථිරවම ඉවත් කිරීමට අවශ්‍යද?")) return;
+    try {
+      const res = await fetch('/api/notifications', {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id })
+      });
+      if (res.ok) {
+        setNotiFeedback({ type: 'success', text: 'පණිවිඩය සාර්ථකව ඉවත් කරන ලදී!' });
+        fetchNotifications();
+        setTimeout(() => setNotiFeedback({ type: '', text: '' }), 3000);
+      } else {
+        setNotiFeedback({ type: 'error', text: 'පණිවිඩය ඉවත් කිරීමේදී දෝෂයක් මතු විය.' });
+      }
+    } catch (error) {
+      console.error(error);
+      setNotiFeedback({ type: 'error', text: 'තාක්ෂණික දෝෂයක් මතු විය.' });
+    }
   };
 
   // Handle Password Approvals
@@ -89,6 +126,7 @@ export default function AdminDashboard() {
       if (res.ok) {
         setNotiFeedback({ type: 'success', text: data.message });
         setNotiMessage('');
+        fetchNotifications(); // 🔴 අලුත්: පණිවිඩය යැවූ පසු ලැයිස්තුව යාවත්කාලීන කිරීම
       } else {
         setNotiFeedback({ type: 'error', text: data.message });
       }
@@ -226,6 +264,32 @@ export default function AdminDashboard() {
                   {notiLoading ? 'යවමින් පවතී...' : 'පණිවිඩය පළ කරන්න'}
                 </button>
               </form>
+
+              {/* 🔴 අලුත්: පළ කළ පණිවිඩ ලැයිස්තුව සහ ඉවත් කිරීමේ බොත්තම */}
+              {notifications.length > 0 && (
+                <div className={`mt-6 pt-6 border-t ${isDarkMode ? 'border-slate-800' : 'border-gray-200'}`}>
+                  <h3 className={`text-sm font-bold mb-3 ${textMuted}`}>දැනට පළ කර ඇති පණිවිඩ ({notifications.length})</h3>
+                  <div className="space-y-2.5 max-h-60 overflow-y-auto pr-1 custom-scrollbar">
+                    {notifications.map((noti) => (
+                      <div key={noti._id} className={`flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 p-3.5 rounded-xl border ${isDarkMode ? 'bg-slate-800/70 border-slate-700' : 'bg-amber-50/60 border-amber-100'}`}>
+                        <div className="flex-1">
+                          <span className={`text-[11px] font-bold px-2 py-0.5 rounded-md mr-2 ${isDarkMode ? 'bg-amber-900/50 text-amber-300' : 'bg-amber-200 text-amber-900'}`}>
+                            {noti.alYear === 'All' ? 'සියලුම සිසුන්' : `${noti.alYear} A/L`}
+                          </span>
+                          <span className="text-sm font-medium">{noti.message}</span>
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() => handleDeleteNotification(noti._id)}
+                          className={`text-xs font-bold px-3.5 py-2 rounded-lg transition shrink-0 ${isDarkMode ? 'bg-red-900/40 text-red-400 hover:bg-red-900/70' : 'bg-red-100 text-red-600 hover:bg-red-200'}`}
+                        >
+                          🗑️ ඉවත් කරන්න
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
             </div>
           )}
 
